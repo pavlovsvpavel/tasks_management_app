@@ -2,8 +2,8 @@ from pydantic import EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import func
 
-from app.models.accounts import User
-from app.core.security import get_password_hash, verify_password
+from models.accounts import User
+from core.security import get_password_hash, verify_password
 
 def get_user_by_email(db: Session, email: EmailStr) -> User | None:
     return db.query(User).filter(User.email == email).first()

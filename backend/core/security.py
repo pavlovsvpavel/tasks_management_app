@@ -9,9 +9,9 @@ from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 
-from app.core.config import settings
-from app.db.database import get_db
-from app.models.accounts import User
+from core.config import settings
+from db.database import get_db
+from models.accounts import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

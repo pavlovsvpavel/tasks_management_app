@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import func
 
-from app.db.database import Base
+from db.database import Base
 
 class Task(Base):
     __tablename__ = "tasks"

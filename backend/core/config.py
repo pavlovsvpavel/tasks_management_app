@@ -3,6 +3,9 @@ from typing import List
 from pydantic_settings import BaseSettings
 from pydantic import field_validator, BaseModel
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Settings(BaseSettings):
     API_PREFIX: str = "/api"

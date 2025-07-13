@@ -2,16 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 
-from app.core.cookies import CookieManager
-from app.db.database import get_db
-from app.schemas.accounts import UserCreate, UserResponse, LoginRequest
+from core.cookies import CookieManager
+from db.database import get_db
+from schemas.accounts import UserCreate, UserResponse, LoginRequest
 
-from app.services.user_service import (
+from services.user_service import (
     create_user,
     get_user_by_email,
     authenticate_user, update_last_login
 )
-from app.core.security import create_access_token, generate_csrf_token
+from core.security import create_access_token, generate_csrf_token
 
 router = APIRouter(prefix="/users", tags=["users"])
 

@@ -8,12 +8,12 @@ from typing import List
 from starlette import status
 from starlette.requests import Request
 
-from app.core.security import get_current_user
-from app.db.database import get_db
-from app.models.tasks import Task
-from app.schemas.tasks import TaskCreate, TaskResponse, TaskUpdate
+from core.security import get_current_user
+from db.database import get_db
+from models.tasks import Task
+from schemas.tasks import TaskCreate, TaskResponse, TaskUpdate
 
-from app.models.accounts import User
+from models.accounts import User
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 

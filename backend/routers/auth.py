@@ -6,12 +6,12 @@ from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.responses import RedirectResponse, Response
 
-from app.core.cookies import CookieManager
-from app.db.database import get_db
-from app.core.config import settings
+from core.cookies import CookieManager
+from db.database import get_db
+from core.config import settings
 
-from app.services.user_service import get_user_by_google_id, create_oauth_user, authenticate_user, update_last_login
-from app.core.security import create_access_token, generate_csrf_token
+from services.user_service import get_user_by_google_id, create_oauth_user, authenticate_user, update_last_login
+from core.security import create_access_token, generate_csrf_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

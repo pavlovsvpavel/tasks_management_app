@@ -1,6 +1,6 @@
 from starlette.responses import Response
 
-from app.core.config import AuthCookieSettings, CsrfCookieSettings
+from core.config import AuthCookieSettings, CsrfCookieSettings
 
 
 class CookieManager:
