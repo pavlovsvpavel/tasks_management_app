@@ -6,8 +6,6 @@ from sqlalchemy.orm import Session, selectinload
 from typing import List
 
 from starlette import status
-from starlette.requests import Request
-
 from core.security import get_current_user
 from db.database import get_db
 from models.tasks import Task
@@ -23,6 +21,15 @@ async def create_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+
+    """Create a new task"""
+
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+
     db_task = Task(**task.model_dump(), user_id=current_user.id)
     db.add(db_task)
     db.commit()
@@ -30,18 +37,65 @@ async def create_task(
 
     return db_task
 
-@router.get("/get", response_model=List[TaskResponse])
-async def get_tasks(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.get("/get/all-tasks", response_model=List[TaskResponse])
+async def get_tasks(
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    """
+    Get all tasks by current user.
+
+    Returns:
+    - 200: All tasks
+    - 401: If not authenticated
+    """
+
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
     tasks = db.query(Task).filter(Task.user_id == current_user.id).all()
 
     return tasks
 
 
-@router.patch("/{task_id}",
+@router.get("/get/{task_id}", response_model=TaskResponse)
+async def get_tasks(
+        task_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+):
+    """
+    Get a specific task by ID if it belongs to the current user.
+
+    Returns:
+    - 200: Task details
+    - 404: If task doesn't exist or doesn't belong to user
+    - 401: If not authenticated
+    """
+
+    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
+
+    if current_user.id != Task.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found for this user",
+        )
+
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found or access denied"
+        )
+
+    return task
+
+
+@router.patch("/update/{task_id}",
     response_model=TaskResponse,
 )
 async def update_task(
-        request: Request,
         task_id: int,
         task_update: TaskUpdate,
         db: Session = Depends(get_db),
@@ -51,11 +105,11 @@ async def update_task(
     Update a specific task with full database loading and concurrency control.
 
     - **task_id**: ID of task to update
-    - **version**: Current version for optimistic locking
     - **name** (optional): New task name
     - **description** (optional): New description
     - **completed** (optional): Set completion status
     """
+
     # Load task with all relationships and version checking
     stmt = (
         select(Task)

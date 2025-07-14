@@ -8,10 +8,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings(BaseSettings):
-    API_PREFIX: str = "/api"
-    DEBUG: bool = False
+    API_PREFIX: str = os.getenv("API_PREFIX")
+    DEBUG: bool = os.getenv("DEBUG")
     DATABASE_URL: str = os.getenv("DATABASE_URL")
-    ALLOWED_ORIGINS: str = ""
+    ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS")
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = os.getenv("ALGORITHM")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")

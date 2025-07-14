@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.exceptions import HTTPException
-from starlette.responses import RedirectResponse, Response
+from starlette.responses import RedirectResponse
 
 from core.cookies import CookieManager
 from db.database import get_db
@@ -114,43 +114,3 @@ async def auth_google_callback(
     except Exception as e:
         return RedirectResponse(f"{settings.FRONTEND_HOME_URL}?error={str(e)}")
 
-
-@router.get("/logout")
-async def logout(response: Response):
-    """
-    Logout user by clearing the cookies
-    """
-
-    response.delete_cookie(
-        key="access_token",
-        path="/",
-        domain=None,
-    )
-
-    response.delete_cookie(
-        key="csrf_token",
-        path="/",
-        domain=None,
-    )
-
-    return {"message": "Successfully logged out"}
-
-
-@router.get("/logout-with-redirect")
-async def logout_and_redirect():
-    """
-    Logout user, clearing the cookies and redirect to page
-    """
-    response = RedirectResponse(url=settings.FRONTEND_HOME_URL)
-
-    response.delete_cookie(
-        key="access_token",
-        path="/",
-        domain=None,
-    )
-    response.delete_cookie(
-        key="csrf_token",
-        path="/",
-        domain=None,
-    )
-    return response

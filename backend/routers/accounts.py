@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from starlette.responses import Response
+from starlette.responses import Response, RedirectResponse
 
+from core.config import settings
 from core.cookies import CookieManager
 from db.database import get_db
 from schemas.accounts import UserCreate, UserResponse, LoginRequest
@@ -18,6 +19,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("/register", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    """Register with email/password"""
+
     db_user = get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(
@@ -34,6 +37,7 @@ def email_login(
         db: Session = Depends(get_db)
 ):
     """Login with email/password and get access token"""
+    
     user = authenticate_user(db, credentials.email, credentials.password)
     if not user:
         raise HTTPException(
@@ -60,3 +64,44 @@ def email_login(
         # Include only if frontend needs it
         "csrf_token": csrf_token
     }
+
+
+@router.get("/logout")
+async def logout(response: Response):
+    """
+    Logout user and clearing the cookies
+    """
+
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        domain=None,
+    )
+
+    response.delete_cookie(
+        key="csrf_token",
+        path="/",
+        domain=None,
+    )
+
+    return {"message": "Successfully logged out"}
+
+
+@router.get("/logout-with-redirect")
+async def logout_and_redirect():
+    """
+    Logout user, clearing the cookies and redirect to page
+    """
+    response = RedirectResponse(url=settings.FRONTEND_HOME_URL)
+
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        domain=None,
+    )
+    response.delete_cookie(
+        key="csrf_token",
+        path="/",
+        domain=None,
+    )
+    return response
