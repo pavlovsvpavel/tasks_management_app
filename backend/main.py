@@ -5,8 +5,6 @@ from core.config import settings
 from routers import accounts, auth, home
 from routers import tasks
 from db.database import engine, Base
-from models.accounts import User
-from core.security import get_current_user
 
 app = FastAPI(
     title="Task App",

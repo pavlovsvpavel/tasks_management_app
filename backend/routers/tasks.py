@@ -1,10 +1,8 @@
 import datetime
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from typing import List
-
 from starlette import status
 from core.security import get_current_user
 from db.database import get_db
@@ -15,13 +13,13 @@ from models.accounts import User
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
+
 @router.post("/create", response_model=TaskResponse)
 async def create_task(
-    task: TaskCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        task: TaskCreate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-
     """Create a new task"""
 
     if not current_user:
@@ -36,6 +34,7 @@ async def create_task(
     db.refresh(db_task)
 
     return db_task
+
 
 @router.get("/get/all-tasks", response_model=List[TaskResponse])
 async def get_tasks(
@@ -93,8 +92,8 @@ async def get_tasks(
 
 
 @router.patch("/update/{task_id}",
-    response_model=TaskResponse,
-)
+              response_model=TaskResponse,
+              )
 async def update_task(
         task_id: int,
         task_update: TaskUpdate,

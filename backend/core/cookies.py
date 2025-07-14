@@ -1,5 +1,4 @@
 from starlette.responses import Response
-
 from core.config import AuthCookieSettings, CsrfCookieSettings
 
 

@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import func
-
 from db.database import Base
+
 
 class Task(Base):
     __tablename__ = "tasks"

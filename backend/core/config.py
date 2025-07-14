@@ -2,10 +2,10 @@ import os
 from typing import List
 from pydantic_settings import BaseSettings
 from pydantic import field_validator, BaseModel
-
 from dotenv import load_dotenv
 
 load_dotenv()
+
 
 class Settings(BaseSettings):
     API_PREFIX: str = os.getenv("API_PREFIX")
@@ -40,6 +40,7 @@ class AuthCookieSettings(BaseModel):
     max_age: int = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     path: str = "/"
     domain: str = None
+
 
 class CsrfCookieSettings(BaseModel):
     secure: bool = True

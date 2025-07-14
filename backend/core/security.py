@@ -1,6 +1,5 @@
 import datetime
 import secrets
-
 from fastapi import Depends
 from jose import jwt, JWTError
 from passlib.context import CryptContext
@@ -8,7 +7,6 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
-
 from core.config import settings
 from db.database import get_db
 from models.accounts import User

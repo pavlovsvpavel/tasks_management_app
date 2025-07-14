@@ -5,11 +5,9 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.responses import RedirectResponse
-
 from core.cookies import CookieManager
 from db.database import get_db
 from core.config import settings
-
 from services.user_service import get_user_by_google_id, create_oauth_user, authenticate_user, update_last_login
 from core.security import create_access_token, generate_csrf_token
 
@@ -113,4 +111,3 @@ async def auth_google_callback(
 
     except Exception as e:
         return RedirectResponse(f"{settings.FRONTEND_HOME_URL}?error={str(e)}")
-
