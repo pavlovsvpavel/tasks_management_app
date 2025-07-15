@@ -15,6 +15,7 @@ class User(Base):
     picture = Column(String, nullable=True)
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    last_login = Column(DateTime(timezone=True), nullable=True)
+    last_login = Column(DateTime(timezone=True), nullable=True, server_default=func.now())
+    is_active = Column(Boolean, default=True)
 
     tasks = relationship("Task", back_populates="user")

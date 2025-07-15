@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
-from routers import accounts, auth, home
+from routers import users, auth, home
 from routers import tasks
 from db.database import engine, Base
 
@@ -28,7 +28,7 @@ Base.metadata.create_all(bind=engine)
 # Include routers
 app.include_router(home.router)
 app.include_router(auth.router, prefix=settings.API_PREFIX)
-app.include_router(accounts.router, prefix=settings.API_PREFIX)
+app.include_router(users.router, prefix=settings.API_PREFIX)
 app.include_router(tasks.router, prefix=settings.API_PREFIX)
 
 if __name__ == "__main__":

@@ -1,15 +1,10 @@
 import datetime
 import secrets
-from fastapi import Depends
+import uuid
+
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
-from starlette import status
-from starlette.exceptions import HTTPException
-from starlette.requests import Request
 from core.config import settings
-from db.database import get_db
-from models.accounts import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,61 +19,47 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def verify_token(token: str):
-    try:
-        payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
-        )
-        return payload
-    except JWTError:
-        return None
+def create_access_token(data: dict):
+    expires_delta = datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return _create_token(data, expires_delta, "access")
 
 
-async def get_current_user(
-        db: Session = Depends(get_db),
-        request: Request = None,
-) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated",
-    )
-
-    token = None
-
-    if request:
-        cookie_token = request.cookies.get("access_token")
-        if cookie_token and cookie_token.startswith("Bearer "):
-            token = cookie_token[7:]
-
-    if not token:
-        raise credentials_exception
-
-    try:
-        payload = verify_token(token)
-        user_id = payload.get("sub")
-        if not user_id:
-            raise credentials_exception
-
-        user = db.query(User).filter(User.id == int(user_id)).first()
-        if not user:
-            raise credentials_exception
-
-        return user
-    except JWTError:
-        raise credentials_exception
+def create_refresh_token(data: dict):
+    expires_delta = datetime.timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    return _create_token(data, expires_delta, "refresh")
 
 
-def create_access_token(data: dict, expires_delta: datetime.timedelta = None) -> str:
+def _create_token(data: dict, expires_delta: datetime.timedelta, token_type: str):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.datetime.now(datetime.UTC) + expires_delta
-    else:
-        expire = datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
+    expire = datetime.datetime.now(datetime.UTC) + expires_delta
+    to_encode.update({
+        "exp": expire,
+        "iat": datetime.datetime.now(datetime.UTC),
+        "type": token_type,
+        "jti": str(uuid.uuid4())
+    })
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def generate_csrf_token() -> str:
     return secrets.token_urlsafe(32)
+
+
+def verify_access_token(token: str):
+    try:
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+            options={"require_exp": True}  # ← Ensures exp claim exists
+        )
+
+        # Manual expiration check (double security)
+        if datetime.datetime.now(datetime.UTC) > datetime.datetime.fromtimestamp(payload["exp"], tz=datetime.timezone.utc):
+            raise JWTError("Token expired")
+
+        return payload
+
+    except JWTError as e:
+        print(f"Token verification failed: {str(e)}")
+        return None
