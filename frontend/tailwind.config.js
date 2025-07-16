@@ -8,7 +8,7 @@ module.exports = {
         regular: ['Ubuntu-Regular']
       },
       colors: {
-        site_bg: "white",
+        site_bg: "#cccccc",
         primary: "#030014",
         secondary: "#151312",
         light: {
@@ -21,7 +21,8 @@ module.exports = {
           200: "#030014",
         },
         accent: "#AB8BFF",
-        btn_color: "#3B82F6"
+        btn_color: "#3B82F6",
+        text_color: "#ffffff"
       },
     },
   },

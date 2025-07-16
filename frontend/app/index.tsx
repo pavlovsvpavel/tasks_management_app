@@ -3,13 +3,18 @@ import {Link} from "expo-router";
 import {images} from "@/constants/images";
 
 export default function Index() {
+
     return (
         <View className="flex-1 bg-site_bg">
-            <ScrollView className="flex-1 px-5">
+            <ScrollView
+                className="flex-1 p-5"
+                showsVerticalScrollIndicator={false}
+                // contentContainerStyle={{minHeight: "100%", paddingBottom: 10}}
+            >
                 <Image
                     source={images.logo} className="w-20 h-20 mt-20 mb-5 mx-auto"
                 />
-                <View className="flex-1 gap-8 p-5">
+                <View className="flex-1 gap-8">
                     <View className="flex-1 justify-center items-center">
                         <Text className="text-3xl text-dark-200 font-extrabold mt-6">My Tasks</Text>
                         <Text className="text-m text-center text-dark-100 mt-4">
@@ -17,7 +22,7 @@ export default function Index() {
                         </Text>
                     </View>
 
-                    <View className="flex-1 gap-6 mt-8">
+                    <View className="flex-1 gap-6">
                         <Link href="/login"
                               className="bg-btn_color text-center text-white px-8 py-4 rounded-lg font-bold">
                             Get Started

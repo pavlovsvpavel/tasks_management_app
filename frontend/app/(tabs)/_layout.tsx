@@ -7,15 +7,24 @@ import {images} from "@/constants/images";
 function TabIcon({focused, icon, title}: any) {
     if (focused) {
         return (
-            <ImageBackground
-                source={images.highlight}
+            //     <ImageBackground
+            //         source={images.highlight}
+            //         className="flex flex-row w-full flex-1 min-w-[112px] min-h-16 mt-6 justify-center items-center rounded-full overflow-hidden"
+            //     >
+            //         <Image source={icon} tintColor="#151312" className="size-5"/>
+            //         <Text className="text-secondary text-base font-semibold ml-2">
+            //             {title}
+            //         </Text>
+            //     </ImageBackground>
+            // );
+            <View
                 className="flex flex-row w-full flex-1 min-w-[112px] min-h-16 mt-6 justify-center items-center rounded-full overflow-hidden"
             >
                 <Image source={icon} tintColor="#151312" className="size-5"/>
                 <Text className="text-secondary text-base font-semibold ml-2">
                     {title}
                 </Text>
-            </ImageBackground>
+            </View>
         );
     }
 
@@ -36,38 +45,27 @@ export default function TabsLayout() {
                     height: "100%",
                     justifyContent: "center",
                     alignItems: "center",
+                    marginBottom: 20,
                 },
                 tabBarStyle: {
-                    backgroundColor: "#0F0D23",
-                    borderRadius: 50,
+                    backgroundColor: "#3B82F6",
+                    borderRadius: 100,
                     marginHorizontal: 15,
-                    marginBottom: 40,
-                    height: 60,
+                    marginBottom: 50,
+                    height: 50,
                     position: "absolute",
                     overflow: "hidden",
-                    borderWidth: 1,
-                    borderColor: "#0F0D23",
+
                 },
             }}
         >
             <Tabs.Screen
-                name="index"
+                name="user_tasks"
                 options={{
-                    title: "index",
+                    title: "My Tasks",
                     headerShown: false,
                     tabBarIcon: ({focused}) => (
-                        <TabIcon focused={focused} icon={icons.home} title="Home"/>
-                    ),
-                }}
-            />
-
-            <Tabs.Screen
-                name="create_task"
-                options={{
-                    title: "Task",
-                    headerShown: false,
-                    tabBarIcon: ({focused}) => (
-                        <TabIcon focused={focused} icon={icons.plus_sign} title="Task"/>
+                        <TabIcon focused={focused} icon={icons.checklist} title="My Tasks"/>
                     ),
                 }}
             />
