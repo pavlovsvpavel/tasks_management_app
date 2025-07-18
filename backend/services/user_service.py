@@ -9,7 +9,7 @@ from starlette.requests import Request
 
 from db.database import get_db
 from models.users import User
-from core.security import get_password_hash, verify_password, verify_access_token
+from core.security import get_password_hash, verify_password, validate_token
 from schemas.users import UserUpdate, UserChangePassword
 
 
@@ -34,7 +34,7 @@ async def get_current_user(
         raise credentials_exception
 
     try:
-        payload = verify_access_token(token)
+        payload = validate_token(token)
         if not payload:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -72,8 +72,29 @@ def authenticate_user(db: Session, email: EmailStr, password: str) -> User | Non
     """Authenticate a user with email/password"""
     user = get_user_by_email(db, email)
 
-    if not user or not verify_password(password, user.hashed_password):
-        return None
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email"
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account is disabled. Please contact support."
+        )
+
+    if not verify_password(password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password"
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account is disabled. Please contact support."
+        )
 
     return user
 

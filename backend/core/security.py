@@ -1,9 +1,10 @@
 import datetime
-import secrets
 import uuid
 
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from starlette import status
+from starlette.exceptions import HTTPException
 from core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -41,11 +42,7 @@ def _create_token(data: dict, expires_delta: datetime.timedelta, token_type: str
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-def generate_csrf_token() -> str:
-    return secrets.token_urlsafe(32)
-
-
-def verify_access_token(token: str):
+def validate_token(token: str, expected_type:str):
     try:
         payload = jwt.decode(
             token,
@@ -54,6 +51,9 @@ def verify_access_token(token: str):
             options={"require_exp": True}  # ← Ensures exp claim exists
         )
 
+        if expected_type and payload.get("type") != expected_type:
+            raise JWTError(f"Invalid token type. Expected: {expected_type}")
+
         # Manual expiration check (double security)
         if datetime.datetime.now(datetime.UTC) > datetime.datetime.fromtimestamp(payload["exp"], tz=datetime.timezone.utc):
             raise JWTError("Token expired")
@@ -61,5 +61,8 @@ def verify_access_token(token: str):
         return payload
 
     except JWTError as e:
-        print(f"Token verification failed: {str(e)}")
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Token verification failed: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"}
+        )

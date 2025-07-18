@@ -1,129 +1,66 @@
-import datetime
+import time
 
-from fastapi import APIRouter, Depends, Body
-from fastapi.security import OAuth2PasswordRequestForm, HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import APIRouter, Depends, Header
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from httpx import AsyncClient
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.exceptions import HTTPException
-from starlette.requests import Request
-from starlette.responses import RedirectResponse, Response
+from starlette.responses import RedirectResponse
 from core.cookies import CookieManager
 from db.database import get_db
 from core.config import settings
 from models.users import User
-from schemas.auth import TokenResponse
-from services.user_service import get_user_by_google_id, create_oauth_user, authenticate_user, update_last_login, \
+from services.user_service import get_user_by_google_id, create_oauth_user, update_last_login, \
     validate_user_status
-from core.security import create_access_token, generate_csrf_token, create_refresh_token, verify_access_token
+from core.security import create_access_token, create_refresh_token, validate_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
-@router.get("/protected")
-async def protected_route(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
-    if not credentials:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
+
+@router.post("/validate-token")
+async def validate_token_route(
+        credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+        expected_type: str | None = Header(None)
+):
+    """Validate exp date of token."""
 
     token = credentials.credentials
-
-    payload = verify_access_token(token)
-
-    if not payload:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
+    payload = validate_token(token, expected_type)
 
     return {
-        "message": "Access granted",
+        "valid": True,
         "user_id": payload.get("sub"),
-        "token_info": {
-            "type": "bearer",
-            "expires_at": datetime.datetime.fromtimestamp(payload["exp"]).isoformat()
-        }
+        "expires_in": payload["exp"] - int(time.time())
     }
-
-@router.post("/token", response_model=TokenResponse)
-async def login_for_access_token(
-        response: Response,
-        form_data: OAuth2PasswordRequestForm = Depends(),
-        db: Session = Depends(get_db)
-):
-    """
-    OAuth2 token login that returns both access and refresh tokens.
-    Supports web (cookies) and mobile (JSON response).
-    """
-    # Authenticate user
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    validate_user_status(user)
-
-    access_token = create_access_token(data={"sub": str(user.id)})
-    refresh_token = create_refresh_token(data={"sub": str(user.id)})
-    csrf_token = generate_csrf_token()
-
-    cookie_mgr = CookieManager(response)
-    cookie_mgr.set_access_token(access_token)
-    cookie_mgr.set_refresh_token(refresh_token)
-    cookie_mgr.set_csrf(csrf_token)
-
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-        "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        "user": {
-            "id": user.id,
-            "email": user.email
-        }
-    }
-
 
 @router.post("/refresh-token")
-async def refresh_access_token(
-        request: Request,
-        response: Response,
-        refresh_token: str = Body(None, embed=True),
+async def refresh_token_route(
+        credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
         db: Session = Depends(get_db)
 ):
-    """
-    Refresh access token using a valid refresh token.
-    Accepts token from either cookie (web) or request body (mobile).
-    """
-
-    if not refresh_token:
-        refresh_token = request.cookies.get("refresh_token")
-        if not refresh_token:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Refresh token is required"
-            )
+    """Refresh tokens using ONLY a valid refresh token."""
+    refresh_token = credentials.credentials
 
     try:
-        payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        # 1. Validate token type strictly (only refresh tokens allowed)
+        payload = jwt.decode(
+            refresh_token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
+        )
 
         if payload.get("type") != "refresh":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid token type"
+                detail="Only refresh tokens can be used here"
             )
 
+        # 2. Validate user
         user_id = payload.get("sub")
-
         if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -136,27 +73,31 @@ async def refresh_access_token(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-
         validate_user_status(user)
 
+        # 3. Generate new tokens (with conditional refresh token rotation)
         new_access_token = create_access_token(data={"sub": str(user.id)})
-        new_refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
-        cookie_mgr = CookieManager(response)
-        cookie_mgr.set_access_token(new_access_token)
-        cookie_mgr.set_refresh_token(new_refresh_token)
+        # Only generate new refresh token if current one is near expiration
+        remaining_life = payload["exp"] - int(time.time())
+        new_refresh_token = None
+        if remaining_life < (settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400 * 0.25):  # Last 25% of lifetime
+            new_refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
         return {
             "access_token": new_access_token,
             "refresh_token": new_refresh_token,
-            "token_type": "bearer",
-            "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            "token_meta": {
+                "refresh_rotated": new_refresh_token is not None,
+                "access_expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            }
         }
 
     except JWTError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid refresh token: {str(e)}"
+            detail=f"Invalid token: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"}
         )
 
 
