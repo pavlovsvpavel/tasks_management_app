@@ -5,7 +5,7 @@ import {images} from "@/constants/images";
 export default function Index() {
 
     return (
-        <View className="flex-1 bg-site_bg">
+        <View className="flex-1 ">
             <ScrollView
                 className="flex-1 p-5"
                 showsVerticalScrollIndicator={false}

@@ -1,29 +1,67 @@
 import {Stack} from "expo-router";
 import './globals.css';
-import {SessionProvider} from '@/context/ctx';
+import {SessionProvider, useSession} from '@/context/AuthContext';
 import {SplashScreenController} from '@/screens/SplashScreen';
-import {useSession} from '@/context/ctx';
+import {View} from "react-native";
 import {StatusBar} from 'expo-status-bar';
+import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
+import {ServerStatusProvider, useServerStatus} from "@/context/ServerStatusContext";
+import {RefreshProvider} from "@/context/RefreshContext";
+import ServerStatusOverlay from "@/components/ServerStatusOverlay";
+import {RetryProvider} from "@/context/RetryContext";
+import SessionStatusOverlay from "@/components/SessionStatusOverlay";
+import {AlertProvider} from "@/context/AlertContext";
+
 
 export default function RootLayout() {
     return (
         <>
-            <StatusBar
-                style="dark"
-                translucent={true}
-            />
-            <SessionProvider>
-                <SplashScreenController/>
-                <RootNavigator/>
-            </SessionProvider>
+            <StatusBar style="dark" translucent={true}/>
+            <AlertProvider>
+            <RetryProvider>
+                <ServerStatusProvider>
+                    <SessionProvider>
+                        <RefreshProvider>
+                            <SplashScreenController/>
+                            <AppContent/>
+                        </RefreshProvider>
+                    </SessionProvider>
+                </ServerStatusProvider>
+            </RetryProvider>
+                </AlertProvider>
         </>
-
     );
 }
 
+function AppContent() {
+    const {isServerDown} = useServerStatus();
+
+    return (
+        <>
+            <RootNavigator/>
+            {isServerDown && <ServerStatusOverlay/>}
+        </>
+    );
+}
+
+
 function RootNavigator() {
-    const {session} = useSession();
-    const isAuthenticated = session !== null && session !== undefined;
+    const {accessToken, isLoading: isSessionLoading, sessionError} = useSession();
+    console.log('RootNavigator render, isSessionLoading:', isSessionLoading, 'at', new Date().toISOString());
+
+    if (isSessionLoading) {
+        return (
+            <View className="flex-1 justify-center items-center">
+                <PageLoadingSpinner/>
+            </View>
+        );
+    }
+
+    if (sessionError === 'SESSION_EXPIRED') {
+        return <SessionStatusOverlay />;
+    }
+
+    const isAuthenticated = !!accessToken;
 
     return (
         <Stack>
@@ -41,7 +79,10 @@ function RootNavigator() {
                 />
                 <Stack.Screen
                     name="login"
-                    options={{headerShown: false}}
+                    options={{
+                        headerShown: false, animationTypeForReplace: !accessToken ? 'pop' : 'push'
+                    }}
+
                 />
                 <Stack.Screen
                     name="register"

@@ -1,21 +1,35 @@
-import {useEffect} from "react";
-import { SplashScreen, router } from 'expo-router';
-import { useSession } from '@/context/ctx';
+import {useEffect, useCallback} from 'react';
+import {useFonts} from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import {useSession} from '@/context/AuthContext';
 
+SplashScreen.preventAutoHideAsync();
 
 export function SplashScreenController() {
-  const { session, isLoading } = useSession();
+    const {isLoading: isSessionLoading} = useSession();
 
-  useEffect(() => {
-    if (!isLoading) {
-      SplashScreen.hideAsync();
-      if (session) {
-        router.replace('/(tabs)/user_tasks');
-      } else {
-        router.replace('/');
-      }
-    }
-  }, [isLoading, session]);
+    const [fontsLoaded, fontError] = useFonts({});
 
-  return null;
+    const onAppReady = useCallback(async () => {
+        const isAppReady = !isSessionLoading && fontsLoaded;
+
+        console.log(`[SplashScreen] Checking if app is ready... Session Loading: ${isSessionLoading}, Fonts Loaded: ${fontsLoaded}. App is Ready: ${isAppReady}`);
+
+        if (isAppReady) {
+            await SplashScreen.hideAsync();
+            console.log('[SplashScreen] App is ready, hiding splash screen.');
+        }
+    }, [isSessionLoading, fontsLoaded]);
+
+    useEffect(() => {
+        if (fontError) {
+            console.error("[SplashScreen] Font loading error:", fontError);
+            SplashScreen.hideAsync();
+        }
+
+        onAppReady();
+
+    }, [onAppReady, fontError]);
+
+    return null;
 }

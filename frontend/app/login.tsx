@@ -1,36 +1,41 @@
-import React, {useState} from 'react';
-import {View, Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView, Alert} from 'react-native';
+import {useState} from 'react';
+import {View, Text, TextInput, TouchableOpacity, ScrollView, Alert} from 'react-native';
 import {Link, router} from 'expo-router';
-import {FontAwesome5, MaterialIcons, Feather, AntDesign} from '@expo/vector-icons';
-import {useSession} from '@/context/ctx';
-import {loginUser} from "@/utils/api";
+import {FontAwesome5, MaterialIcons, Ionicons} from '@expo/vector-icons';
+import {useSession} from '@/context/AuthContext';
+import {loginUser} from "@/services/LoginService";
+import {ButtonSpinner} from "@/components/ButtonSpinner";
+import {useAlert} from "@/context/AlertContext";
 
 
 export default function Login() {
+    const {setTokens} = useSession();
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         email: "",
         password: ""
     });
+    const {showAlert} = useAlert();
 
-    const {signIn} = useSession();
 
     const handleSubmit = async () => {
-        setIsLoading(true);
-
+        setIsLoggingIn(true);
         try {
-            const responseData = await loginUser(formData.email, formData.password);
-            signIn(responseData.tokens.access_token);
-
-        } catch (error: unknown) {
-            Alert.alert(
-                'Error',
-                error instanceof Error ? error.message : 'Login failed'
+            const {accessToken, refreshToken} = await loginUser(
+                formData.email,
+                formData.password
             );
-
+            await setTokens({accessToken, refreshToken, isRefreshed: false});
+            router.replace('/userTasks');
+        } catch (error: unknown) {
+            showAlert({
+                title: 'Error',
+                message: error instanceof Error ? error.message : 'Login failed',
+                buttons: [{text: 'Retry', onPress: () => router.replace('/login')}]
+            });
         } finally {
-            setIsLoading(false);
+            setIsLoggingIn(false);
         }
     };
 
@@ -45,18 +50,14 @@ export default function Login() {
         }
     };
 
+    const inputClass = "pl-10 w-full border border-gray-300 rounded-lg";
+
     return (
         <ScrollView
             className="flex-1 py-10 px-5"
             showsVerticalScrollIndicator={false}
             // contentContainerStyle={{minHeight: "100%", paddingBottom: 10}}
         >
-            <TouchableOpacity
-                onPress={() => router.back()}
-                className="p-2 -ml-2"
-            >
-                <AntDesign name="leftcircle" size={24} style={{ color: '#3B82F6' }} />
-            </TouchableOpacity>
             <View className="flex-1 justify-center gap-4">
                 <View className=" flex-1 justify-center items-center gap-2 mb-8">
                     <Text className="text-xl font-semibold text-dark-200">Welcome back</Text>
@@ -91,15 +92,15 @@ export default function Login() {
                                 value={formData.email}
                                 onChangeText={(text) => setFormData(prev => ({...prev, email: text}))}
                                 placeholder="Enter your email"
-                                className="pl-10 w-full border border-gray-300 rounded-lg p-3"
+                                className={inputClass}
                             />
                         </View>
                     </View>
                     <View className="flex-1 justify-center gap-2">
                         <Text className="text-sm font-medium">Password</Text>
-                        <View className=" flex flex-row items-center gap-6">
-                            <Feather
-                                name="lock"
+                        <View className="flex flex-row items-center gap-6">
+                            <Ionicons
+                                name="lock-closed"
                                 size={20}
                                 color="#9CA3AF"
                                 className="absolute left-3 top-3.5 z-10"
@@ -110,22 +111,22 @@ export default function Login() {
                                 value={formData.password}
                                 onChangeText={(text) => setFormData(prev => ({...prev, password: text}))}
                                 placeholder="Enter your password"
-                                className="pl-10 pr-10 w-full border border-gray-300 rounded-lg p-3"
+                                className={inputClass}
                             />
                             <TouchableOpacity
                                 className="absolute right-3 top-3.5"
                                 onPress={() => setShowPassword(!showPassword)}
                             >
                                 {showPassword ? (
-                                    <Feather name="eye-off" size={20}/>
+                                    <Ionicons name="eye-off" size={20}/>
                                 ) : (
-                                    <Feather name="eye" size={20}/>
+                                    <Ionicons name="eye" size={20}/>
                                 )}
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <View>
-                        <Link href="/forgot-password" className="text-blue-500 text-sm">
+                    <View className="self-end mt-2">
+                        <Link href="/password/forgotPassword" className="text-blue-500 text-sm font-bold">
                             Forgot password?
                         </Link>
                     </View>
@@ -134,10 +135,10 @@ export default function Login() {
                     <TouchableOpacity
                         className="w-full bg-btn_color rounded-lg p-3 items-center justify-center"
                         onPress={handleSubmit}
-                        disabled={isLoading}
+                        disabled={isLoggingIn}
                     >
-                        {isLoading ? (
-                            <ActivityIndicator color="white"/>
+                        {isLoggingIn ? (
+                            <ButtonSpinner/>
                         ) : (
                             <Text className="text-white font-medium">Sign In</Text>
                         )}

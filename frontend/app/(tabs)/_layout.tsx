@@ -1,85 +1,108 @@
-import {Tabs} from "expo-router";
-import {ImageBackground, Image, Text, View} from "react-native";
+import {Redirect, Tabs} from 'expo-router';
+import {Ionicons} from '@expo/vector-icons';
+import {TabIconProps} from "@/interfaces/interfaces";
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useSession} from "@/context/AuthContext";
+import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
 
-import {icons} from "@/constants/icons";
-import {images} from "@/constants/images";
 
-function TabIcon({focused, icon, title}: any) {
-    if (focused) {
-        return (
-            //     <ImageBackground
-            //         source={images.highlight}
-            //         className="flex flex-row w-full flex-1 min-w-[112px] min-h-16 mt-6 justify-center items-center rounded-full overflow-hidden"
-            //     >
-            //         <Image source={icon} tintColor="#151312" className="size-5"/>
-            //         <Text className="text-secondary text-base font-semibold ml-2">
-            //             {title}
-            //         </Text>
-            //     </ImageBackground>
-            // );
-            <View
-                className="flex flex-row w-full flex-1 min-w-[112px] min-h-16 mt-6 justify-center items-center rounded-full overflow-hidden"
-            >
-                <Image source={icon} tintColor="#151312" className="size-5"/>
-                <Text className="text-secondary text-base font-semibold ml-2">
-                    {title}
-                </Text>
-            </View>
-        );
-    }
-
+function TabIcon({focused, color, size, name}: TabIconProps) {
     return (
-        <View className="size-full justify-center items-center mt-4 rounded-full">
-            <Image source={icon} tintColor="white" className="size-5"/>
-        </View>
+        <Ionicons
+            name={name}
+            size={focused ? size + 4 : size}
+            color={color}
+        />
     );
 }
 
 export default function TabsLayout() {
+    const {isAuthenticated, isLoading} = useSession();
+
+    if (isLoading) {
+        console.log('TabsLayout: Session loading, showing spinner at', new Date().toISOString());
+        return <PageLoadingSpinner/>;
+    }
+
+    if (!isAuthenticated) {
+        console.log('TabsLayout: Not authenticated, redirecting to /login at', new Date().toISOString());
+        return <Redirect href="/login"/>;
+    }
+
+    console.log('TabsLayout: Rendering tabs at', new Date().toISOString());
+
     return (
-        <Tabs
-            screenOptions={{
-                tabBarShowLabel: false,
-                tabBarItemStyle: {
-                    width: "100%",
-                    height: "100%",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 20,
-                },
-                tabBarStyle: {
-                    backgroundColor: "#3B82F6",
-                    borderRadius: 100,
-                    marginHorizontal: 15,
-                    marginBottom: 50,
-                    height: 50,
-                    position: "absolute",
-                    overflow: "hidden",
-
-                },
-            }}
-        >
-            <Tabs.Screen
-                name="user_tasks"
-                options={{
-                    title: "My Tasks",
+        <SafeAreaView
+            edges={['top', 'left', 'right', 'bottom']}
+            className="flex-1 py-5 px-5">
+            <Tabs
+                screenOptions={{
+                    tabBarShowLabel: true,
                     headerShown: false,
-                    tabBarIcon: ({focused}) => (
-                        <TabIcon focused={focused} icon={icons.checklist} title="My Tasks"/>
-                    ),
-                }}
-            />
+                    tabBarStyle: {
+                        borderTopWidth: 1,
+                        borderRadius: 50,
+                        borderTopColor: '#cccccc',
+                        height: 80,
+                        paddingBottom: 10,
+                        paddingTop: 10,
 
-            <Tabs.Screen
-                name="profile"
-                options={{
-                    title: "Profile",
-                    headerShown: false,
-                    tabBarIcon: ({focused}) => (
-                        <TabIcon focused={focused} icon={icons.person} title="Profile"/>
-                    ),
-                }}
-            />
-        </Tabs>
+                    },
+                    tabBarItemStyle: {
+                        flex: 1,
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        paddingHorizontal: 4,
+                    },
+                }}>
+                <Tabs.Screen
+                    name="userTasks"
+                    options={{
+                        title: 'Tasks',
+                        headerShown: false,
+                        tabBarIcon: ({focused, color, size}) => (
+                            <TabIcon
+                                focused={focused}
+                                color={color}
+                                size={size}
+                                name={focused ? 'checkbox' : 'checkbox-outline'}
+                            />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
+                    name="createTask"
+                    options={{
+                        title: 'Create Task',
+                        headerShown: false,
+                        tabBarIcon: ({focused, color, size}) => (
+                            <TabIcon
+                                focused={focused}
+                                color={color}
+                                size={size}
+                                name={focused ? 'add-circle' : 'add-circle-outline'}
+                            />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
+                    name="profile"
+                    options={{
+                        title: 'Profile',
+                        headerShown: false,
+                        tabBarIcon: ({focused, color, size}) => (
+                            <TabIcon
+                                focused={focused}
+                                color={color}
+                                size={size}
+                                name={focused ? 'person' : 'person-outline'}
+                            />
+                        ),
+                    }}
+                />
+            </Tabs>
+        </SafeAreaView>
     );
+
 }
