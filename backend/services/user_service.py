@@ -1,59 +1,43 @@
 from fastapi import Depends
-from jose import JWTError
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import func
 from starlette import status
 from starlette.exceptions import HTTPException
-from starlette.requests import Request
 
 from db.database import get_db
 from models.users import User
 from core.security import get_password_hash, verify_password, validate_token
 from schemas.users import UserUpdate, UserChangePassword
 
+bearer_scheme = HTTPBearer()
+
 
 async def get_current_user(
-        db: Session = Depends(get_db),
-        request: Request = None,
+        credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+        db: Session = Depends(get_db)
 ) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated",
-    )
+    token = credentials.credentials
+    payload = validate_token(token, expected_type="access")
 
-    token = None
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
-    if request:
-        cookie_token = request.cookies.get("access_token")
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
-        if cookie_token:
-            token = cookie_token
-
-    if not token:
-        raise credentials_exception
-
-    try:
-        payload = validate_token(token)
-        if not payload:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired token",
-                headers={"WWW-Authenticate": "Bearer"}
-            )
-
-        user_id = payload.get("sub")
-        if not user_id:
-            raise credentials_exception
-
-        user = db.query(User).filter(User.id == int(user_id)).first()
-        if not user:
-            raise credentials_exception
-
-        return user
-
-    except JWTError:
-        raise credentials_exception
+    return user
 
 
 def validate_user_status(user: User):

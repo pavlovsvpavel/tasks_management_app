@@ -41,6 +41,21 @@
 				},
 				{
 					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"",
+									"pm.environment.set(\"current_access_token\", res.tokens['access_token']);",
+									"pm.environment.set(\"current_refresh_token\", res.tokens['refresh_token']);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -48,13 +63,19 @@
 						"method": "POST",
 						"header": [],
 						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"{{username}}\",\n    \"password\": \"{{password}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
 								}
-							}
+							]
 						},
 						"url": {
 							"raw": "{{base_url}}/users/login",
@@ -71,12 +92,26 @@
 				},
 				{
 					"name": "User profile details",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{current_access_token}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
 						"url": {
 							"raw": "{{base_url}}/users/profile-details",
 							"host": [
@@ -94,13 +129,20 @@
 					"name": "User profile update",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{current_access_token}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"full_name\": \"Pacho\"\n}",
+							"raw": "{\n  \"full_name\": \"Admin\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -360,7 +402,7 @@
 			"name": "Tokens",
 			"item": [
 				{
-					"name": "Token",
+					"name": "Refresh",
 					"event": [
 						{
 							"listen": "test",
@@ -368,8 +410,19 @@
 								"exec": [
 									"const res = pm.response.json();",
 									"",
+									"console.log(\"Response from /refresh-token:\", JSON.stringify(res, null, 2));",
+									"",
+									"// Always set the new access token",
 									"pm.environment.set(\"current_access_token\", res.access_token);",
-									"pm.environment.set(\"current_refresh_token\", res.refresh_token);",
+									"",
+									"// Check if refresh_token exists and is different from the old one",
+									"const oldRefreshToken = pm.environment.get(\"current_refresh_token\");",
+									"if (res.refresh_token && res.refresh_token !== oldRefreshToken) {",
+									"    console.log(\"New refresh token detected. Updating environment.\");",
+									"    pm.environment.set(\"current_refresh_token\", res.refresh_token);",
+									"} else {",
+									"    console.log(\"No new refresh token provided. Keeping old one.\");",
+									"}",
 									""
 								],
 								"type": "text/javascript",
@@ -378,38 +431,33 @@
 						}
 					],
 					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
+						"auth": {
+							"type": "bearer",
+							"bearer": [
 								{
-									"key": "username",
-									"value": "user@example.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "qwer",
-									"type": "text"
+									"key": "token",
+									"value": "{{current_refresh_token}}",
+									"type": "string"
 								}
 							]
 						},
+						"method": "POST",
+						"header": [],
 						"url": {
-							"raw": "{{base_url}}/auth/token",
+							"raw": "{{base_url}}/auth/refresh-token",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"auth",
-								"token"
+								"refresh-token"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Protected",
+					"name": "Validate",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -421,59 +469,16 @@
 								}
 							]
 						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/auth/protected",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"protected"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Refresh",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const res = pm.response.json();",
-									"",
-									"pm.environment.set(\"current_access_token\", res.access_token);",
-									"pm.environment.set(\"current_refresh_token\", res.refresh_token);",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
 						"method": "POST",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"refresh_token\": \"{{current_refresh_token}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{base_url}}/auth/refresh-token",
+							"raw": "{{base_url}}/auth/validate-token",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"auth",
-								"refresh-token"
+								"validate-token"
 							]
 						}
 					},

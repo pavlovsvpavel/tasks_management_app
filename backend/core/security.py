@@ -1,7 +1,7 @@
 import datetime
 import uuid
 
-from jose import jwt, JWTError
+from jose import jwt, JWTError, ExpiredSignatureError
 from passlib.context import CryptContext
 from starlette import status
 from starlette.exceptions import HTTPException
@@ -54,15 +54,24 @@ def validate_token(token: str, expected_type:str):
         if expected_type and payload.get("type") != expected_type:
             raise JWTError(f"Invalid token type. Expected: {expected_type}")
 
-        # Manual expiration check (double security)
-        if datetime.datetime.now(datetime.UTC) > datetime.datetime.fromtimestamp(payload["exp"], tz=datetime.timezone.utc):
+        exp_timestamp = payload.get("exp")
+        if exp_timestamp and datetime.datetime.now(datetime.UTC) > datetime.datetime.fromtimestamp(exp_timestamp, tz=datetime.timezone.utc):
             raise JWTError("Token expired")
 
         return payload
 
+
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired",
+            headers={"WWW-Authenticate": "Bearer"}
+
+        )
+
     except JWTError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Token verification failed: {str(e)}",
+            detail=f"Invalid token: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"}
         )

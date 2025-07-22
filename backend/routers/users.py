@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from starlette.responses import Response, RedirectResponse, JSONResponse
-from core.config import settings
+from starlette.responses import Response
 from db.database import get_db
 from models.users import User
 from schemas.users import UserCreate, UserResponse, UserChangePassword, UserUpdate, LoginResponse
@@ -62,25 +61,6 @@ async def login_user(
     }
 
 
-@router.get("/logout")
-async def logout(response: Response):
-    """Logout user and clearing the cookies"""
-
-    response.delete_cookie(
-        key="access_token",
-        path="/",
-        domain=None,
-    )
-
-    response.delete_cookie(
-        key="csrf_token",
-        path="/",
-        domain=None,
-    )
-
-    return {"message": "Successfully logged out"}
-
-
 @router.get("/profile-details", response_model=UserResponse)
 async def get_current_user_profile(current_user: User = Depends(get_current_user)):
     """Get current authenticated user's profile"""
@@ -127,16 +107,5 @@ async def change_password(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect"
         )
-
-    response = JSONResponse(
-        content={
-            "message": "Password changed successfully",
-            "action": "logout",
-            "notification": "You have to log in with your new password"
-        },
-        status_code=status.HTTP_200_OK
-    )
-
-    await logout(response)
 
     return {"message": "Password changed successfully"}

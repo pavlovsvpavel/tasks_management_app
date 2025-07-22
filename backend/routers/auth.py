@@ -26,10 +26,14 @@ async def validate_token_route(
         credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
         expected_type: str | None = Header(None)
 ):
-    """Validate exp date of token."""
+    """Validate token."""
 
-    token = credentials.credentials
-    payload = validate_token(token, expected_type)
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No token provided or invalid Authorization header"
+        )
+    payload = validate_token(credentials.credentials, expected_type)  # Let exceptions bubble up
 
     return {
         "valid": True,
@@ -37,9 +41,10 @@ async def validate_token_route(
         "expires_in": payload["exp"] - int(time.time())
     }
 
+
 @router.post("/refresh-token")
 async def refresh_token_route(
-        credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
+        credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
         db: Session = Depends(get_db)
 ):
     """Refresh tokens using ONLY a valid refresh token."""
@@ -73,16 +78,16 @@ async def refresh_token_route(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
+
         validate_user_status(user)
-
-        # 3. Generate new tokens (with conditional refresh token rotation)
         new_access_token = create_access_token(data={"sub": str(user.id)})
-
-        # Only generate new refresh token if current one is near expiration
         remaining_life = payload["exp"] - int(time.time())
-        new_refresh_token = None
-        if remaining_life < (settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400 * 0.25):  # Last 25% of lifetime
+
+        if remaining_life < (
+                settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400 * 0.25):
             new_refresh_token = create_refresh_token(data={"sub": str(user.id)})
+        else:
+            new_refresh_token = refresh_token
 
         return {
             "access_token": new_access_token,
@@ -160,7 +165,6 @@ async def auth_google_callback(
 
         access_token = create_access_token(data={"sub": str(user.id)})
         refresh_token = create_refresh_token(data={"sub": str(user.id)})
-        csrf_token = generate_csrf_token()
 
         update_last_login(db, user)
         response = RedirectResponse(url=settings.FRONTEND_HOME_URL)
@@ -168,7 +172,6 @@ async def auth_google_callback(
         cookie_mgr = CookieManager(response)
         cookie_mgr.set_access_token(access_token)
         cookie_mgr.set_refresh_token(refresh_token)
-        cookie_mgr.set_csrf(csrf_token)
 
         return response
 
