@@ -4,6 +4,14 @@ import {AlertButton} from "@/components/CustomAlert";
 interface ServerStatusContextType {
     isServerDown: boolean;
     checkHealth: () => Promise<boolean>;
+    isInitialCheckComplete: boolean;
+    setServerStatus: (isDown: boolean) => void;
+}
+
+interface RetryContextType {
+    registerRetryHandler: (key: string, handler: () => Promise<void>) => void;
+    unregisterRetryHandler: (key: string) => void;
+    triggerRetry: () => void;
 }
 
 interface RefreshHandler<T = void> {
@@ -15,32 +23,6 @@ interface RefreshContextType {
     unregisterRefreshHandler: () => void;
     triggerRefresh: () => Promise<void>;
     isRefreshing: boolean;
-}
-
-interface Task {
-    id: number;
-    name: string;
-    description: string;
-    created_at: datetime;
-    completed_at: datetime;
-    completed: boolean;
-    user_id: number;
-}
-
-interface RegisterResponse {
-    message: string;
-    user?: {
-        id: string;
-        email: string;
-        full_name: string;
-    };
-}
-
-interface TabIconProps {
-    focused: boolean;
-    color: string;
-    size: number;
-    name: keyof typeof Ionicons.glyphMap;
 }
 
 interface AuthContextType {
@@ -62,22 +44,9 @@ interface TokenPair {
     isRefreshed: boolean;
 }
 
-interface User {
-    id: number;
-    email: string;
-    username: string;
-    full_name: string;
-}
-
 interface RefreshResponse {
     access_token: string;
     refresh_token?: string;
-}
-
-interface RetryContextType {
-    registerRetryHandler: (key: string, handler: () => Promise<void>) => void;
-    unregisterRetryHandler: (key: string) => void;
-    triggerRetry: () => void;
 }
 
 interface CustomAlertProps {
@@ -85,6 +54,32 @@ interface CustomAlertProps {
     title: string;
     message?: string;
     buttons: AlertButton[];
+}
+
+interface RegisterResponse {
+    message: string;
+    user?: {
+        id: string;
+        email: string;
+        full_name: string;
+    };
+}
+
+interface TabIconProps {
+    focused: boolean;
+    color: string;
+    size: number;
+    name: keyof typeof Ionicons.glyphMap;
+}
+
+interface Task {
+    id: number;
+    name: string;
+    description: string;
+    created_at: datetime;
+    completed_at: datetime;
+    completed: boolean;
+    user_id: number;
 }
 
 

@@ -6,10 +6,17 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const ServerStatusContext = createContext<ServerStatusContextType>({
     isServerDown: false,
     checkHealth: async () => true,
+    isInitialCheckComplete: false,
+    setServerStatus: (isDown: boolean) => false
 });
 
 export const ServerStatusProvider = ({children}: { children: ReactNode }) => {
     const [isServerDown, setIsServerDown] = useState(false);
+    const [isInitialCheckComplete, setIsInitialCheckComplete] = useState(false);
+
+    const setServerStatus = (isDown: boolean) => {
+        setIsServerDown(isDown);
+    };
 
     const checkHealth = useCallback(async (): Promise<boolean> => {
         try {
@@ -33,15 +40,29 @@ export const ServerStatusProvider = ({children}: { children: ReactNode }) => {
     }, []);
 
     useEffect(() => {
-        checkHealth();
+        let isMounted = true;
+
+        const runInitialCheck = async () => {
+            await checkHealth();
+            if (isMounted) {
+                setIsInitialCheckComplete(true);
+            }
+        };
+
+        void runInitialCheck();
         const interval = setInterval(checkHealth, 120000);
-        return () => clearInterval(interval);
-    }, [checkHealth]);
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, [checkHealth, setIsInitialCheckComplete]);
 
     return (
         <ServerStatusContext.Provider value={{
             isServerDown,
             checkHealth,
+            isInitialCheckComplete,
+            setServerStatus,
         }}>
             {children}
         </ServerStatusContext.Provider>

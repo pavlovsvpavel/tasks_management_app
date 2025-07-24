@@ -1,16 +1,15 @@
 import {Stack} from "expo-router";
 import './globals.css';
-import {SessionProvider, useSession} from '@/context/AuthContext';
-import {SplashScreenController} from '@/screens/SplashScreen';
+import {useFonts} from "expo-font";
 import {View} from "react-native";
 import {StatusBar} from 'expo-status-bar';
+import {RetryProvider} from "@/context/RetryContext";
+import {AlertProvider} from "@/context/AlertContext";
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
 import {ServerStatusProvider, useServerStatus} from "@/context/ServerStatusContext";
-import {RefreshProvider} from "@/context/RefreshContext";
 import ServerStatusOverlay from "@/components/ServerStatusOverlay";
-import {RetryProvider} from "@/context/RetryContext";
-import SessionStatusOverlay from "@/components/SessionStatusOverlay";
-import {AlertProvider} from "@/context/AlertContext";
+import {AuthProvider, useAuth} from '@/context/AuthContext';
+import {RefreshProvider} from "@/context/RefreshContext";
 
 
 export default function RootLayout() {
@@ -18,38 +17,34 @@ export default function RootLayout() {
         <>
             <StatusBar style="dark" translucent={true}/>
             <AlertProvider>
-            <RetryProvider>
-                <ServerStatusProvider>
-                    <SessionProvider>
-                        <RefreshProvider>
-                            <SplashScreenController/>
-                            <AppContent/>
-                        </RefreshProvider>
-                    </SessionProvider>
-                </ServerStatusProvider>
-            </RetryProvider>
-                </AlertProvider>
+                <RetryProvider>
+                    <ServerStatusProvider>
+                        <AuthProvider>
+                            <RefreshProvider>
+                                <AppContent/>
+                            </RefreshProvider>
+                        </AuthProvider>
+                    </ServerStatusProvider>
+                </RetryProvider>
+            </AlertProvider>
         </>
     );
 }
 
 function AppContent() {
-    const {isServerDown} = useServerStatus();
+    const {isServerDown, isInitialCheckComplete} = useServerStatus();
+    const {isLoading: isAuthLoading} = useAuth();
 
-    return (
-        <>
-            <RootNavigator/>
-            {isServerDown && <ServerStatusOverlay/>}
-        </>
-    );
-}
+    const [fontsLoaded] = useFonts({
+        'ubuntu-normal': require('../assets/fonts/Ubuntu-Regular.ttf'),
+        'ubuntu-bold': require('../assets/fonts/Ubuntu-Bold.ttf'),
+        'ubuntu-semibold': require('../assets/fonts/Ubuntu-Medium.ttf'),
+        'ubuntu-light': require('../assets/fonts/Ubuntu-Light.ttf'),
+    });
 
+    const isAppLoading = !fontsLoaded || isAuthLoading || !isInitialCheckComplete;
 
-function RootNavigator() {
-    const {accessToken, isLoading: isSessionLoading, sessionError} = useSession();
-    console.log('RootNavigator render, isSessionLoading:', isSessionLoading, 'at', new Date().toISOString());
-
-    if (isSessionLoading) {
+    if (isAppLoading) {
         return (
             <View className="flex-1 justify-center items-center">
                 <PageLoadingSpinner/>
@@ -57,10 +52,21 @@ function RootNavigator() {
         );
     }
 
-    if (sessionError === 'SESSION_EXPIRED') {
-        return <SessionStatusOverlay />;
+    if (isServerDown) {
+        return <ServerStatusOverlay/>;
     }
 
+    return (
+        <>
+            <RootNavigator/>
+        </>
+    );
+}
+
+
+function RootNavigator() {
+    const {accessToken, isLoading: isAuthLoading} = useAuth();
+    console.log('[RootNavigator] render, isAuthLoading:', isAuthLoading, 'at', new Date().toISOString());
     const isAuthenticated = !!accessToken;
 
     return (

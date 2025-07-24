@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, ActivityIndicator} from "react-native";
+import { View, Text, TouchableOpacity } from '@/components/Themed';
 import {Ionicons} from '@expo/vector-icons';
 import {CustomAlertProps} from "@/interfaces/interfaces";
 
@@ -10,37 +10,55 @@ export interface AlertButton {
     style?: 'default' | 'cancel' | 'destructive';
 }
 
+const buttonClasses = {
+    default: {
+        button: 'bg-blue-500',
+        text: 'text-white'
+    },
+    destructive: {
+        button: 'bg-red-600',
+        text: 'text-white'
+    },
+    cancel: {
+        button: 'bg-gray-200',
+        text: 'text-gray-800'
+    },
+};
 
 export default function CustomAlert({isVisible, title, message, buttons}: CustomAlertProps) {
     if (!isVisible) return null;
 
     return (
-        <View style={styles.container}>
-            <View style={styles.content}>
-                <Ionicons name="information-circle-outline" size={48} color="#007AFF" style={{marginBottom: 12}}/>
-                <Text style={styles.title}>{title}</Text>
-                {message && <Text style={styles.message}>{message}</Text>}
+        <View className="absolute inset-0 bg-black/60 justify-center items-center z-[10000]">
+            <View className="w-[85%] max-w-[340px] bg-white p-6 rounded-2xl items-center shadow-lg shadow-black/25">
+                <View className="mb-3">
+                    <Ionicons name="information-circle-outline" size={48} color="#007AFF"/>
+                </View>
 
-                <View style={styles.buttonContainer}>
+                <Text className="text-gray-900 text-xl mb-2 text-center" weight="bold">
+                    {title}
+                </Text>
+
+                {message && (
+                    <Text className="text-gray-600 text-center mb-6 text-base leading-[22px]">
+                        {message}
+                    </Text>
+                )}
+
+                <View className="flex-row w-full gap-x-2.5">
                     {buttons.map((button, index) => {
-                        let buttonStyle = styles.button;
-                        let textStyle = styles.buttonText;
-
-                        if (button.style === 'destructive') {
-                            buttonStyle = {...buttonStyle, ...styles.destructiveButton};
-                            textStyle = {...textStyle, ...styles.destructiveButtonText};
-                        } else if (button.style === 'cancel') {
-                            buttonStyle = {...buttonStyle, ...styles.cancelButton};
-                            textStyle = {...textStyle, ...styles.cancelButtonText};
-                        }
+                        const variant = button.style || 'default';
+                        const variantClasses = buttonClasses[variant];
 
                         return (
                             <TouchableOpacity
                                 key={index}
-                                style={[buttonStyle, {flex: 1}]}
+                                className={`flex-1 items-center justify-center py-3 rounded-lg ${variantClasses.button}`}
                                 onPress={button.onPress}
                             >
-                                <Text style={textStyle}>{button.text}</Text>
+                                <Text weight="bold" className={`text-base ${variantClasses.text}`}>
+                                    {button.text}
+                                </Text>
                             </TouchableOpacity>
                         )
                     })}
@@ -49,67 +67,3 @@ export default function CustomAlert({isVisible, title, message, buttons}: Custom
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10000,
-    },
-    content: {
-        width: '85%',
-        maxWidth: 340,
-        backgroundColor: '#FFFFFF',
-        padding: 24,
-        borderRadius: 16,
-        alignItems: 'center',
-        shadowColor: "#000",
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    title: {
-        color: '#111827',
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    message: {
-        color: '#4B5563',
-        textAlign: 'center',
-        marginBottom: 24,
-        fontSize: 16,
-        lineHeight: 22,
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        width: '100%',
-        gap: 10, // Adds space between buttons
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    destructiveButton: {
-        backgroundColor: '#FF3B30',
-    },
-    destructiveButtonText: {
-        color: 'white',
-    },
-    cancelButton: {
-        backgroundColor: '#E5E7EB',
-    },
-    cancelButtonText: {
-        color: '#1F2937',
-    }
-});

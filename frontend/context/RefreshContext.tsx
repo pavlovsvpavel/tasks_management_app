@@ -1,4 +1,4 @@
-import React, {createContext, useCallback, useContext, useState} from 'react';
+import {createContext, ReactNode, useCallback, useContext, useState} from 'react';
 import {RefreshContextType, RefreshHandler} from "@/interfaces/interfaces";
 
 
@@ -12,11 +12,10 @@ const RefreshContext = createContext<RefreshContextType>({
     isRefreshing: false,
 });
 
-export const RefreshProvider = ({children}: { children: React.ReactNode }) => {
+export const RefreshProvider = ({children}: { children: ReactNode }) => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [currentHandler, setCurrentHandler] = useState<RefreshHandler<any> | null>(null);
-
-    console.log('RefreshProvider render', isRefreshing);
+    console.log('[Refresh Context] RefreshProvider render', isRefreshing);
 
     const registerRefreshHandler = useCallback(<T, >(handler: RefreshHandler<T>) => {
         setCurrentHandler(() => handler);
@@ -49,4 +48,10 @@ export const RefreshProvider = ({children}: { children: React.ReactNode }) => {
     );
 };
 
-export const useRefresh = () => useContext(RefreshContext);
+export const useRefresh = () => {
+    const context = useContext(RefreshContext);
+    if (!context) {
+        throw new Error('useRefresh must be used within a RefreshProvider');
+    }
+    return context;
+};

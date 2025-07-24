@@ -11,7 +11,8 @@ import {AuthContextType, TokenPair} from '@/interfaces/interfaces';
 import {getTokens, saveTokensToStorage, deleteTokensFromStorage} from '@/utils/tokenStorage';
 import {validateAndRefreshTokens, TokenValidationError} from '@/services/TokenAuth';
 import {useRetry} from "@/context/RetryContext";
-
+import {useServerStatus} from "@/context/ServerStatusContext";
+import {useAlert} from './AlertContext';
 
 const AuthContext = createContext<AuthContextType>({
     isAuthenticated: false,
@@ -27,12 +28,15 @@ const AuthContext = createContext<AuthContextType>({
     },
 });
 
-export const SessionProvider = ({children}: PropsWithChildren) => {
+export const AuthProvider = ({children}: PropsWithChildren) => {
     const [isLoading, setIsLoading] = useState(true);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [refreshToken, setRefreshToken] = useState<string | null>(null);
     const [sessionError, setSessionError] = useState<string | null>(null);
     const {registerRetryHandler, unregisterRetryHandler} = useRetry();
+    const {isServerDown, isInitialCheckComplete} = useServerStatus();
+    const {showAlert} = useAlert();
+
 
     const clearSessionError = useCallback(() => setSessionError(null), []);
 
@@ -68,9 +72,37 @@ export const SessionProvider = ({children}: PropsWithChildren) => {
     }, [clearTokens]);
 
     useEffect(() => {
+        if (sessionError) {
+            if (sessionError === 'SESSION_EXPIRED') {
+                showAlert({
+                    title: "Session Expired",
+                    message: "Your session has ended. Please log in again to continue.",
+                    buttons: [{text: "OK"}]
+                });
+            }
+            clearSessionError();
+        }
+    }, [sessionError, showAlert, clearSessionError]);
+
+
+    useEffect(() => {
         const initialize = async () => {
             console.log('[AuthContext] Starting initialization...');
             setIsLoading(true);
+
+            if (!isInitialCheckComplete) {
+                console.log('[AuthContext] Paused. Waiting for initial server health check.');
+                return;
+            }
+
+            if (isServerDown) {
+                console.warn('[AuthContext] Initialization halted: Server is down.');
+                setSessionError('SERVER_UNAVAILABLE');
+                setIsLoading(false);
+                return;
+            }
+
+            console.log('[AuthContext] Server is up. Proceeding with full validation.');
 
             try {
                 const tokens = await getTokens();
@@ -107,10 +139,16 @@ export const SessionProvider = ({children}: PropsWithChildren) => {
         };
 
         registerRetryHandler('auth', initialize);
-        initialize();
+        (async () => {
+            try {
+                await initialize();
+            } catch (error) {
+                console.error('[AuthContext] An unexpected top-level error occurred during initialization:', error);
+            }
+        })();
 
         return () => unregisterRetryHandler('auth');
-    }, [registerRetryHandler, unregisterRetryHandler, setTokens, clearTokens]);
+    }, [isServerDown, isInitialCheckComplete, setTokens, clearTokens]);
 
     const validateSession = useCallback(async (): Promise<{ isValid: boolean; accessToken: string | null }> => {
         if (!accessToken || !refreshToken) {
@@ -149,10 +187,10 @@ export const SessionProvider = ({children}: PropsWithChildren) => {
     return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
-export const useSession = () => {
+export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
-        throw new Error('useContext must be used within a SessionProvider');
+        throw new Error('useAuth must be used within a AuthProvider');
     }
     return context;
 }

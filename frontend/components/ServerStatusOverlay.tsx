@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
+import {useState} from 'react';
+import { View, Text, TouchableOpacity } from '@/components/Themed';
 import {useServerStatus} from "@/context/ServerStatusContext";
 import {useRetry} from "@/context/RetryContext";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
@@ -21,66 +21,26 @@ export default function ServerStatusOverlay() {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.content}>
-                <Text style={styles.title}>Service Unavailable</Text>
-                <Text style={styles.message}>
+        <View className="absolute inset-0 bg-black/85 justify-center items-center z-[9999]">
+            <View className="w-4/5 bg-zinc-800 p-5 rounded-lg items-center border border-zinc-700">
+                <Text className="text-white text-xl mb-3" weight="bold">
+                    Service Unavailable
+                </Text>
+                <Text className="text-neutral-200 text-center mb-5">
                     Our services are temporarily down. Please try again later.
                 </Text>
                 <TouchableOpacity
-                    style={styles.button}
+                    className="bg-[#007AFF] py-2.5 px-5 rounded-lg min-w-[150px] items-center justify-center disabled:opacity-50"
                     onPress={handleRetry}
                     disabled={isRetrying}
                 >
                     {isRetrying ? (
                         <ButtonSpinner/>
                     ) : (
-                        <Text style={styles.buttonText}>Retry Connection</Text>
+                        <Text className="text-white" weight="bold">Retry Connection</Text>
                     )}
                 </TouchableOpacity>
             </View>
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.85)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 9999,
-    },
-    content: {
-        width: '80%',
-        backgroundColor: '#2c2c2c',
-        padding: 20,
-        borderRadius: 10,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#444'
-    },
-    title: {
-        color: '#FFFFFF',
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    message: {
-        color: '#DDDDDD',
-        textAlign: 'center',
-        marginBottom: 20,
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        minWidth: 150,
-        alignItems: 'center',
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-    },
-});

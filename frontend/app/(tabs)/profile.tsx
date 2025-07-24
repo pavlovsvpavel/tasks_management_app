@@ -1,31 +1,33 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {
     Alert,
     RefreshControl,
     ScrollView,
-    Text,
     TextInput,
-    TouchableOpacity,
-    View,
 } from 'react-native';
+import { View, Text, TouchableOpacity } from '@/components/Themed';
 import {useFocusEffect} from "expo-router";
-import {useSession} from "@/context/AuthContext";
+import {useAuth} from "@/context/AuthContext";
 import {useRefresh} from '@/context/RefreshContext';
 import {Ionicons, MaterialCommunityIcons} from "@expo/vector-icons";
-import {useApiClient, ServerDownError, SessionExpiredError} from '@/hooks/useApiClient';
+import {useApiClient} from '@/hooks/useApiClient';
+import {
+    ServerDownError,
+    SessionExpiredError,
+    SessionRefreshedError,
+    ValidationError
+} from '@/utils/errors';
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {useAlert} from "@/context/AlertContext";
 
 export default function ProfileScreen() {
     const {registerRefreshHandler, unregisterRefreshHandler, triggerRefresh, isRefreshing} = useRefresh();
-    const {logout, isLoading: isSessionLoading} = useSession();
+    const {logout, isLoading: isAuthLoading} = useAuth();
     const {showAlert} = useAlert();
     const {apiClient} = useApiClient();
     const [isProfileLoading, setIsProfileLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-
-
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [editing, setEditing] = useState(false);
@@ -36,6 +38,38 @@ export default function ProfileScreen() {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const handleApiError = useCallback((error: unknown, context: 'profile' | 'password') => {
+        console.error(`An API error occurred while updating ${context}:`, error);
+
+        if (error instanceof SessionRefreshedError) {
+            showAlert({
+                title: 'Session Updated',
+                message: 'Your session was refreshed for security. Please try your action again.',
+                buttons: [{text: 'OK'}]
+            });
+            return;
+        }
+
+        if (error instanceof SessionExpiredError || error instanceof ServerDownError) {
+            return;
+        }
+
+        if (error instanceof ValidationError) {
+            showAlert({
+                title: context === 'password' ? 'Password Change Failed' : 'Update Failed',
+                message: error.body.detail || 'The server returned a validation error.',
+                buttons: [{text: 'OK'}]
+            });
+            return;
+        }
+
+        showAlert({
+            title: 'An Unexpected Error Occurred',
+            message: 'We were unable to complete your request. Please try again.',
+            buttons: [{text: 'Dismiss'}]
+        });
+    }, [showAlert]);
 
 
     const fetchProfileDetails = useCallback(async () => {
@@ -48,11 +82,10 @@ export default function ProfileScreen() {
             setEmail(user.email);
             return user;
         } catch (error) {
-            // console.error('fetchProfileDetails error:', error);
             if (error instanceof ServerDownError) {
                 console.log('Cannot fetch profile, server is down.');
             } else if (error instanceof SessionExpiredError) {
-                console.log('Cannot fetch profile, session expired.');
+                console.log('[Profile page] Cannot fetch profile, session expired.');
             } else {
                 Alert.alert('Error', 'Failed to load your profile. Please pull down to refresh.');
             }
@@ -74,6 +107,7 @@ export default function ProfileScreen() {
             const response = await apiClient('/users/profile-update', {
                 method: 'PATCH',
                 body: JSON.stringify({full_name: fullName.trim()}),
+                retryOn401: false,
             });
 
             const updatedUser = await response.json();
@@ -82,19 +116,11 @@ export default function ProfileScreen() {
             showAlert({
                 title: 'Success',
                 message: 'Your profile has been updated successfully.',
-                buttons: [{text: 'Great!'}]
+                buttons: [{text: 'OK'}]
             });
             setEditing(false);
         } catch (error) {
-            console.error('handleProfileChanges error:', error);
-            if (error instanceof ServerDownError || error instanceof SessionExpiredError) {
-            } else {
-                showAlert({
-                    title: 'Update Failed',
-                    message: 'We were unable to save your profile changes. Please try again.',
-                    buttons: [{text: 'Dismiss'}]
-                });
-            }
+            handleApiError(error, 'profile');
         } finally {
             setIsSaving(false);
         }
@@ -134,6 +160,7 @@ export default function ProfileScreen() {
                     current_password: currentPassword,
                     new_password: newPassword,
                 }),
+                retryOn401: false,
             });
 
             await response.json();
@@ -148,53 +175,35 @@ export default function ProfileScreen() {
             setNewPassword('');
             setConfirmPassword('');
         } catch (error) {
-            // console.error('handleChangePassword error:', error);
-            // if (error instanceof ServerDownError || error instanceof SessionExpiredError) {
-            //     // Handled globally
-            // }
-
-            if (error instanceof Error) {
-                try {
-                    const jsonString = error.message.split('Body: ')[1];
-
-                    if (jsonString) {
-                        const errorBody = JSON.parse(jsonString);
-                        Alert.alert('Error', errorBody.detail || 'An invalid server response was received.');
-                    } else {
-                        Alert.alert('Error', error.message);
-                    }
-                } catch (parseError) {
-                    console.error("Could not parse error body from message:", error.message);
-                    Alert.alert('Error', 'Failed to change password. The server response was unreadable.');
-                }
-            } else {
-                Alert.alert('Error', 'An unexpected and unknown error occurred.');
-            }
+            handleApiError(error, 'profile');
         } finally {
             setIsSaving(false);
         }
     };
 
     useEffect(() => {
-        if (isSessionLoading) {
+        if (isAuthLoading) {
             return;
         }
 
-        const loadInitialProfile = async () => {
-            setIsProfileLoading(true);
-            await fetchProfileDetails();
-            setIsProfileLoading(false);
-        };
+        (async () => {
+            try {
+                setIsProfileLoading(true);
+                await fetchProfileDetails();
+            } catch (error) {
+                console.error("Failed to load initial profile:", error);
+            } finally {
+                setIsProfileLoading(false);
+            }
+        })();
 
-        loadInitialProfile();
-
-    }, [isSessionLoading, fetchProfileDetails]);
+    }, [isAuthLoading, fetchProfileDetails]);
 
 
     useFocusEffect(
         useCallback(() => {
             registerRefreshHandler(fetchProfileDetails);
-            return () => unregisterRefreshHandler(); // Clean up on blur
+            return () => unregisterRefreshHandler();
         }, [registerRefreshHandler, unregisterRefreshHandler, fetchProfileDetails])
     );
 
@@ -219,7 +228,7 @@ export default function ProfileScreen() {
             }
         >
             <View className="flex-row justify-between items-center mb-5 px-4">
-                <Text className="text-2xl font-bold text-primary">Profile</Text>
+                <Text className="text-2xl text-primary" weight="bold">Profile</Text>
                 <TouchableOpacity
                     onPress={() =>
                         showAlert({
@@ -252,14 +261,14 @@ export default function ProfileScreen() {
                 </View>
 
                 <View className="items-center">
-                    <Text className="text-xl font-semibold text-gray-800 mb-1">{fullName}</Text>
+                    <Text className="text-xl text-gray-800 mb-1" weight="bold">{fullName}</Text>
                     <Text className="text-base text-gray-500">{email}</Text>
                 </View>
             </View>
 
             <View className={sectionClass}>
                 <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg font-semibold text-gray-800">Personal Information</Text>
+                    <Text className="text-lg text-gray-800" weight="bold">Personal Information</Text>
                     <TouchableOpacity onPress={() => setEditing(!editing)}>
                         <MaterialCommunityIcons
                             name={editing ? "account-cancel" : "account-edit"}
@@ -270,7 +279,7 @@ export default function ProfileScreen() {
                 </View>
 
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-primary mb-1.5">Full Name</Text>
+                    <Text className="text-sm text-primary mb-1.5" weight="semibold">Full Name</Text>
                     <TextInput
                         className={`bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800 ${!editing && 'bg-gray-100 text-gray-500'}`}
                         value={fullName}
@@ -282,7 +291,7 @@ export default function ProfileScreen() {
                 </View>
 
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-primary mb-1.5">Email</Text>
+                    <Text className="text-sm text-primary mb-1.5" weight="semibold">Email</Text>
                     <TextInput
                         className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-500"
                         value={email}
@@ -294,7 +303,7 @@ export default function ProfileScreen() {
 
                 {editing && (
                     <TouchableOpacity
-                        className="bg-btn_color rounded-lg py-3 flex-row items-center justify-center mt-2 h-[48px]" // Added fixed height
+                        className="bg-btn_color rounded-lg py-3 flex-row items-center justify-center mt-2 h-[48px]"
                         onPress={handleProfileChanges}
                         disabled={isSaving}
                     >
@@ -303,7 +312,7 @@ export default function ProfileScreen() {
                         ) : (
                             <>
                                 <Ionicons name="save" size={18} color="#ffffff"/>
-                                <Text className="text-white text-base font-semibold ml-2">Save Changes</Text>
+                                <Text className="text-white text-base ml-2" weight="bold">Save Changes</Text>
                             </>
                         )}
                     </TouchableOpacity>
@@ -312,7 +321,7 @@ export default function ProfileScreen() {
 
             <View className={sectionClass}>
                 <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg font-semibold text-gray-800">Security</Text>
+                    <Text className="text-lg text-gray-800" weight="bold">Security</Text>
                     <Ionicons name="shield-checkmark-outline" size={22} color="#3B82F6"/>
                 </View>
 
@@ -322,7 +331,7 @@ export default function ProfileScreen() {
                 >
                     <View className="flex-row items-center">
                         <Ionicons name="lock-closed-outline" size={20} color="#6B7280"/>
-                        <Text className="ml-3 text-base text-primary font-medium">Change Password</Text>
+                        <Text className="ml-3 text-base text-primary" weight="semibold">Change Password</Text>
                     </View>
                     <Ionicons name={showPasswordChange ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
                 </TouchableOpacity>
@@ -330,7 +339,7 @@ export default function ProfileScreen() {
                 {showPasswordChange && (
                     <View className="border-t border-gray-200 mt-4 pt-4">
                         <View className="mb-4 relative">
-                            <Text className="text-sm font-semibold text-primary mb-1.5">Current Password</Text>
+                            <Text className="text-sm text-primary mb-1.5" weight="semibold">Current Password</Text>
                             <TextInput
                                 className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800"
                                 value={currentPassword}
@@ -348,7 +357,7 @@ export default function ProfileScreen() {
                         </View>
 
                         <View className="mb-4 relative">
-                            <Text className="text-sm font-semibold text-primary mb-1.5">New Password</Text>
+                            <Text className="text-sm text-primary mb-1.5" weight="semibold">New Password</Text>
                             <TextInput
                                 className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800"
                                 value={newPassword}
@@ -366,7 +375,7 @@ export default function ProfileScreen() {
                         </View>
 
                         <View className="mb-4 relative">
-                            <Text className="text-sm font-semibold text-primary mb-1.5">Confirm New Password</Text>
+                            <Text className="text-sm text-primary mb-1.5" weight="semibold">Confirm New Password</Text>
                             <TextInput
                                 className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800"
                                 value={confirmPassword}
@@ -394,7 +403,7 @@ export default function ProfileScreen() {
                             ) : (
                                 <>
                                     <Ionicons name="lock-closed-outline" size={20} color="#ffffff"/>
-                                    <Text className="text-white text-base font-semibold ml-2">Confirm Password
+                                    <Text className="text-white text-base ml-2" weight="bold">Confirm Password
                                         Change</Text>
                                 </>
                             )}

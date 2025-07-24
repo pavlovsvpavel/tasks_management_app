@@ -1,15 +1,17 @@
 import {useState} from 'react';
-import {View, Text, TextInput, TouchableOpacity, ScrollView, Alert} from 'react-native';
-import {Link, router} from 'expo-router';
+import {TextInput, ScrollView} from 'react-native';
+import { View, Text, TouchableOpacity } from '@/components/Themed';
+import {router} from 'expo-router';
+import { Link } from '@/components/Themed';
 import {FontAwesome5, MaterialIcons, Ionicons} from '@expo/vector-icons';
-import {useSession} from '@/context/AuthContext';
+import {useAuth} from '@/context/AuthContext';
 import {loginUser} from "@/services/LoginService";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {useAlert} from "@/context/AlertContext";
 
 
 export default function Login() {
-    const {setTokens} = useSession();
+    const {setTokens} = useAuth();
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
@@ -60,7 +62,7 @@ export default function Login() {
         >
             <View className="flex-1 justify-center gap-4">
                 <View className=" flex-1 justify-center items-center gap-2 mb-8">
-                    <Text className="text-xl font-semibold text-dark-200">Welcome back</Text>
+                    <Text className="text-xl text-dark-200" weight="bold">Welcome back</Text>
                     <Text className="text-sm text-dark-100">
                         Sign in to your account to continue
                     </Text>
@@ -71,14 +73,14 @@ export default function Login() {
                         onPress={handleGoogleLogin}
                     >
                         <FontAwesome5 name="google" size={24} color="#4285F4"/>
-                        <Text className="font-bold ml-4">Continue with Google</Text>
+                        <Text className="ml-4" weight="bold">Continue with Google</Text>
                     </TouchableOpacity>
 
                     <Text className="text-center text-gray-500 text-xs uppercase">Or continue with</Text>
                 </View>
                 <View className="flex-1 justify-center gap-2">
                     <View className="flex-1 justify-center gap-2">
-                        <Text className="text-sm font-medium">Email</Text>
+                        <Text className="text-sm" weight="semibold">Email</Text>
                         <View className=" flex flex-row items-center gap-6">
                             <MaterialIcons
                                 name="email"
@@ -97,7 +99,7 @@ export default function Login() {
                         </View>
                     </View>
                     <View className="flex-1 justify-center gap-2">
-                        <Text className="text-sm font-medium">Password</Text>
+                        <Text className="text-sm" weight="semibold">Password</Text>
                         <View className="flex flex-row items-center gap-6">
                             <Ionicons
                                 name="lock-closed"
@@ -126,7 +128,8 @@ export default function Login() {
                         </View>
                     </View>
                     <View className="self-end mt-2">
-                        <Link href="/password/forgotPassword" className="text-blue-500 text-sm font-bold">
+                        <Link href="/password/forgotPassword"
+                              className="text-blue-500 text-sm" weight="semibold">
                             Forgot password?
                         </Link>
                     </View>
@@ -140,12 +143,12 @@ export default function Login() {
                         {isLoggingIn ? (
                             <ButtonSpinner/>
                         ) : (
-                            <Text className="text-white font-medium">Sign In</Text>
+                            <Text className="text-white" weight="semibold">Sign In</Text>
                         )}
                     </TouchableOpacity>
                     <Text className="text-sm text-gray-500">
                         Don't have an account?{' '}
-                        <Link href="/register" className="text-blue-500 font-medium">
+                        <Link href="/register" className="text-blue-500" weight="semibold">
                             Sign up
                         </Link>
                     </Text>

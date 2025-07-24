@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
-import {View, Text, TextInput, TouchableOpacity, ScrollView, Alert} from 'react-native';
-import {Link, router} from 'expo-router';
+import {TextInput, ScrollView} from 'react-native';
+import { View, Text, TouchableOpacity } from '@/components/Themed';
+import {router} from 'expo-router';
+import { Link } from '@/components/Themed';
 import {FontAwesome5, MaterialIcons, Ionicons} from '@expo/vector-icons';
 import {registerUser} from "@/services/RegisterService";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
@@ -69,7 +71,7 @@ export default function Register() {
         >
             <View className="flex-1 justify-center gap-4">
                 <View className=" flex-1 justify-center items-center gap-2 mb-8">
-                    <Text className="text-xl font-semibold text-dark-200">Create your account</Text>
+                    <Text className="text-xl text-dark-200" weight="bold">Create your account</Text>
                     <Text className="text-sm text-dark-100">
                         Join and start organizing your tasks
                     </Text>
@@ -80,14 +82,14 @@ export default function Register() {
                         onPress={handleGoogleSignUp}
                     >
                         <FontAwesome5 name="google" size={24} color="#4285F4"/>
-                        <Text className="font-bold ml-4">Sign up with Google</Text>
+                        <Text className="ml-4" weight="bold">Sign up with Google</Text>
                     </TouchableOpacity>
 
                     <Text className="text-center text-gray-500 text-xs uppercase">Or continue with</Text>
                 </View>
                 <View className="flex-1 justify-center gap-2">
                     <View className="flex-1 justify-center gap-2">
-                        <Text className="text-sm font-medium">Full Name</Text>
+                        <Text className="text-sm" weight="semibold">Full Name</Text>
                         <View className=" flex flex-row items-center gap-6">
                             <Ionicons
                                 name="person"
@@ -106,7 +108,7 @@ export default function Register() {
                         </View>
                     </View>
                     <View className="flex-1 justify-center gap-2">
-                        <Text className="text-sm font-medium">Email</Text>
+                        <Text className="text-sm" weight="semibold">Email</Text>
                         <View className=" flex flex-row items-center gap-6">
                             <MaterialIcons
                                 name="email"
@@ -125,7 +127,7 @@ export default function Register() {
                         </View>
                     </View>
                     <View className="flex-1 justify-center gap-2">
-                        <Text className="text-sm font-medium">Password</Text>
+                        <Text className="text-sm" weight="semibold">Password</Text>
                         <View className=" flex flex-row items-center gap-6">
                             <Ionicons
                                 name="lock-closed"
@@ -154,7 +156,7 @@ export default function Register() {
                         </View>
                     </View>
                     <View className="flex-1 justify-center gap-2">
-                        <Text className="text-sm font-medium">Confirm Password</Text>
+                        <Text className="text-sm" weight="semibold">Confirm Password</Text>
                         <View className=" flex flex-row items-center gap-6">
                             <Ionicons
                                 name="lock-closed"
@@ -192,12 +194,13 @@ export default function Register() {
                         {isRegistering ? (
                             <ButtonSpinner/>
                         ) : (
-                            <Text className="text-white font-medium">Create Account</Text>
+                            <Text className="text-white" weight="semibold">Create Account</Text>
                         )}
                     </TouchableOpacity>
                     <Text className="text-sm text-gray-500">
                         Already have an account?{' '}
-                        <Link href="/login" className="text-blue-500 font-medium">
+                        <Link href="/login"
+                              className="text-blue-500" weight="semibold">
                             Sign in
                         </Link>
                     </Text>

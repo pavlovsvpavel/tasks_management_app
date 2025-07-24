@@ -2,7 +2,7 @@ import {Redirect, Tabs} from 'expo-router';
 import {Ionicons} from '@expo/vector-icons';
 import {TabIconProps} from "@/interfaces/interfaces";
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useSession} from "@/context/AuthContext";
+import {useAuth} from "@/context/AuthContext";
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
 
 
@@ -17,9 +17,9 @@ function TabIcon({focused, color, size, name}: TabIconProps) {
 }
 
 export default function TabsLayout() {
-    const {isAuthenticated, isLoading} = useSession();
+    const {isAuthenticated, isLoading: isAuthLoading} = useAuth();
 
-    if (isLoading) {
+    if (isAuthLoading) {
         console.log('TabsLayout: Session loading, showing spinner at', new Date().toISOString());
         return <PageLoadingSpinner/>;
     }
