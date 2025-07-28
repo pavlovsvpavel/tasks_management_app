@@ -14,7 +14,7 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-if settings.ENVIRONMENT == "development":
+if settings.ENVIRONMENT == "development" or settings.ENVIRONMENT == "local":
     print("Running in development mode, enabling CORS for web testing.")
     app.add_middleware(
         CORSMiddleware,

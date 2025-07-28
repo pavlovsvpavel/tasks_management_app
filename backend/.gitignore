@@ -4,3 +4,9 @@
 *.db
 ./idea
 /db/db.sqlite3
+
+# Python artifacts
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
