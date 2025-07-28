@@ -1,0 +1,56 @@
+# Database
+postgres_backups
+postgres_db
+postman
+*.sqlite3
+/db/db.sqlite3
+
+
+# Python artifacts
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+
+# Env files (don’t bake secrets into image)
+envs/.env.dev
+envs/
+envs/.env
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Git & VCS
+.git/
+.gitignore
+
+# IDEs and editors
+*.swp
+*.swo
+*.log
+.vscode/
+.idea/
+*.bak
+
+# Testing
+coverage/
+htmlcov/
+.tox/
+.pytest_cache/
+nosetests.xml
+test-results.xml
+
+# Compiled or generated
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Misc
+*.DS_Store
+Thumbs.db
