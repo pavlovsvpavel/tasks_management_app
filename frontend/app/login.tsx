@@ -52,15 +52,15 @@ export default function Login() {
         }
     };
 
-    const inputClass = "pl-10 w-full border border-gray-300 rounded-lg";
+    const inputClass = "pl-10 w-full border border-gray-300 rounded-lg text-base text-gray-800";
 
     return (
         <ScrollView
-            className="flex-1 py-10 px-5"
+            className="flex-1 py-12 px-5"
             showsVerticalScrollIndicator={false}
             // contentContainerStyle={{minHeight: "100%", paddingBottom: 10}}
         >
-            <View className="flex-1 justify-center gap-4">
+            <View className="flex-1 justify-center gap-4 pt-8">
                 <View className=" flex-1 justify-center items-center gap-2 mb-8">
                     <Text className="text-xl text-dark-200" weight="bold">Welcome back</Text>
                     <Text className="text-sm text-dark-100">
@@ -95,6 +95,7 @@ export default function Login() {
                                 onChangeText={(text) => setFormData(prev => ({...prev, email: text}))}
                                 placeholder="Enter your email"
                                 className={inputClass}
+                                placeholderTextColor="#9CA3AF"
                             />
                         </View>
                     </View>
@@ -114,6 +115,7 @@ export default function Login() {
                                 onChangeText={(text) => setFormData(prev => ({...prev, password: text}))}
                                 placeholder="Enter your password"
                                 className={inputClass}
+                                placeholderTextColor="#9CA3AF"
                             />
                             <TouchableOpacity
                                 className="absolute right-3 top-3.5"

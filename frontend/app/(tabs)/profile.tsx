@@ -212,11 +212,11 @@ export default function ProfileScreen() {
         return <PageLoadingSpinner/>;
     }
 
-    const sectionClass = 'bg-white rounded-xl p-5 mx-4 mb-5 shadow-md';
+    const sectionClass = 'bg-white rounded-xl p-5 mb-5';
 
     return (
         <ScrollView
-            className="flex-1"
+            className="flex-1 py-5"
             showsVerticalScrollIndicator={false}
             refreshControl={
                 <RefreshControl

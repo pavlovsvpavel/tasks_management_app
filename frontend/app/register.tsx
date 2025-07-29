@@ -61,7 +61,7 @@ export default function Register() {
         }
     };
 
-    const inputClass = "pl-10 w-full border border-gray-300 rounded-lg";
+    const inputClass = "pl-10 w-full border border-gray-300 rounded-lg text-base text-gray-800";
 
     return (
         <ScrollView
@@ -69,7 +69,7 @@ export default function Register() {
             showsVerticalScrollIndicator={false}
             // contentContainerStyle={{minHeight: "100%", paddingBottom: 10}}
         >
-            <View className="flex-1 justify-center gap-4">
+            <View className="flex-1 justify-center gap-4 pt-8">
                 <View className=" flex-1 justify-center items-center gap-2 mb-8">
                     <Text className="text-xl text-dark-200" weight="bold">Create your account</Text>
                     <Text className="text-sm text-dark-100">
@@ -104,6 +104,7 @@ export default function Register() {
                                 onChangeText={(text) => setFormData(prev => ({...prev, full_name: text}))}
                                 placeholder="Enter your full name"
                                 className={inputClass}
+                                placeholderTextColor="#9CA3AF"
                             />
                         </View>
                     </View>
@@ -123,6 +124,7 @@ export default function Register() {
                                 onChangeText={(text) => setFormData(prev => ({...prev, email: text}))}
                                 placeholder="Enter your email"
                                 className={inputClass}
+                                placeholderTextColor="#9CA3AF"
                             />
                         </View>
                     </View>
@@ -142,6 +144,7 @@ export default function Register() {
                                 onChangeText={(text) => setFormData(prev => ({...prev, password: text}))}
                                 placeholder="Enter your password"
                                 className={inputClass}
+                                placeholderTextColor="#9CA3AF"
                             />
                             <TouchableOpacity
                                 className="absolute right-3 top-3.5"
@@ -171,6 +174,7 @@ export default function Register() {
                                 onChangeText={(text) => setFormData(prev => ({...prev, confirmPassword: text}))}
                                 placeholder="Confirm your password"
                                 className={inputClass}
+                                placeholderTextColor="#9CA3AF"
                             />
                             <TouchableOpacity
                                 className="absolute right-3 top-3.5"

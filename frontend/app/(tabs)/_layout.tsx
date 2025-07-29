@@ -34,18 +34,21 @@ export default function TabsLayout() {
     return (
         <SafeAreaView
             edges={['top', 'left', 'right', 'bottom']}
-            className="flex-1 py-5 px-5">
+            className="flex-1 px-5">
             <Tabs
                 screenOptions={{
                     tabBarShowLabel: true,
                     headerShown: false,
+                    tabBarActiveTintColor: 'black',
+                    tabBarInactiveTintColor: 'white',
                     tabBarStyle: {
-                        borderTopWidth: 1,
+                        elevation: 0,
                         borderRadius: 50,
-                        borderTopColor: '#cccccc',
-                        height: 80,
+                        backgroundColor: '#3B82F6',
+                        height: 60,
                         paddingBottom: 10,
                         paddingTop: 10,
+                        marginTop: 15,
 
                     },
                     tabBarItemStyle: {

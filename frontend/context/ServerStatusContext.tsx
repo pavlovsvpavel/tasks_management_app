@@ -24,7 +24,7 @@ export const ServerStatusProvider = ({children}: { children: ReactNode }) => {
             const timeoutId = setTimeout(() => controller.abort(), 5000);
 
             const response = await fetch(`${API_URL}/health`, {
-                method: 'HEAD',
+                method: 'GET',
                 signal: controller.signal,
             });
 

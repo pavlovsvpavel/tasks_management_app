@@ -8,20 +8,18 @@
     "scheme": "tasks",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#ffffff"
+
       },
-      "edgeToEdgeEnabled": true
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/logo.png"
+      "permissions": [
+        "android.permission.INTERNET"
+      ],
+      "package": "com.ppsoft.tasks-app",
+              "navigationBarColor": "#1F1F1F",
+        "navigationBarIconColor": "dark"
     },
     "plugins": [
       "expo-router",
@@ -29,9 +27,18 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/logo.png",
-          "imageWidth": 200,
+          "imageWidth": 50,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": false,
+            "enableEdgeToEdge": true
+          }
         }
       ]
     ],
@@ -39,7 +46,10 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "process.env.EXPO_PUBLIC_API_URL"
+      "router": {},
+      "eas": {
+        "projectId": "3bb0b83d-5edd-4a3b-b105-15e7f2573c50"
+      }
     }
   }
 }
