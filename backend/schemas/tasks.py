@@ -6,6 +6,8 @@ class TaskBase(BaseModel):
     name: str
     description: Optional[str] = None
     completed: bool = False
+    due_date: datetime
+    priority: str
 
 class TaskCreate(TaskBase):
     pass

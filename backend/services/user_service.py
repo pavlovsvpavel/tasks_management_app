@@ -1,7 +1,8 @@
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import EmailStr
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import func
 from starlette import status
 from starlette.exceptions import HTTPException
@@ -16,10 +17,10 @@ bearer_scheme = HTTPBearer()
 
 async def get_current_user(
         credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_db)
 ) -> User:
     token = credentials.credentials
-    payload = validate_token(token, expected_type="access")
+    payload = await validate_token(token, expected_type="access")
 
     user_id = payload.get("sub")
     if not user_id:
@@ -29,7 +30,10 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    query = select(User).where(User.id == int(user_id))
+    result = await db.execute(query)
+    user = result.scalars().first()
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -37,24 +41,33 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    return user
-
-
-def validate_user_status(user: User):
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is disabled"
+            detail="User account is inactive"
         )
 
-
-def get_user_by_email(db: Session, email: EmailStr) -> User | None:
-    return db.query(User).filter(User.email == email).first()
+    return user
 
 
-def authenticate_user(db: Session, email: EmailStr, password: str) -> User | None:
+# async def validate_user_status(user: User):
+#     if not user.is_active:
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="User account is disabled"
+#         )
+
+
+async def get_user_by_email(db: AsyncSession, email: EmailStr) -> User | None:
+    query = select(User).where(User.email == email)
+    result = await db.execute(query)
+    user = result.scalars().first()
+    return user
+
+
+async def authenticate_user(db: AsyncSession, email: EmailStr, password: str) -> User | None:
     """Authenticate a user with email/password"""
-    user = get_user_by_email(db, email)
+    user = await get_user_by_email(db, email)
 
     if not user:
         raise HTTPException(
@@ -83,11 +96,13 @@ def authenticate_user(db: Session, email: EmailStr, password: str) -> User | Non
     return user
 
 
-def get_user_by_google_id(db: Session, google_id: str) -> User | None:
-    return db.query(User).filter(User.google_id == google_id).first()
+async def get_user_by_google_id(db: AsyncSession, google_id: str) -> User | None:
+    query = select(User).where(User.google_id == google_id)
+    result = await db.execute(query)
+    return result.scalars().first()
 
 
-def create_user(db: Session, user_data) -> User:
+async def create_user(db: AsyncSession, user_data) -> User:
     """Create a new user with password hashing"""
     hashed_password = get_password_hash(user_data.password)
     db_user = User(
@@ -96,12 +111,12 @@ def create_user(db: Session, user_data) -> User:
         full_name=user_data.full_name
     )
     db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    await db.commit()
+    await db.refresh(db_user)
     return db_user
 
 
-def create_oauth_user(db: Session, email: str, google_id: str,
+async def create_oauth_user(db: AsyncSession, email: str, google_id: str,
                       full_name: str = None, picture: str = None) -> User:
     """Create a user from OAuth provider"""
     db_user = User(
@@ -112,48 +127,54 @@ def create_oauth_user(db: Session, email: str, google_id: str,
         is_verified=True
     )
     db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    await db.commit()
+    await db.refresh(db_user)
     return db_user
 
 
-def update_last_login(db: Session, user: User):
+async def update_last_login(db: AsyncSession, user: User):
     """Explicitly update last login timestamp"""
     user.last_login = func.now()
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
     return user
 
 
-def get_user_by_id(db: Session, user_id: int):
-    """Get user by ID"""
-    return db.query(User).filter(User.id == user_id).first()
+# async def get_user_by_id(db: AsyncSession, user_id: int):
+#     """Get user by ID"""
+#
+#     query = select(User).where(User.id == user_id)
+#     result = await db.execute(query)
+#     user = result.scalars().first()
+#
+#     return user
 
 
-def update_user_full_name(db: Session, user_id: int, user_update: UserUpdate):
-    db_user = db.get(User, user_id)
+async def update_user_full_name(db: AsyncSession, user_id: int, user_update: UserUpdate):
+    db_user = await db.get(User, user_id)
     if not db_user:
         return None
 
     if user_update.full_name is not None:
         db_user.full_name = user_update.full_name
 
-    db.commit()
-    db.refresh(db_user)
+    db.add(db_user)
+    await db.commit()
+    await db.refresh(db_user)
     return db_user
 
 
-def change_user_password(db: Session, user_id: int, password_data: UserChangePassword):
+async def change_user_password(db: AsyncSession, user: User, password_data: UserChangePassword):
     """Change user password after verifying current password"""
-    user = get_user_by_id(db, user_id)
-    if not user:
-        return None
+    # user = await get_user_by_id(db, user_id)
+    # if not user:
+    #     return None
 
     if not verify_password(password_data.current_password, user.hashed_password):
         return False
 
     user.hashed_password = get_password_hash(password_data.new_password)
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
 
     return user

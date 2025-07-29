@@ -1,6 +1,6 @@
 from fastapi import Depends
-from sqlalchemy.orm import Session
-from starlette import status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.exceptions import HTTPException
 
 from db.database import get_db
@@ -11,15 +11,15 @@ from services.user_service import get_current_user
 
 async def verify_task_ownership(
         task_id: int,
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user),
-) -> type[Task]:
-    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
+) -> Task:
+    query = select(Task).where(Task.id == task_id)
+    result = await db.execute(query)
+    task = result.scalars().first()
 
     if not task:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not found for this user"
-        )
-
+        raise HTTPException(status_code=404, detail="Task not found")
+    if task.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this task")
     return task

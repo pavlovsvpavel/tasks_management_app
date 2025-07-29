@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from httpx import AsyncClient
 from jose import jwt, JWTError
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.responses import RedirectResponse
@@ -12,8 +13,7 @@ from core.cookies import CookieManager
 from db.database import get_db
 from core.config import settings
 from models.users import User
-from services.user_service import get_user_by_google_id, create_oauth_user, update_last_login, \
-    validate_user_status
+from services.user_service import get_user_by_google_id, create_oauth_user, update_last_login
 from core.security import create_access_token, create_refresh_token, validate_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -33,7 +33,7 @@ async def validate_token_route(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No token provided or invalid Authorization header"
         )
-    payload = validate_token(credentials.credentials, expected_type)  # Let exceptions bubble up
+    payload = await validate_token(credentials.credentials, expected_type)
 
     return {
         "valid": True,
@@ -45,7 +45,7 @@ async def validate_token_route(
 @router.post("/refresh-token")
 async def refresh_token_route(
         credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_db)
 ):
     """Refresh tokens using ONLY a valid refresh token."""
     refresh_token = credentials.credentials
@@ -72,14 +72,22 @@ async def refresh_token_route(
                 detail="Invalid token payload"
             )
 
-        user = db.query(User).filter(User.id == user_id).first()
+        query = select(User).where(User.id == int(user_id))
+        result = await db.execute(query)
+        user = result.scalars().first()
+
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
 
-        validate_user_status(user)
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User account is inactive"
+            )
+
         new_access_token = create_access_token(data={"sub": str(user.id)})
         remaining_life = payload["exp"] - int(time.time())
 
@@ -123,7 +131,7 @@ async def login_google():
 async def auth_google_callback(
         code: str = None,
         error: str = None,
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_db)
 ):
     if error:
         return RedirectResponse(url="{settings.FRONTEND_HOME_URL}")
@@ -153,9 +161,9 @@ async def auth_google_callback(
             user_info_response.raise_for_status()
             user_info = user_info_response.json()
 
-        user = get_user_by_google_id(db, user_info["sub"])
+        user = await get_user_by_google_id(db, user_info["sub"])
         if not user:
-            user = create_oauth_user(
+            user = await create_oauth_user(
                 db,
                 email=user_info["email"],
                 google_id=user_info["sub"],
@@ -166,7 +174,7 @@ async def auth_google_callback(
         access_token = create_access_token(data={"sub": str(user.id)})
         refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
-        update_last_login(db, user)
+        await update_last_login(db, user)
         response = RedirectResponse(url=settings.FRONTEND_HOME_URL)
 
         cookie_mgr = CookieManager(response)

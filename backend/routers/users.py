@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
-from starlette.responses import Response
+from sqlalchemy.ext.asyncio import AsyncSession
 from db.database import get_db
 from models.users import User
 from schemas.users import UserCreate, UserResponse, UserChangePassword, UserUpdate, LoginResponse
@@ -16,34 +15,33 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/register", response_model=UserResponse)
-def register_user(
+async def register_user(
         user: UserCreate,
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_db)
 ):
     """Register with email/password"""
 
-    db_user = get_user_by_email(db, email=user.email)
+    db_user = await get_user_by_email(db, email=user.email)
 
     if db_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this email already registered"
         )
-    return create_user(db=db, user_data=user)
+    return await create_user(db=db, user_data=user)
 
 
 @router.post("/login", response_model=LoginResponse)
 async def login_user(
-        response: Response,
         form_data: OAuth2PasswordRequestForm = Depends(),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_db)
 ):
     """OAuth2 token login that returns both access and refresh tokens.
      Supports web (cookies) and mobile (JSON response)."""
 
-    user = authenticate_user(db, form_data.username, form_data.password)
+    user = await authenticate_user(db, form_data.username, form_data.password)
 
-    user = update_last_login(db, user)
+    user = await update_last_login(db, user)
 
     access_token = create_access_token(data={"sub": str(user.id)})
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
@@ -72,11 +70,11 @@ async def get_current_user_profile(current_user: User = Depends(get_current_user
 async def update_user_profile(
         user_update: UserUpdate,
         current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_db)
 ):
     """Update current user's profile information"""
 
-    updated_user = update_user_full_name(db, current_user.id, user_update)
+    updated_user = await update_user_full_name(db, current_user.id, user_update)
 
     if not updated_user:
         raise HTTPException(
@@ -90,11 +88,11 @@ async def update_user_profile(
 async def change_password(
         password_data: UserChangePassword,
         current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(get_db),
 ):
     """Change user password after verifying current password"""
 
-    result = change_user_password(db, current_user.id, password_data)
+    result = await change_user_password(db, current_user, password_data)
 
     if result is None:
         raise HTTPException(

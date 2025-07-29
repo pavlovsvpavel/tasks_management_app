@@ -1,25 +1,48 @@
 services:
+  db:
+    image: postgres:17
+    container_name: db-tasks-app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./backend/envs/.env.dev
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
-    container_name: fastapi_app
+    container_name: fastapi-tasks-app
     env_file:
       - ./backend/envs/.env.dev
+    environment:
+      - GUNICORN_WORKERS=10
     volumes:
       - ./backend/db:/home/app/db/
     user: "ubuntu"
     restart: always
     platform: linux/amd64
+    depends_on:
+      db:
+        condition: service_healthy
 
   nginx:
-    build: ./nginx
-    container_name: nginx_proxy
+    build:
+      context: ./nginx
+    container_name: nginx-tasks-app
     ports:
       - "80:80"
+    env_file:
+      - ./backend/envs/.env.dev
     restart: always
     depends_on:
       - backend
 
-networks:
-  default:
-    driver: bridge
+volumes:
+  postgres_data:
+    name: tasks_app_postgres_data

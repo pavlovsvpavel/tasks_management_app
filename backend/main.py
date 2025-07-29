@@ -25,7 +25,7 @@ if settings.ENVIRONMENT == "development" or settings.ENVIRONMENT == "local":
     )
 
 # Create database tables
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 # Include routers
 app.include_router(health.router, prefix=settings.API_PREFIX)

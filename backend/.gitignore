@@ -2,7 +2,8 @@
 /src/
 .env*
 *.db
-./idea
+./idea/
+./vscode/
 /db/db.sqlite3
 
 # Python artifacts
@@ -10,3 +11,5 @@
 *.py[cod]
 *.pyo
 *.pyd
+*$py.class
+/docker-compose-db.yml

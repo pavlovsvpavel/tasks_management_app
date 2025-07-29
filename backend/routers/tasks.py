@@ -1,6 +1,7 @@
 import datetime
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from db.database import get_db
 from models.tasks import Task
@@ -16,22 +17,22 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 @router.post("/create", response_model=TaskResponse)
 async def create_task(
         task: TaskCreate,
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
     """Create a new task"""
 
     task = Task(**task.model_dump(), user_id=current_user.id)
     db.add(task)
-    db.commit()
-    db.refresh(task)
+    await db.commit()
+    await db.refresh(task)
 
     return task
 
 
 @router.get("/get/all-tasks", response_model=List[TaskResponse])
 async def get_all_tasks(
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
     """
@@ -42,7 +43,10 @@ async def get_all_tasks(
     - 401: If not authenticated
     """
 
-    tasks = db.query(Task).filter(Task.user_id == current_user.id).all()
+    query = select(Task).where(Task.user_id == current_user.id)
+
+    result = await db.execute(query)
+    tasks = result.scalars().all()
 
     return tasks
 
@@ -66,7 +70,7 @@ async def get_task(
 @router.patch("/update/{task_id}", response_model=TaskResponse)
 async def update_task(
         task_update: TaskUpdate,
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(get_db),
         task: Task = Depends(verify_task_ownership)
 ):
     """
@@ -79,25 +83,24 @@ async def update_task(
 
     update_data = task_update.model_dump(exclude_unset=True)
 
-    if "completed" in update_data:
-        task.completed = update_data["completed"]
-        task.completed_at = datetime.datetime.now(datetime.UTC) if update_data["completed"] else None
+    for key, value in update_data.items():
+        setattr(task, key, value)
 
-    if "name" in update_data:
-        task.name = update_data["name"]
+    if "completed" in update_data and task.completed:
+        task.completed_at = datetime.datetime.now(datetime.UTC)
+    elif "completed" in update_data and not task.completed:
+        task.completed_at = None
 
-    if "description" in update_data:
-        task.description = update_data["description"]
-
-    db.commit()
-    db.refresh(task)
+    db.add(task)
+    await db.commit()
+    await db.refresh(task)
 
     return task
 
 
 @router.delete("/delete/{task_id}")
 async def delete_task(
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(get_db),
         task: Task = Depends(verify_task_ownership)
 ):
     """
@@ -109,7 +112,7 @@ async def delete_task(
     - 401: If not authenticated
     """
 
-    db.delete(task)
-    db.commit()
+    await db.delete(task)
+    await db.commit()
 
     return {"message": "Task deleted successfully"}

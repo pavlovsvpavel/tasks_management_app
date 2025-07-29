@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
-from typing import List, Literal
+from typing import List, Literal, Optional
 
-from pydantic import field_validator
+from pydantic import field_validator, PostgresDsn, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,7 +13,12 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal["local", "development", "production"]
     API_PREFIX: str
     DEBUG: bool
-    DATABASE_URL: str
+    DATABASE_URL: Optional[str] = None
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: int
     ALLOWED_ORIGINS: str
     SECRET_KEY: str
     ALGORITHM: str
@@ -23,6 +28,21 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str
     GOOGLE_REDIRECT_URI: str
     FRONTEND_HOME_URL: str
+
+    @model_validator(mode='after')
+    def assemble_db_connection(self) -> 'Settings':
+        built_url = PostgresDsn.build(
+            scheme="postgresql+psycopg",
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_HOST,
+            port=self.POSTGRES_PORT,
+            path=f"{self.POSTGRES_DB or ''}"
+        )
+        self.DATABASE_URL = str(built_url)
+        return self
+
+
 
     @field_validator("ALLOWED_ORIGINS")
     def parse_allowed_origins(cls, v: str) -> List[str]:

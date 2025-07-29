@@ -42,7 +42,7 @@ def _create_token(data: dict, expires_delta: datetime.timedelta, token_type: str
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-def validate_token(token: str, expected_type:str):
+async def validate_token(token: str, expected_type:str):
     try:
         payload = jwt.decode(
             token,
