@@ -18,7 +18,6 @@ export const AlertProvider = ({children}: { children: ReactNode }) => {
     const [alertOptions, setAlertOptions] = useState<ShowAlertOptions>({title: '', buttons: []});
 
     const showAlert = useCallback((options: ShowAlertOptions) => {
-        // Wrap button presses to automatically hide the alert
         const wrappedButtons = options.buttons.map(button => ({
             ...button,
             onPress: () => {

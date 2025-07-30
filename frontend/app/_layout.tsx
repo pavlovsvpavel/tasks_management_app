@@ -10,6 +10,7 @@ import {ServerStatusProvider, useServerStatus} from "@/context/ServerStatusConte
 import ServerStatusOverlay from "@/components/ServerStatusOverlay";
 import {AuthProvider, useAuth} from '@/context/AuthContext';
 import {RefreshProvider} from "@/context/RefreshContext";
+import {TaskCacheProvider} from "@/context/TaskCacheContext";
 
 
 export default function RootLayout() {
@@ -19,11 +20,13 @@ export default function RootLayout() {
             <AlertProvider>
                 <RetryProvider>
                     <ServerStatusProvider>
-                        <AuthProvider>
-                            <RefreshProvider>
-                                <AppContent/>
-                            </RefreshProvider>
-                        </AuthProvider>
+                        <TaskCacheProvider>
+                            <AuthProvider>
+                                <RefreshProvider>
+                                    <AppContent/>
+                                </RefreshProvider>
+                            </AuthProvider>
+                        </TaskCacheProvider>
                     </ServerStatusProvider>
                 </RetryProvider>
             </AlertProvider>
@@ -40,6 +43,7 @@ function AppContent() {
         'ubuntu-bold': require('../assets/fonts/Ubuntu-Bold.ttf'),
         'ubuntu-semibold': require('../assets/fonts/Ubuntu-Medium.ttf'),
         'ubuntu-light': require('../assets/fonts/Ubuntu-Light.ttf'),
+        'ubuntu-italic': require('../assets/fonts/Ubuntu-Italic.ttf'),
     });
 
     const isAppLoading = !fontsLoaded || isAuthLoading || !isInitialCheckComplete;
@@ -76,6 +80,14 @@ function RootNavigator() {
                     name="(tabs)"
                     options={{headerShown: false}}
                 />
+                <Stack.Screen
+                    name="tasks/[id]"
+                    options={{headerShown: false}}
+                />
+                <Stack.Screen
+                    name="tasks/update/[id]"
+                    options={{headerShown: false}}
+                />
             </Stack.Protected>
 
             <Stack.Protected guard={!isAuthenticated}>
@@ -88,7 +100,6 @@ function RootNavigator() {
                     options={{
                         headerShown: false, animationTypeForReplace: !accessToken ? 'pop' : 'push'
                     }}
-
                 />
                 <Stack.Screen
                     name="register"

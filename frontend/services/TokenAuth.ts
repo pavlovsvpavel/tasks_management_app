@@ -2,6 +2,7 @@ import {RefreshResponse, TokenPair} from "@/interfaces/interfaces";
 import {getTokens, saveTokensToStorage, deleteTokensFromStorage} from '@/utils/tokenStorage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const APP_KEY = process.env.EXPO_PUBLIC_APP_KEY;
 
 export class TokenValidationError extends Error {
     constructor(message: string) {
@@ -10,13 +11,38 @@ export class TokenValidationError extends Error {
     }
 }
 
+const authApiClient = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
+    const defaultHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'X-App-Key': APP_KEY || '',
+    };
+
+    const config: RequestInit = {
+        ...options,
+        headers: {
+            ...defaultHeaders,
+            ...options.headers,
+        },
+    };
+
+    const response = await fetch(`${API_URL}${endpoint}`, config);
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({detail: 'An unknown error occurred.'}));
+        const errorMessage = errorData.detail || `Request to ${endpoint} failed with status ${response.status}`;
+        throw new TokenValidationError(errorMessage);
+    }
+
+    return response;
+};
+
 let refreshPromise: Promise<TokenPair> | null = null;
 
 export const validateAndRefreshTokens = async (
     existingTokens?: { accessToken: string | null; refreshToken: string | null }
 ): Promise<TokenPair> => {
     if (refreshPromise) {
-        console.log('[TokenAuth] Returning existing refresh promise.');
+        console.log('[TokenAuth] A refresh is already in progress. Reusing the existing promise.');
         return refreshPromise;
     }
 
@@ -28,17 +54,20 @@ export const validateAndRefreshTokens = async (
                 throw new TokenValidationError('MISSING_TOKENS');
             }
 
-            await validateTokens(refreshToken, 'refresh');
+            await validateToken(refreshToken, 'refresh');
 
             try {
-                await validateTokens(accessToken, 'access');
+                await validateToken(accessToken, 'access');
+                console.log('[TokenAuth] Access token is still valid.');
                 return {accessToken, refreshToken, isRefreshed: false};
             } catch (accessError) {
+                console.log('[TokenAuth] Access token is invalid. Attempting to refresh...');
                 const newTokens = await refreshTokenPair(refreshToken);
 
                 const finalRefreshToken = newTokens.refresh_token || refreshToken;
                 await saveTokensToStorage(newTokens.access_token, finalRefreshToken);
 
+                console.log('[TokenAuth] Tokens refreshed successfully.');
                 return {
                     accessToken: newTokens.access_token,
                     refreshToken: finalRefreshToken,
@@ -46,14 +75,13 @@ export const validateAndRefreshTokens = async (
                 };
             }
         } catch (error) {
-            console.error('[TokenAuth] Unrecoverable session error:', error);
+            console.error('[TokenAuth] Unrecoverable session error, clearing tokens:', error);
             await deleteTokensFromStorage();
 
             const errorMessage = error instanceof Error ? error.message : 'An unknown session error occurred.';
             throw new TokenValidationError(errorMessage);
 
         } finally {
-            console.log('[TokenAuth] Validation process finished.');
             refreshPromise = null;
         }
     })();
@@ -62,36 +90,27 @@ export const validateAndRefreshTokens = async (
 };
 
 
-const validateTokens = async (
+const validateToken = async (
     token: string,
     expectedType?: 'access' | 'refresh'
 ): Promise<void> => {
-    const response = await fetch(`${API_URL}/auth/validate-token`, {
+    await authApiClient('/auth/validate-token', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
             'X-Expected-Token-Type': expectedType || '',
         },
     });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Token validation failed');
-    }
 };
 
 
 const refreshTokenPair = async (
     refreshToken: string
 ): Promise<RefreshResponse> => {
-    const response = await fetch(`${API_URL}/auth/refresh-token`, {
+
+    const response = await authApiClient('/auth/refresh-token', {
         method: 'POST',
         headers: {Authorization: `Bearer ${refreshToken}`},
     });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Refresh token request failed');
-    }
-    return await response.json();
+    return response.json();
 };

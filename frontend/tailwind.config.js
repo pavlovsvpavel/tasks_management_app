@@ -9,6 +9,7 @@ module.exports = {
                 "ubuntu-bold": ['ubuntu-bold'],
                 "ubuntu-semibold": ['ubuntu-semibold'],
                 "ubuntu-light": ['ubuntu-light'],
+                "ubuntu-italic": ['ubuntu-italic'],
             },
             colors: {
                 site_bg: "#cccccc",

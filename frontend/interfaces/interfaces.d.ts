@@ -1,31 +1,31 @@
 import {Ionicons} from "@expo/vector-icons";
 import {AlertButton} from "@/components/CustomAlert";
 
-interface ServerStatusContextType {
+export interface ServerStatusContextType {
     isServerDown: boolean;
     checkHealth: () => Promise<boolean>;
     isInitialCheckComplete: boolean;
     setServerStatus: (isDown: boolean) => void;
 }
 
-interface RetryContextType {
+export interface RetryContextType {
     registerRetryHandler: (key: string, handler: () => Promise<void>) => void;
     unregisterRetryHandler: (key: string) => void;
     triggerRetry: () => void;
 }
 
-interface RefreshHandler<T = void> {
+export interface RefreshHandler<T = void> {
     (): Promise<T>;
 }
 
-interface RefreshContextType {
+export interface RefreshContextType {
     registerRefreshHandler: <T>(handler: RefreshHandler<T>) => void;
     unregisterRefreshHandler: () => void;
     triggerRefresh: () => Promise<void>;
     isRefreshing: boolean;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
     isAuthenticated: boolean;
     setTokens: (tokens: TokenPair) => Promise<void>;
     clearTokens: (isSessionExpired?: boolean) => Promise<void>;
@@ -38,25 +38,25 @@ interface AuthContextType {
     logout: () => Promise<void>;
 }
 
-interface TokenPair {
+export interface TokenPair {
     accessToken: string;
     refreshToken: string;
     isRefreshed: boolean;
 }
 
-interface RefreshResponse {
+export interface RefreshResponse {
     access_token: string;
     refresh_token?: string;
 }
 
-interface CustomAlertProps {
+export interface CustomAlertProps {
     isVisible: boolean;
     title: string;
     message?: string;
     buttons: AlertButton[];
 }
 
-interface RegisterResponse {
+export interface RegisterResponse {
     message: string;
     user?: {
         id: string;
@@ -65,14 +65,14 @@ interface RegisterResponse {
     };
 }
 
-interface TabIconProps {
+export interface TabIconProps {
     focused: boolean;
     color: string;
     size: number;
     name: keyof typeof Ionicons.glyphMap;
 }
 
-interface Task {
+export interface Task {
     id: number;
     name: string;
     description: string;
@@ -82,4 +82,49 @@ interface Task {
     user_id: number;
 }
 
+export interface ErrorHandlerOptions {
+    validationTitles?: Record<string, string>;
+}
 
+export interface TaskResponse {
+    id: number;
+    user_id: number;
+    title: string;
+    description: string | null;
+    completed: boolean;
+    due_date: string;
+    priority: 'low' | 'medium' | 'high';
+    created_at: string;
+    completed_at: string | null;
+}
+
+export type SortField = 'due_date' | 'title';
+export type SortDirection = 'asc' | 'desc';
+
+export interface SortControlsProps {
+    sortBy: SortField;
+    sortDirection: SortDirection;
+    onSortChange: (field: SortField) => void;
+}
+
+export interface TaskItemProps {
+    task: TaskResponse;
+    onPrompt: () => void;
+    isUpdating: boolean;
+}
+
+export interface DetailRowProps {
+    label: string;
+    value: string;
+    valueColor?: string;
+}
+
+export interface PrioritySelectorProps {
+    currentPriority: Priority;
+    onPriorityChange: (priority: Priority) => void;
+}
+
+export interface TaskCacheContextType {
+    getTaskFromCache: (taskId: number) => TaskResponse | undefined;
+    updateTaskInCache: (task: TaskResponse) => void;
+}

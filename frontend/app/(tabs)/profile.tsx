@@ -14,12 +14,11 @@ import {useApiClient} from '@/hooks/useApiClient';
 import {
     ServerDownError,
     SessionExpiredError,
-    SessionRefreshedError,
-    ValidationError
 } from '@/utils/errors';
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {useAlert} from "@/context/AlertContext";
+import {useApiErrorHandler} from "@/hooks/useApiErrorHandler";
 
 export default function ProfileScreen() {
     const {registerRefreshHandler, unregisterRefreshHandler, triggerRefresh, isRefreshing} = useRefresh();
@@ -39,42 +38,18 @@ export default function ProfileScreen() {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const handleApiError = useCallback((error: unknown, context: 'profile' | 'password') => {
-        console.error(`An API error occurred while updating ${context}:`, error);
-
-        if (error instanceof SessionRefreshedError) {
-            showAlert({
-                title: 'Session Updated',
-                message: 'Your session was refreshed for security. Please try your action again.',
-                buttons: [{text: 'OK'}]
-            });
-            return;
+    const handleApiError = useApiErrorHandler({
+        validationTitles: {
+            profile: 'Profile Update Failed',
+            password: 'Password Change Failed'
         }
-
-        if (error instanceof SessionExpiredError || error instanceof ServerDownError) {
-            return;
-        }
-
-        if (error instanceof ValidationError) {
-            showAlert({
-                title: context === 'password' ? 'Password Change Failed' : 'Update Failed',
-                message: error.body.detail || 'The server returned a validation error.',
-                buttons: [{text: 'OK'}]
-            });
-            return;
-        }
-
-        showAlert({
-            title: 'An Unexpected Error Occurred',
-            message: 'We were unable to complete your request. Please try again.',
-            buttons: [{text: 'Dismiss'}]
-        });
-    }, [showAlert]);
-
+    });
 
     const fetchProfileDetails = useCallback(async () => {
         try {
-            const response = await apiClient('/users/profile-details', {method: 'GET'});
+            const response = await apiClient('/users/profile-details', {
+                method: 'GET'
+            });
             const user = await response.json();
 
             console.log('Profile details fetched successfully:', {fullName: user.full_name, email: user.email});
@@ -216,7 +191,7 @@ export default function ProfileScreen() {
 
     return (
         <ScrollView
-            className="flex-1 py-5"
+            className="flex-1"
             showsVerticalScrollIndicator={false}
             refreshControl={
                 <RefreshControl
@@ -311,7 +286,7 @@ export default function ProfileScreen() {
                             <ButtonSpinner/>
                         ) : (
                             <>
-                                <Ionicons name="save" size={18} color="#ffffff"/>
+                                <Ionicons name="save-outline" size={18} color="#ffffff"/>
                                 <Text className="text-white text-base ml-2" weight="bold">Save Changes</Text>
                             </>
                         )}

@@ -4,7 +4,8 @@ import {TabIconProps} from "@/interfaces/interfaces";
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useAuth} from "@/context/AuthContext";
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
-
+import {Text} from '@/components/Themed';
+import React from "react";
 
 function TabIcon({focused, color, size, name}: TabIconProps) {
     return (
@@ -16,7 +17,7 @@ function TabIcon({focused, color, size, name}: TabIconProps) {
     );
 }
 
-export default function TabsLayout() {
+function TabsLayout() {
     const {isAuthenticated, isLoading: isAuthLoading} = useAuth();
 
     if (isAuthLoading) {
@@ -34,7 +35,7 @@ export default function TabsLayout() {
     return (
         <SafeAreaView
             edges={['top', 'left', 'right', 'bottom']}
-            className="flex-1 px-5">
+            className="flex-1 px-5 pt-5">
             <Tabs
                 screenOptions={{
                     tabBarShowLabel: true,
@@ -49,7 +50,6 @@ export default function TabsLayout() {
                         paddingBottom: 10,
                         paddingTop: 10,
                         marginTop: 15,
-
                     },
                     tabBarItemStyle: {
                         flex: 1,
@@ -58,6 +58,14 @@ export default function TabsLayout() {
                         alignItems: 'center',
                         paddingHorizontal: 4,
                     },
+                    tabBarLabel: ({focused, color, children}) => (
+                        <Text
+                            weight={focused ? 'bold' : 'normal'}
+                            style={{color: color, fontSize: 10, marginTop: 2}}
+                        >
+                            {children}
+                        </Text>
+                    ),
                 }}>
                 <Tabs.Screen
                     name="userTasks"
@@ -107,5 +115,5 @@ export default function TabsLayout() {
             </Tabs>
         </SafeAreaView>
     );
-
 }
+export default React.memo(TabsLayout);

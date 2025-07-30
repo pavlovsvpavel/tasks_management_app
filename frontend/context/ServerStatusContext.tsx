@@ -2,6 +2,7 @@ import {createContext, ReactNode, useCallback, useContext, useEffect, useState} 
 import {ServerStatusContextType} from '@/interfaces/interfaces';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const APP_KEY = process.env.EXPO_PUBLIC_APP_KEY;
 
 const ServerStatusContext = createContext<ServerStatusContextType>({
     isServerDown: false,
@@ -26,6 +27,7 @@ export const ServerStatusProvider = ({children}: { children: ReactNode }) => {
             const response = await fetch(`${API_URL}/health`, {
                 method: 'GET',
                 signal: controller.signal,
+                headers: {'Content-Type': 'application/json', 'X-App-Key': `${APP_KEY}`},
             });
 
             clearTimeout(timeoutId);
