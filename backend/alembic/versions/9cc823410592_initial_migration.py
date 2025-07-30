@@ -1,8 +1,8 @@
-"""Initial database schema
+"""Initial migration
 
-Revision ID: cf44fa43a567
+Revision ID: 9cc823410592
 Revises: 
-Create Date: 2025-07-29 14:54:55.008243
+Create Date: 2025-07-30 20:00:49.054620
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cf44fa43a567'
+revision: str = '9cc823410592'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -40,12 +40,12 @@ def upgrade() -> None:
     op.create_table('tasks',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('title', sa.String(), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
-    sa.Column('due_date', sa.DateTime(), nullable=False),
+    sa.Column('due_date', sa.DateTime(timezone=True), nullable=False),
     sa.Column('priority', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('completed_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('completed', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')

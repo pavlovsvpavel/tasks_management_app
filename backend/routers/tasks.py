@@ -75,10 +75,6 @@ async def update_task(
 ):
     """
     Update a specific task with full database loading and concurrency control.
-
-    - **name** (optional): New task name
-    - **description** (optional): New description
-    - **completed** (optional): Set completion status
     """
 
     update_data = task_update.model_dump(exclude_unset=True)
