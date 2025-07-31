@@ -1,5 +1,6 @@
 import {Stack} from "expo-router";
 import './globals.css';
+import '../i18n';
 import {useFonts} from "expo-font";
 import {View} from "react-native";
 import {StatusBar} from 'expo-status-bar';
@@ -11,12 +12,12 @@ import ServerStatusOverlay from "@/components/ServerStatusOverlay";
 import {AuthProvider, useAuth} from '@/context/AuthContext';
 import {RefreshProvider} from "@/context/RefreshContext";
 import {TaskCacheProvider} from "@/context/TaskCacheContext";
-
+import {ThemeProvider} from '@/context/ThemeContext';
+import {useTheme} from '@/context/ThemeContext';
 
 export default function RootLayout() {
     return (
-        <>
-            <StatusBar style="dark" translucent={true}/>
+        <ThemeProvider>
             <AlertProvider>
                 <RetryProvider>
                     <ServerStatusProvider>
@@ -30,13 +31,14 @@ export default function RootLayout() {
                     </ServerStatusProvider>
                 </RetryProvider>
             </AlertProvider>
-        </>
+        </ThemeProvider>
     );
 }
 
 function AppContent() {
     const {isServerDown, isInitialCheckComplete} = useServerStatus();
     const {isLoading: isAuthLoading} = useAuth();
+    const {theme} = useTheme();
 
     const [fontsLoaded] = useFonts({
         'ubuntu-normal': require('../assets/fonts/Ubuntu-Regular.ttf'),
@@ -62,6 +64,7 @@ function AppContent() {
 
     return (
         <>
+            <StatusBar style={theme === 'dark' ? 'light' : 'dark'}/>
             <RootNavigator/>
         </>
     );
@@ -81,12 +84,8 @@ function RootNavigator() {
                     options={{headerShown: false}}
                 />
                 <Stack.Screen
-                    name="tasks/[id]"
-                    options={{headerShown: false}}
-                />
-                <Stack.Screen
-                    name="tasks/update/[id]"
-                    options={{headerShown: false}}
+                    name="tasks"
+                    options={{ headerShown: false }}
                 />
             </Stack.Protected>
 

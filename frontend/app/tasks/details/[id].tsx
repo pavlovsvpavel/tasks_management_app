@@ -127,13 +127,13 @@ export default function TaskDetailScreen() {
             >
                 <View className="flex-row items-center mb-5">
                     <TouchableOpacity onPress={() => router.back()}>
-                        <Ionicons name="arrow-back" size={20} color="#333"/>
+                        <Ionicons name="arrow-back" size={24} color="#333"/>
                     </TouchableOpacity>
                     <Text className="text-xl pl-4" weight="bold">Task Details</Text>
                 </View>
 
                 <View className="flex-1 gap-3 bg-white rounded-xl p-5 mb-5 ">
-                    <Text className="text-base text-primary" weight="bold">{taskFromCache.title}</Text>
+                    <Text className="text-lg text-primary" weight="bold">{taskFromCache.title}</Text>
                     <Text className="text-sm text-gray-400 mt-2">
                         Created on {format(new Date(taskFromCache.created_at), 'd MMM yyyy, HH:mm')}
                     </Text>

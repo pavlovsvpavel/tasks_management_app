@@ -5,7 +5,9 @@ import {
     ScrollView,
     TextInput,
 } from 'react-native';
-import { View, Text, TouchableOpacity } from '@/components/Themed';
+import {Image} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {useFocusEffect} from "expo-router";
 import {useAuth} from "@/context/AuthContext";
 import {useRefresh} from '@/context/RefreshContext';
@@ -19,6 +21,9 @@ import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {useAlert} from "@/context/AlertContext";
 import {useApiErrorHandler} from "@/hooks/useApiErrorHandler";
+import {useTranslation} from "react-i18next";
+import {useTheme} from "@/context/ThemeContext";
+
 
 export default function ProfileScreen() {
     const {registerRefreshHandler, unregisterRefreshHandler, triggerRefresh, isRefreshing} = useRefresh();
@@ -37,11 +42,21 @@ export default function ProfileScreen() {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const {t, i18n} = useTranslation();
+    const [showLanguageSettings, setShowLanguageSettings] = useState(false);
+    const [showThemeSettings, setShowThemeSettings] = useState(false);
+    const {theme, toggleTheme} = useTheme();
+    const [pictureUrl, setPictureUrl] = useState<string | null>(null);
+
+    const changeLanguage = (lng: 'en' | 'bg') => {
+        i18n.changeLanguage(lng);
+    };
+
 
     const handleApiError = useApiErrorHandler({
         validationTitles: {
-            profile: 'Profile Update Failed',
-            password: 'Password Change Failed'
+            profile: t('profileChangeAlerts.validationError'),
+            password: t('passwordChangeAlerts.validationError')
         }
     });
 
@@ -55,6 +70,7 @@ export default function ProfileScreen() {
             console.log('Profile details fetched successfully:', {fullName: user.full_name, email: user.email});
             setFullName(user.full_name || '');
             setEmail(user.email);
+            setPictureUrl(user.picture);
             return user;
         } catch (error) {
             if (error instanceof ServerDownError) {
@@ -67,11 +83,61 @@ export default function ProfileScreen() {
         }
     }, [apiClient]);
 
+    const handlePickAndUploadImage = async () => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permissionResult.granted) {
+            showAlert({
+                title: t('profileChangeAlerts.profilePictureUploadPermissionsTitle'),
+                message: t('profileChangeAlerts.profilePictureUploadPermissionsMessage'),
+                buttons: [{text: 'OK'}]
+            });
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: 'images',
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.5,
+            base64: true,
+        });
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            const imageAsset = result.assets[0];
+            const base64Data = `data:${imageAsset.mimeType};base64,${imageAsset.base64}`;
+
+            setIsSaving(true);
+            try {
+                const response = await apiClient('/users/upload-picture', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        picture: base64Data,
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const updatedUser = await response.json();
+
+                setPictureUrl(updatedUser.picture);
+                showAlert({
+                    title: t('profileChangeAlerts.profileChangeTitle'),
+                    message: t('profileChangeAlerts.profileChangeMessage'),
+                    buttons: [{text: 'OK'}]
+                });
+            } catch (error) {
+                handleApiError(error, 'profile-picture');
+            } finally {
+                setIsSaving(false);
+            }
+        }
+    };
+
     const handleProfileChanges = async () => {
         if (!fullName.trim()) {
             showAlert({
-                title: 'Invalid Input',
-                message: 'Full name cannot be empty.',
+                title: t('profileChangeFullName.profileChangeTitle'),
+                message: t('profileChangeFullName.profileChangeMessage'),
                 buttons: [{text: 'OK'}]
             });
             return;
@@ -89,8 +155,8 @@ export default function ProfileScreen() {
             setFullName(updatedUser.full_name || '');
             setEmail(updatedUser.email);
             showAlert({
-                title: 'Success',
-                message: 'Your profile has been updated successfully.',
+                title: t('profileChangeAlerts.profileChangeTitle'),
+                message: t('profileChangeAlerts.profileChangeMessage'),
                 buttons: [{text: 'OK'}]
             });
             setEditing(false);
@@ -104,24 +170,24 @@ export default function ProfileScreen() {
     const handleChangePassword = async () => {
         if (!currentPassword || !newPassword || !confirmPassword) {
             showAlert({
-                title: 'Missing Fields',
-                message: 'All password fields are required.',
+                title: t('passwordChangeAlerts.missingFieldsTitle'),
+                message: t('passwordChangeAlerts.missingFieldsMessage'),
                 buttons: [{text: 'OK'}]
             });
             return;
         }
         if (newPassword !== confirmPassword) {
             showAlert({
-                title: 'Password Mismatch',
-                message: 'Your new password and confirmation do not match.',
+                title: t('passwordChangeAlerts.mismatchTitle'),
+                message: t('passwordChangeAlerts.mismatchMessage'),
                 buttons: [{text: 'OK'}]
             });
             return;
         }
         if (newPassword.length < 8) {
             showAlert({
-                title: 'Password Too Short',
-                message: 'Your new password must be at least 8 characters long.',
+                title: t('passwordChangeAlerts.tooShortTitle'),
+                message: t('passwordChangeAlerts.tooShortMessage'),
                 buttons: [{text: 'OK'}]
             });
             return;
@@ -140,8 +206,8 @@ export default function ProfileScreen() {
 
             await response.json();
             showAlert({
-                title: 'Password Changed',
-                message: 'Your password has been successfully updated.',
+                title: t('changePasswordConfirmationTitle'),
+                message: t('changePasswordConfirmationMessage'),
                 buttons: [{text: 'OK'}]
             });
 
@@ -203,16 +269,16 @@ export default function ProfileScreen() {
             }
         >
             <View className="flex-row justify-between items-center mb-5 px-4">
-                <Text className="text-2xl text-primary" weight="bold">Profile</Text>
+                <Text className="text-2xl text-primary" weight="bold">{t('profile')}</Text>
                 <TouchableOpacity
                     onPress={() =>
                         showAlert({
-                            title: 'Confirm Logout',
-                            message: 'Are you sure you want to log out?',
+                            title: t('logoutConfirmationTitle'),
+                            message: t('logoutConfirmationMessage'),
                             buttons: [
-                                {text: 'Cancel', style: 'cancel'},
+                                {text: t('cancel'), style: 'cancel'},
                                 {
-                                    text: 'Logout',
+                                    text: t('logout'),
                                     style: 'destructive',
                                     onPress: logout,
                                 },
@@ -227,10 +293,17 @@ export default function ProfileScreen() {
             <View className={`${sectionClass} items-center`}>
                 <View className="relative mb-4">
                     <View className="w-20 h-20 rounded-full bg-gray-100 items-center justify-center overflow-hidden">
-                        <Ionicons name="person" size={40} color="#6B7280"/>
+                        {pictureUrl ? (
+                            <Image source={{uri: pictureUrl}} className="w-full h-full"/>
+                        ) : (
+                            <Ionicons name="person" size={40} color="#6B7280"/>
+                        )}
                     </View>
                     <TouchableOpacity
-                        className="absolute bottom-0 right-0 bg-btn_color rounded-xl w-6 h-6 items-center justify-center">
+                        className="absolute bottom-0 right-0 bg-btn_color rounded-xl w-6 h-6 items-center justify-center"
+                        onPress={handlePickAndUploadImage}
+                        disabled={isSaving}
+                    >
                         <Ionicons name="camera" size={16} color="#FFFFFF"/>
                     </TouchableOpacity>
                 </View>
@@ -243,7 +316,7 @@ export default function ProfileScreen() {
 
             <View className={sectionClass}>
                 <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg text-gray-800" weight="bold">Personal Information</Text>
+                    <Text className="text-lg text-gray-800" weight="bold">{t('personalInformation')}</Text>
                     <TouchableOpacity onPress={() => setEditing(!editing)}>
                         <MaterialCommunityIcons
                             name={editing ? "account-cancel" : "account-edit"}
@@ -254,24 +327,24 @@ export default function ProfileScreen() {
                 </View>
 
                 <View className="mb-4">
-                    <Text className="text-sm text-primary mb-1.5" weight="semibold">Full Name</Text>
+                    <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('fullName')}</Text>
                     <TextInput
                         className={`bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800 ${!editing && 'bg-gray-100 text-gray-500'}`}
                         value={fullName}
                         onChangeText={setFullName}
                         editable={editing}
-                        placeholder="Enter full name"
+                        placeholder={t('fullNamePlaceholder')}
                         placeholderTextColor="#9CA3AF"
                     />
                 </View>
 
                 <View className="mb-4">
-                    <Text className="text-sm text-primary mb-1.5" weight="semibold">Email</Text>
+                    <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('email')}</Text>
                     <TextInput
                         className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-500"
                         value={email}
                         editable={false}
-                        placeholder="Email address"
+                        placeholder={t('emailPlaceholder')}
                         placeholderTextColor="#9CA3AF"
                     />
                 </View>
@@ -287,7 +360,8 @@ export default function ProfileScreen() {
                         ) : (
                             <>
                                 <Ionicons name="save-outline" size={18} color="#ffffff"/>
-                                <Text className="text-white text-base ml-2" weight="bold">Save Changes</Text>
+                                <Text className="text-white text-base ml-2"
+                                      weight="bold">{t('saveProfileChanges')}</Text>
                             </>
                         )}
                     </TouchableOpacity>
@@ -296,7 +370,7 @@ export default function ProfileScreen() {
 
             <View className={sectionClass}>
                 <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg text-gray-800" weight="bold">Security</Text>
+                    <Text className="text-lg text-gray-800" weight="bold">{t('security')}</Text>
                     <Ionicons name="shield-checkmark-outline" size={22} color="#3B82F6"/>
                 </View>
 
@@ -306,7 +380,7 @@ export default function ProfileScreen() {
                 >
                     <View className="flex-row items-center">
                         <Ionicons name="lock-closed-outline" size={20} color="#6B7280"/>
-                        <Text className="ml-3 text-base text-primary" weight="semibold">Change Password</Text>
+                        <Text className="ml-3 text-base text-primary" weight="semibold">{t('changePassword')}</Text>
                     </View>
                     <Ionicons name={showPasswordChange ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
                 </TouchableOpacity>
@@ -314,13 +388,14 @@ export default function ProfileScreen() {
                 {showPasswordChange && (
                     <View className="border-t border-gray-200 mt-4 pt-4">
                         <View className="mb-4 relative">
-                            <Text className="text-sm text-primary mb-1.5" weight="semibold">Current Password</Text>
+                            <Text className="text-sm text-primary mb-1.5"
+                                  weight="semibold">{t('currentPassword')}</Text>
                             <TextInput
                                 className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800"
                                 value={currentPassword}
                                 onChangeText={setCurrentPassword}
                                 secureTextEntry={!showCurrentPassword}
-                                placeholder="Enter current password"
+                                placeholder={t('currentPasswordPlaceholder')}
                                 placeholderTextColor="#9CA3AF"
                             />
                             <TouchableOpacity
@@ -332,13 +407,13 @@ export default function ProfileScreen() {
                         </View>
 
                         <View className="mb-4 relative">
-                            <Text className="text-sm text-primary mb-1.5" weight="semibold">New Password</Text>
+                            <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('newPassword')}</Text>
                             <TextInput
                                 className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800"
                                 value={newPassword}
                                 onChangeText={setNewPassword}
                                 secureTextEntry={!showNewPassword}
-                                placeholder="Enter new password"
+                                placeholder={t('newPasswordPlaceholder')}
                                 placeholderTextColor="#9CA3AF"
                             />
                             <TouchableOpacity
@@ -350,13 +425,14 @@ export default function ProfileScreen() {
                         </View>
 
                         <View className="mb-4 relative">
-                            <Text className="text-sm text-primary mb-1.5" weight="semibold">Confirm New Password</Text>
+                            <Text className="text-sm text-primary mb-1.5"
+                                  weight="semibold">{t('confirmNewPassword')}</Text>
                             <TextInput
                                 className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800"
                                 value={confirmPassword}
                                 onChangeText={setConfirmPassword}
                                 secureTextEntry={!showConfirmPassword}
-                                placeholder="Confirm new password"
+                                placeholder={t('confirmNewPasswordPlaceholder')}
                                 placeholderTextColor="#9CA3AF"
                             />
                             <TouchableOpacity
@@ -378,10 +454,86 @@ export default function ProfileScreen() {
                             ) : (
                                 <>
                                     <Ionicons name="lock-closed-outline" size={20} color="#ffffff"/>
-                                    <Text className="text-white text-base ml-2" weight="bold">Confirm Password
-                                        Change</Text>
+                                    <Text className="text-white text-base ml-2" weight="bold">
+                                        {t('confirmPasswordChange')}
+                                    </Text>
                                 </>
                             )}
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
+            <View className={`${sectionClass} gap-4`}>
+                <View className="flex-row justify-between items-center mb-5">
+                    <Text className="text-lg text-gray-800" weight="bold">{t('settings')}</Text>
+                    <Ionicons name="settings-outline" size={22} color="#3B82F6"/>
+                </View>
+
+                <TouchableOpacity
+                    className="flex-row items-center justify-between py-3 px-4 bg-gray-100 rounded-lg"
+                    onPress={() => setShowLanguageSettings(!showLanguageSettings)}
+                >
+                    <View className="flex-row items-center">
+                        <Ionicons name="language" size={20} color="#6B7280"/>
+                        <Text className="ml-3 text-base text-primary" weight="semibold">{t('changeLanguage')}</Text>
+                    </View>
+                    <Ionicons name={showLanguageSettings ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
+                </TouchableOpacity>
+
+                {showLanguageSettings && (
+                    <View className="flex-1 gap-3 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
+                        <TouchableOpacity
+                            className="flex-row items-center p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                            onPress={() => changeLanguage('en')}
+                        >
+                            <Ionicons
+                                name={i18n.language === 'en' ? 'radio-button-on' : 'radio-button-off'}
+                                size={24}
+                                color={i18n.language === 'en' ? '#3B82F6' : '#9CA3AF'}
+                            />
+                            <Text className="ml-3 text-base dark:text-white">English</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="flex-row items-center p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                            onPress={() => changeLanguage('bg')}
+                        >
+                            <Ionicons
+                                name={i18n.language === 'bg' ? 'radio-button-on' : 'radio-button-off'}
+                                size={24}
+                                color={i18n.language === 'bg' ? '#3B82F6' : '#9CA3AF'}
+                            />
+                            <Text className="ml-3 text-base dark:text-white">Български</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                <TouchableOpacity
+                    className="flex-row items-center justify-between py-3 px-4 bg-gray-100 rounded-lg"
+                    onPress={() => setShowThemeSettings(!showThemeSettings)}
+                >
+                    <View className="flex-row items-center">
+                        <Ionicons name="thermometer-outline" size={20} color="#6B7280"/>
+                        <Text className="ml-3 text-base text-primary" weight="semibold">{t('theme')}</Text>
+                    </View>
+                    <Ionicons name={showThemeSettings ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
+                </TouchableOpacity>
+
+                {showThemeSettings && (
+                    <View className="flex-1 gap-3 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
+                        <TouchableOpacity
+                            className="flex-row items-center bg-gray-200 dark:bg-gray-700 p-4 rounded-lg"
+                            onPress={toggleTheme}
+                        >
+                            <Ionicons
+                                name={theme === 'light' ? 'moon' : 'sunny'}
+                                size={24}
+                                color={theme === 'light' ? '#333' : '#FFF'}
+                            />
+                            <Text className="ml-4 text-lg dark:text-white">
+                                {t('switchTo')}{' '}
+                                {theme === 'light' ? t('dark') : t('light')}{' '}
+                                {t('mode')}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 )}

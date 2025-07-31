@@ -11,6 +11,7 @@ import {TaskItem} from '@/components/TaskItem';
 import {SortControls} from '@/components/SortControls';
 import {TaskResponse, SortField, SortDirection} from '@/interfaces/interfaces';
 import { useTaskCache } from '@/context/TaskCacheContext';
+import { useTranslation } from 'react-i18next';
 
 
 export default function UserTasksScreen() {
@@ -22,6 +23,7 @@ export default function UserTasksScreen() {
     const [updatingTaskId, setUpdatingTaskId] = useState<number | null>(null);
     const [sortBy, setSortBy] = useState<SortField>('due_date');
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+    const { t } = useTranslation();
 
     const errorHandlerOptions = useMemo(() => ({
         validationTitles: {
@@ -126,7 +128,7 @@ export default function UserTasksScreen() {
                 ListHeaderComponent={
                     <>
                         <Text className="text-2xl text-primary mb-5 px-4" weight="bold">
-                            Tasks
+                            {t('yourTasks')}
                         </Text>
                         {tasks.length > 0 && (
                             <View className="px-4">
@@ -142,8 +144,8 @@ export default function UserTasksScreen() {
                 ListEmptyComponent={
                     <View className="flex-1 justify-center items-center mt-20">
                         <Ionicons name="file-tray-outline" size={64} color="#676767"/>
-                        <Text className="text-lg text-primary mt-4" weight="bold">No tasks yet.</Text>
-                        <Text className="text-dark-100" weight="normal">Use the "Create Task" tab to add one!</Text>
+                        <Text className="text-lg text-primary mt-4" weight="bold">{t('noTasks')}</Text>
+                        <Text className="text-dark-100" weight="normal">{t('noTasksDescription')}</Text>
                     </View>
                 }
             />

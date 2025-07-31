@@ -130,7 +130,7 @@ export default function UpdateTaskScreen() {
                     {/* Header */}
                     <View className="flex-row items-center mb-5">
                         <TouchableOpacity onPress={() => router.back()}>
-                            <Ionicons name="arrow-back" size={20} color="#333"/>
+                            <Ionicons name="arrow-back" size={24} color="#333"/>
                         </TouchableOpacity>
                         <Text className="text-xl pl-4" weight="bold">Update Task</Text>
                     </View>

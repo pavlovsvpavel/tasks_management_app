@@ -1,30 +1,67 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const {execSync} = require('child_process');
 
-// Get environment and command from arguments
-const env = process.argv[2] || 'dev'; // default to dev
-const command = process.argv.slice(3).join(' '); // capture all remaining args
-
-const envPath = path.join(__dirname, '.env');
-const envFile = fs.readFileSync(envPath, 'utf8');
-
-let apiUrl;
-const lines = envFile.split('\n');
-for (const line of lines) {
-  if (line.startsWith(`EXPO_PUBLIC_API_URL_${env.toUpperCase()}`)) {
-    apiUrl = line.split('=')[1].trim();
-    break;
-  }
+const env = process.argv[2];
+if (!env) {
+    console.error('\x1b[31m%s\x1b[0m', 'Error: You must specify an environment (e.g., "local", "dev", "prod").');
+    console.error('Usage: node env-loader.js <env> <expo_command>');
+    process.exit(1);
 }
 
+const command = process.argv.slice(3).join(' ');
+if (!command) {
+    console.error('\x1b[31m%s\x1b[0m', 'Error: You must specify an Expo command to run.');
+    process.exit(1);
+}
+
+const envPath = path.join(__dirname, '.env');
+if (!fs.existsSync(envPath)) {
+    console.error('\x1b[31m%s\x1b[0m', `Error: .env file not found at ${envPath}`);
+    process.exit(1);
+}
+
+const envFileContent = fs.readFileSync(envPath, 'utf8');
+
+let apiUrl, appKey;
+const urlKey = `EXPO_PUBLIC_API_URL_${env.toUpperCase()}`;
+
+envFileContent.split('\n').forEach(line => {
+    const trimmedLine = line.trim();
+    if (trimmedLine && !trimmedLine.startsWith('#')) {
+        const [key, ...valueParts] = trimmedLine.split('=');
+        const value = valueParts.join('=').trim();
+
+        if (key.trim() === urlKey) {
+            apiUrl = value;
+        }
+        if (key.trim() === 'EXPO_PUBLIC_APP_KEY') {
+            appKey = value;
+        }
+    }
+});
+
 if (!apiUrl) {
-  console.error(`No API URL found for environment: ${env}`);
-  process.exit(1);
+    console.error('\x1b[31m%s\x1b[0m', `Error: No API URL found for key "${urlKey}" in .env file.`);
+    process.exit(1);
+}
+
+if (!appKey) {
+    console.error('\x1b[31m%s\x1b[0m', 'Error: EXPO_PUBLIC_APP_KEY not found in .env file.');
+    process.exit(1);
 }
 
 process.env.EXPO_PUBLIC_API_URL = apiUrl;
-console.log(`Running command with ${env} environment (API: ${apiUrl})`);
-console.log(`Executing: expo ${command}`);
+process.env.EXPO_PUBLIC_APP_KEY = appKey;
 
-execSync(`npx expo ${command}`, { stdio: 'inherit' });
+console.log('\n\x1b[32m%s\x1b[0m', `✅ Using environment: ${env}`);
+console.log(`   - API URL: ${apiUrl}`);
+console.log(`   - App Key: ****${appKey.slice(-4)}`);
+console.log('\x1b[36m%s\x1b[0m', `🚀 Executing: npx expo ${command}\n`);
+
+try {
+    execSync(`npx expo ${command}`, {stdio: 'inherit'});
+} catch (error) {
+    console.error('\n\x1b[31m%s\x1b[0m', `❌ Command "npx expo ${command}" failed.`);
+    process.exit(1);
+}

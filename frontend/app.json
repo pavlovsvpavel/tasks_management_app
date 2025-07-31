@@ -4,32 +4,36 @@
     "slug": "tasks-management-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "tasks",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-
       },
       "permissions": [
         "android.permission.INTERNET"
       ],
-      "package": "com.ppsoft.tasks-app",
-              "navigationBarColor": "#1F1F1F",
-        "navigationBarIconColor": "dark"
+      "package": "com.ppsoft.tasksapp"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo.png",
-          "imageWidth": 50,
+          "image": "./assets/images/icon.png",
+          "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to let you set a profile picture.",
+          "cameraPermission": "The app needs access to your camera to let you take a profile picture."
         }
       ],
       [

@@ -13,7 +13,7 @@ export default function Index() {
                 // contentContainerStyle={{minHeight: "100%", paddingBottom: 10}}
             >
                 <Image
-                    source={images.logo} className="w-20 h-20 mt-20 mb-5 mx-auto"
+                    source={images.logo} className="w-40 h-40 mt-20 mx-auto"
                 />
                 <View className="flex-1 gap-8">
                     <View className="flex-1 justify-center items-center">

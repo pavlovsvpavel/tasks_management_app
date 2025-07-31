@@ -21,7 +21,7 @@ export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
                 <View className="flex-1 gap-1 pr-4">
                     {task.title && (
                         <Text
-                            className="text-sm text-gray-600"
+                            className="text-lg text-primary"
                             weight="bold"
                             numberOfLines={1}
                             ellipsizeMode="tail"
