@@ -11,6 +11,8 @@ from services.user_service import (
 )
 from core.security import create_access_token, create_refresh_token
 
+from backend.schemas.users import PictureUpdateRequest
+
 router = APIRouter(prefix="/users", tags=["users"])
 
 
@@ -107,3 +109,23 @@ async def change_password(
         )
 
     return {"message": "Password changed successfully"}
+
+
+@router.post("/upload-picture", response_model=UserResponse)
+async def upload_profile_picture_base64(
+        request: PictureUpdateRequest,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    # The base64 string is received directly from the request body
+    picture_data = request.picture
+
+    if not picture_data.startswith("data:image/"):
+        raise HTTPException(status_code=400, detail="Invalid Base64 image format")
+
+    current_user.picture = picture_data
+    db.add(current_user)
+    await db.commit()
+    await db.refresh(current_user)
+
+    return current_user

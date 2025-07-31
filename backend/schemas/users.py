@@ -21,6 +21,7 @@ class UserResponse(UserBase):
     is_verified: bool
     created_at: datetime
     last_login: Optional[datetime] = None
+    picture: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -40,3 +41,6 @@ class TokenData(BaseModel):
 class LoginResponse(BaseModel):
     tokens: TokenData
     user: dict
+
+class PictureUpdateRequest(BaseModel):
+    picture: str

@@ -244,6 +244,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
+									"// --- 1. Random Name Generator ---",
 									"function generateRandomName(length) {",
 									"  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';",
 									"  let result = '';",
@@ -252,11 +253,41 @@
 									"  }",
 									"  return result;",
 									"}",
-									"",
 									"const taskRandomName = generateRandomName(8);",
+									"pm.environment.set('task_random_title', taskRandomName);",
 									"",
-									"pm.environment.set('task_random_name', taskRandomName);",
-									""
+									"// --- 2. Random Description Generator ---",
+									"const descriptionTemplates = [",
+									"    \"Finish the report for the Q3 review.\",",
+									"    \"Follow up with the design team about the new mockups.\",",
+									"    \"Deploy the latest changes to the staging server.\",",
+									"    \"Review the pull request from the new developer.\",",
+									"    \"Schedule a meeting to discuss project milestones.\",",
+									"    \"Investigate the performance issue on the main dashboard.\",",
+									"    \"Write documentation for the new API endpoint.\"",
+									"];",
+									"const taskRandomDescription = descriptionTemplates[Math.floor(Math.random() * descriptionTemplates.length)];",
+									"pm.environment.set('task_random_description', taskRandomDescription);",
+									"",
+									"// --- 3. Random Due Date Generator ---",
+									"function generateRandomDueDate() {",
+									"    const today = new Date();",
+									"    // Generate a random number of days to add (e.g., between 1 and 30 days from now)",
+									"    const randomDays = Math.floor(Math.random() * 30) + 1;",
+									"    const futureDate = new Date(today);",
+									"    futureDate.setDate(today.getDate() + randomDays);",
+									"    ",
+									"    // Format the date to ISO 8601 string, which your backend expects (e.g., \"2024-08-28T15:30:00.000Z\")",
+									"    return futureDate.toISOString();",
+									"}",
+									"const taskRandomDueDate = generateRandomDueDate();",
+									"pm.environment.set('task_random_due_date', taskRandomDueDate);",
+									"",
+									"// --- 4. Random Priority Generator ---",
+									"const priorities = ['low', 'medium', 'high'];",
+									"// Pick a random priority from the array",
+									"const taskRandomPriority = priorities[Math.floor(Math.random() * priorities.length)];",
+									"pm.environment.set('task_random_priority', taskRandomPriority);"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -264,11 +295,21 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{current_access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"{{task_random_name}}\",\n    \"description\": \"Test\",\n    \"completed\": false\n}",
+							"raw": "{\n    \"title\": \"{{task_random_title}}\",\n    \"description\": \"{{task_random_description}}\",\n    \"completed\": false,\n    \"due_date\": \"{{task_random_due_date}}\",\n    \"priority\": \"{{task_random_priority}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -291,6 +332,16 @@
 				{
 					"name": "Get all user's tasks",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{current_access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -310,6 +361,16 @@
 				{
 					"name": "Get single task",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{current_access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -380,6 +441,16 @@
 				{
 					"name": "Delete task",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{current_access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -464,7 +535,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{current_access_token}}",
+									"value": "{{current_refresh_token}}",
 									"type": "string"
 								}
 							]
