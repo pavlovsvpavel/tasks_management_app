@@ -11,7 +11,7 @@ from services.user_service import (
 )
 from core.security import create_access_token, create_refresh_token
 
-from backend.schemas.users import PictureUpdateRequest
+from schemas.users import PictureUpdateRequest
 
 router = APIRouter(prefix="/users", tags=["users"])
 
