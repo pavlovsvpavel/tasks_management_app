@@ -47,6 +47,7 @@ export default function ProfileScreen() {
     const [showThemeSettings, setShowThemeSettings] = useState(false);
     const {theme, toggleTheme} = useTheme();
     const [pictureUrl, setPictureUrl] = useState<string | null>(null);
+    const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
     const changeLanguage = (lng: 'en' | 'bg') => {
         i18n.changeLanguage(lng);
@@ -253,11 +254,12 @@ export default function ProfileScreen() {
         return <PageLoadingSpinner/>;
     }
 
-    const sectionClass = 'bg-white rounded-xl p-5 mb-5';
+    const sectionClass = 'bg-card rounded-xl p-5 mb-5';
+
 
     return (
         <ScrollView
-            className="flex-1"
+            className="flex-1 bg-bgnd"
             showsVerticalScrollIndicator={false}
             refreshControl={
                 <RefreshControl
@@ -269,7 +271,7 @@ export default function ProfileScreen() {
             }
         >
             <View className="flex-row justify-between items-center mb-5 px-4">
-                <Text className="text-2xl text-primary" weight="bold">{t('profile')}</Text>
+                <Text className="text-xl text-primary" weight="bold">{t('profile')}</Text>
                 <TouchableOpacity
                     onPress={() =>
                         showAlert({
@@ -292,7 +294,7 @@ export default function ProfileScreen() {
 
             <View className={`${sectionClass} items-center`}>
                 <View className="relative mb-4">
-                    <View className="w-20 h-20 rounded-full bg-gray-100 items-center justify-center overflow-hidden">
+                    <View className="w-20 h-20 rounded-full items-center justify-center overflow-hidden">
                         {pictureUrl ? (
                             <Image source={{uri: pictureUrl}} className="w-full h-full"/>
                         ) : (
@@ -300,23 +302,23 @@ export default function ProfileScreen() {
                         )}
                     </View>
                     <TouchableOpacity
-                        className="absolute bottom-0 right-0 bg-btn_color rounded-xl w-6 h-6 items-center justify-center"
+                        className="absolute bottom-0 right-0 bg-white rounded-xl w-6 h-6 items-center justify-center"
                         onPress={handlePickAndUploadImage}
                         disabled={isSaving}
                     >
-                        <Ionicons name="camera" size={16} color="#FFFFFF"/>
+                        <Ionicons name="camera" size={16} color="#3B82F6"/>
                     </TouchableOpacity>
                 </View>
 
                 <View className="items-center">
-                    <Text className="text-xl text-gray-800 mb-1" weight="bold">{fullName}</Text>
-                    <Text className="text-base text-gray-500">{email}</Text>
+                    <Text className="text-xl text-primary mb-1" weight="bold">{fullName}</Text>
+                    <Text className="text-base text-secondary">{email}</Text>
                 </View>
             </View>
 
             <View className={sectionClass}>
                 <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg text-gray-800" weight="bold">{t('personalInformation')}</Text>
+                    <Text className="text-lg text-primary" weight="bold">{t('personalInformation')}</Text>
                     <TouchableOpacity onPress={() => setEditing(!editing)}>
                         <MaterialCommunityIcons
                             name={editing ? "account-cancel" : "account-edit"}
@@ -329,7 +331,7 @@ export default function ProfileScreen() {
                 <View className="mb-4">
                     <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('fullName')}</Text>
                     <TextInput
-                        className={`bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800 ${!editing && 'bg-gray-100 text-gray-500'}`}
+                        className={`input-default border-default ${editing ? 'border-blue-500 text-primary' : 'text-secondary'}`}
                         value={fullName}
                         onChangeText={setFullName}
                         editable={editing}
@@ -341,7 +343,7 @@ export default function ProfileScreen() {
                 <View className="mb-4">
                     <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('email')}</Text>
                     <TextInput
-                        className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-500"
+                        className="input-default text-secondary border-default"
                         value={email}
                         editable={false}
                         placeholder={t('emailPlaceholder')}
@@ -351,7 +353,7 @@ export default function ProfileScreen() {
 
                 {editing && (
                     <TouchableOpacity
-                        className="bg-btn_color rounded-lg py-3 flex-row items-center justify-center mt-2 h-[48px]"
+                        className="btn-primary"
                         onPress={handleProfileChanges}
                         disabled={isSaving}
                     >
@@ -360,8 +362,7 @@ export default function ProfileScreen() {
                         ) : (
                             <>
                                 <Ionicons name="save-outline" size={18} color="#ffffff"/>
-                                <Text className="text-white text-base ml-2"
-                                      weight="bold">{t('saveProfileChanges')}</Text>
+                                <Text className="btn-primary-text" weight="bold">{t('saveProfileChanges')}</Text>
                             </>
                         )}
                     </TouchableOpacity>
@@ -370,12 +371,12 @@ export default function ProfileScreen() {
 
             <View className={sectionClass}>
                 <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg text-gray-800" weight="bold">{t('security')}</Text>
+                    <Text className="text-lg text-primary" weight="bold">{t('security')}</Text>
                     <Ionicons name="shield-checkmark-outline" size={22} color="#3B82F6"/>
                 </View>
 
                 <TouchableOpacity
-                    className="flex-row items-center justify-between py-3 px-4 bg-gray-100 rounded-lg"
+                    className="expandable-btn"
                     onPress={() => setShowPasswordChange(!showPasswordChange)}
                 >
                     <View className="flex-row items-center">
@@ -386,12 +387,14 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
 
                 {showPasswordChange && (
-                    <View className="border-t border-gray-200 mt-4 pt-4">
+                    <View className="border-t border-default  mt-4 pt-4">
                         <View className="mb-4 relative">
                             <Text className="text-sm text-primary mb-1.5"
                                   weight="semibold">{t('currentPassword')}</Text>
                             <TextInput
-                                className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800"
+                                className={`input-default text-primary ${focusedInput === 'current' ? 'border-focused' : 'border-default'}`}
+                                onFocus={() => setFocusedInput('current')}
+                                onBlur={() => setFocusedInput(null)}
                                 value={currentPassword}
                                 onChangeText={setCurrentPassword}
                                 secureTextEntry={!showCurrentPassword}
@@ -409,7 +412,9 @@ export default function ProfileScreen() {
                         <View className="mb-4 relative">
                             <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('newPassword')}</Text>
                             <TextInput
-                                className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800"
+                                className={`input-default text-primary ${focusedInput === 'new' ? 'border-focused' : 'border-default'}`}
+                                onFocus={() => setFocusedInput('new')}
+                                onBlur={() => setFocusedInput(null)}
                                 value={newPassword}
                                 onChangeText={setNewPassword}
                                 secureTextEntry={!showNewPassword}
@@ -428,7 +433,9 @@ export default function ProfileScreen() {
                             <Text className="text-sm text-primary mb-1.5"
                                   weight="semibold">{t('confirmNewPassword')}</Text>
                             <TextInput
-                                className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-800"
+                                className={`input-default text-primary ${focusedInput === 'confirm' ? 'border-focused' : 'border-default'}`}
+                                onFocus={() => setFocusedInput('confirm')}
+                                onBlur={() => setFocusedInput(null)}
                                 value={confirmPassword}
                                 onChangeText={setConfirmPassword}
                                 secureTextEntry={!showConfirmPassword}
@@ -444,7 +451,7 @@ export default function ProfileScreen() {
                         </View>
 
                         <TouchableOpacity
-                            className="bg-btn_color rounded-lg py-3 flex-row items-center justify-center mt-2 h-[48px]"
+                            className="btn-primary"
                             onPress={handleChangePassword}
                             disabled={isSaving}
                         >
@@ -465,12 +472,12 @@ export default function ProfileScreen() {
             </View>
             <View className={`${sectionClass} gap-4`}>
                 <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg text-gray-800" weight="bold">{t('settings')}</Text>
+                    <Text className="text-lg text-primary" weight="bold">{t('settings')}</Text>
                     <Ionicons name="settings-outline" size={22} color="#3B82F6"/>
                 </View>
 
                 <TouchableOpacity
-                    className="flex-row items-center justify-between py-3 px-4 bg-gray-100 rounded-lg"
+                    className="expandable-btn"
                     onPress={() => setShowLanguageSettings(!showLanguageSettings)}
                 >
                     <View className="flex-row items-center">
@@ -481,9 +488,9 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
 
                 {showLanguageSettings && (
-                    <View className="flex-1 gap-3 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
+                    <View className="flex-row justify-between border-t border-default mt-4 pt-4">
                         <TouchableOpacity
-                            className="flex-row items-center p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                            className="flex-row items-center p-3 rounded-lg input-bgnd"
                             onPress={() => changeLanguage('en')}
                         >
                             <Ionicons
@@ -495,7 +502,7 @@ export default function ProfileScreen() {
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            className="flex-row items-center p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                            className="flex-row items-center p-3 rounded-lg input-bgnd"
                             onPress={() => changeLanguage('bg')}
                         >
                             <Ionicons
@@ -508,20 +515,20 @@ export default function ProfileScreen() {
                     </View>
                 )}
                 <TouchableOpacity
-                    className="flex-row items-center justify-between py-3 px-4 bg-gray-100 rounded-lg"
+                    className="expandable-btn"
                     onPress={() => setShowThemeSettings(!showThemeSettings)}
                 >
                     <View className="flex-row items-center">
-                        <Ionicons name="thermometer-outline" size={20} color="#6B7280"/>
+                        <MaterialCommunityIcons name="theme-light-dark" size={24} color="#6B7280" />
                         <Text className="ml-3 text-base text-primary" weight="semibold">{t('theme')}</Text>
                     </View>
                     <Ionicons name={showThemeSettings ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
                 </TouchableOpacity>
 
                 {showThemeSettings && (
-                    <View className="flex-1 gap-3 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
+                    <View className="flex-1 gap-3 border-t border-default mt-4 pt-4">
                         <TouchableOpacity
-                            className="flex-row items-center bg-gray-200 dark:bg-gray-700 p-4 rounded-lg"
+                            className="flex-row btn"
                             onPress={toggleTheme}
                         >
                             <Ionicons

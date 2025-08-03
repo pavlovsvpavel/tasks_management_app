@@ -1,5 +1,7 @@
 import {Ionicons} from "@expo/vector-icons";
 import {AlertButton} from "@/components/CustomAlert";
+import {ComponentProps} from "react";
+import {Priority} from "@/components/TaskForm";
 
 export interface ServerStatusContextType {
     isServerDown: boolean;
@@ -127,4 +129,23 @@ export interface PrioritySelectorProps {
 export interface TaskCacheContextType {
     getTaskFromCache: (taskId: number) => TaskResponse | undefined;
     updateTaskInCache: (task: TaskResponse) => void;
+}
+
+export interface TaskFormProps {
+    title: string;
+    description: string;
+    dueDate: Date | null;
+    priority: Priority;
+
+    onTitleChange: (text: string) => void;
+    onDescriptionChange: (text: string) => void;
+    onPriorityChange: (priority: Priority) => void;
+
+    onShowDatePicker: () => void;
+    onSubmit: () => void;
+
+    isSubmitting: boolean;
+    submitButtonText: string;
+    submitButtonIconName: ComponentProps<typeof Ionicons>['name'];
+    formatDisplayDate: (date: Date | null) => string;
 }

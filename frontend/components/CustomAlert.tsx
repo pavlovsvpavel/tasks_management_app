@@ -30,17 +30,17 @@ export default function CustomAlert({isVisible, title, message, buttons}: Custom
 
     return (
         <View className="absolute inset-0 bg-black/60 justify-center items-center z-[10000]">
-            <View className="w-[85%] max-w-[340px] bg-white p-6 rounded-2xl items-center shadow-lg shadow-black/25">
+            <View className="w-[85%] max-w-[340px] bg-card p-6 rounded-2xl items-center shadow-lg shadow-black/80">
                 <View className="mb-3">
-                    <Ionicons name="information-circle-outline" size={48} color="#007AFF"/>
+                    <Ionicons name="information-circle-outline" size={48} color="#3B82F6"/>
                 </View>
 
-                <Text className="text-gray-900 text-xl mb-2 text-center" weight="bold">
+                <Text className="text-primary text-xl mb-2 text-center" weight="bold">
                     {title}
                 </Text>
 
                 {message && (
-                    <Text className="text-gray-600 text-center mb-6 text-base leading-[22px]">
+                    <Text className="text-primary text-center mb-6 text-base leading-[22px]">
                         {message}
                     </Text>
                 )}

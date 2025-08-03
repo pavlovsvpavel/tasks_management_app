@@ -1,18 +1,16 @@
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {router, useLocalSearchParams} from 'expo-router';
 import {useEffect, useState} from 'react';
-import {ScrollView, KeyboardAvoidingView} from 'react-native';
-import {View, Text, TouchableOpacity, TextInput} from '@/components/Themed';
+import {ScrollView, KeyboardAvoidingView,} from 'react-native';
+import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {Ionicons} from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {useApiClient} from '@/hooks/useApiClient';
 import {PageLoadingSpinner} from '@/components/PageLoadingSpinner';
 import {useApiErrorHandler} from '@/hooks/useApiErrorHandler';
 import {TaskResponse} from '@/interfaces/interfaces';
-import {useAlert} from '@/context/AlertContext';
-import {PrioritySelector} from "@/components/PrioritySelector";
-import {ButtonSpinner} from "@/components/ButtonSpinner";
+import {useAlert} from '@/context/AlertContext';;
 import {useTaskCache} from '@/context/TaskCacheContext';
+import TaskForm from "@/components/TaskForm";
 
 
 export default function UpdateTaskScreen() {
@@ -33,6 +31,7 @@ export default function UpdateTaskScreen() {
     const [dueDate, setDueDate] = useState<Date | null>(null);
     const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
 
     useEffect(() => {
         if (!id) return;
@@ -112,103 +111,50 @@ export default function UpdateTaskScreen() {
         return <PageLoadingSpinner/>;
     }
 
-    const textInputClass = "bg-gray-50 border border-gray-300 rounded-lg p-3 text-base text-gray-800 w-full focus:border-blue-500 focus:ring-blue-500"
 
     return (
-        <SafeAreaView
-            edges={['top', 'left', 'right']}
-            className="flex-1 px-5"
+        <KeyboardAvoidingView
+            className="flex-1"
+            behavior="height"
         >
-            <KeyboardAvoidingView
-                className="flex-1"
-                behavior="height"
+            <ScrollView
+                className="flex-1 bg-bgnd"
+                showsVerticalScrollIndicator={false}
             >
-                <ScrollView
-                    className="flex-1 py-5"
-                    showsVerticalScrollIndicator={false}
-                >
-                    {/* Header */}
-                    <View className="flex-row items-center mb-5">
-                        <TouchableOpacity onPress={() => router.back()}>
-                            <Ionicons name="arrow-back" size={24} color="#333"/>
-                        </TouchableOpacity>
-                        <Text className="text-xl pl-4" weight="bold">Update Task</Text>
-                    </View>
-                    {/* Form Fields */}
-                    <View className="flex-1 gap-3 bg-white rounded-xl p-5">
-                        {/* Title Input */}
-                        <View>
-                            <Text className="text-base font-semibold text-gray-700 mb-2" weight="semibold">Title
-                                *</Text>
-                            <TextInput
-                                className={textInputClass}
-                                value={title}
-                                onChangeText={setTitle}
-                                placeholder="Enter task title"
-                                placeholderTextColor="#9CA3AF"
-                            />
-                        </View>
-                        {/* Description Input */}
-                        <View>
-                            <Text className="text-base font-semibold text-gray-700 mb-2"
-                                  weight="semibold">Description</Text>
-                            <TextInput
-                                className={`${textInputClass} h-28`}
-                                value={description}
-                                onChangeText={setDescription}
-                                placeholder="Add more details about the task..."
-                                placeholderTextColor="#9CA3AF"
-                                multiline
-                                textAlignVertical="top"
-                            />
-                        </View>
-                        {/* Due Date Picker */}
-                        <View>
-                            <Text className="text-base font-semibold text-gray-700 mb-2" weight="semibold">Due Date
-                                *</Text>
-                            <TouchableOpacity
-                                onPress={showDatePicker}
-                                className={`${textInputClass} flex-row items-center justify-between`}
-                            >
-                                <Text className={`text-base ${dueDate ? 'text-gray-800' : 'text-gray-400'}`}>
-                                    {formatDisplayDate(dueDate)}
-                                </Text>
-                                <Ionicons name="calendar-outline" size={20} color="#6B7280"/>
-                            </TouchableOpacity>
-                        </View>
-                        {/* Priority Buttons */}
-                        <PrioritySelector
-                            currentPriority={priority}
-                            onPriorityChange={setPriority}
-                        />
-
-                        <TouchableOpacity
-                            className="bg-btn_color rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px]"
-                            onPress={handleUpdateTask}
-                            disabled={isUpdating}
-                        >
-                            {isUpdating ? (
-                                <ButtonSpinner/>
-                            ) : (
-                                <>
-                                    <Ionicons name="save-outline" size={20} color="#ffffff"/>
-                                    <Text className="text-white text-base ml-2" weight="bold">Save Changes</Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>
-
-                {/* Date Picker Modal */}
-                <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="datetime"
-                    onConfirm={handleConfirmDate}
-                    onCancel={hideDatePicker}
-                    date={dueDate || new Date()}
-                    minimumDate={new Date()}
+                {/* Header */}
+                <View className="flex-row items-center mb-5">
+                    <TouchableOpacity onPress={() => router.back()}>
+                        <Ionicons name="arrow-back" size={24} color='#3B82F6'/>
+                    </TouchableOpacity>
+                    <Text className="text-xl text-primary pl-4" weight="bold">Update Task</Text>
+                </View>
+                {/* Form Fields */}
+                <TaskForm
+                    title={title}
+                    description={description}
+                    dueDate={dueDate}
+                    priority={priority}
+                    onTitleChange={setTitle}
+                    onDescriptionChange={setDescription}
+                    onPriorityChange={setPriority}
+                    onShowDatePicker={showDatePicker}
+                    onSubmit={handleUpdateTask}
+                    isSubmitting={isUpdating}
+                    submitButtonText="Save Changes"
+                    submitButtonIconName="save-outline"
+                    formatDisplayDate={formatDisplayDate}
                 />
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+            </ScrollView>
+
+            {/* Date Picker Modal */}
+            <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="datetime"
+                onConfirm={handleConfirmDate}
+                onCancel={hideDatePicker}
+                date={dueDate || new Date()}
+                minimumDate={new Date()}
+            />
+        </KeyboardAvoidingView>
     );
 }

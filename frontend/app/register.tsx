@@ -10,6 +10,7 @@ import {useAlert} from "@/context/AlertContext";
 import {useApiClient} from "@/hooks/useApiClient";
 import {ValidationError} from "@/utils/errors";
 
+
 export default function Register() {
     const [isRegistering, setIsRegistering] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -100,38 +101,37 @@ export default function Register() {
         });
     };
 
-    const inputClass = "pl-10 w-full border border-gray-300 rounded-lg text-base text-gray-800";
+    const inputClass = "input-default border-default text-primary pl-10 w-full focus:border-blue-500 focus:ring-blue-500";
 
     return (
         <SafeAreaView
             edges={['top', 'left', 'right', 'bottom']}
-            className="flex-1">
+            className="flex-1 bg-bgnd">
             <ScrollView
                 className="flex-1 py-10 px-5"
                 showsVerticalScrollIndicator={false}
-                // contentContainerStyle={{minHeight: "100%", paddingBottom: 10}}
             >
                 <View className="flex-1 justify-center gap-4">
                     <View className=" flex-1 justify-center items-center gap-2 mb-8">
-                        <Text className="text-xl text-dark-200" weight="bold">Create your account</Text>
-                        <Text className="text-sm text-dark-100">
+                        <Text className="text-xl text-primary" weight="bold">Create your account</Text>
+                        <Text className="text-sm text-primary">
                             Join and start organizing your tasks
                         </Text>
                     </View>
                     <View className="flex-1 justify-center items-center gap-6">
                         <TouchableOpacity
-                            className="w-full border border-gray-300 rounded-lg px-8 py-3 flex-row items-center justify-center"
+                            className="bg-card w-full rounded-lg px-8 py-3 flex-row items-center justify-center"
                             onPress={handleGoogleSignUp}
                         >
                             <FontAwesome5 name="google" size={24} color="#4285F4"/>
-                            <Text className="ml-4" weight="bold">Sign up with Google</Text>
+                            <Text className="ml-4 text-primary" weight="bold">Sign up with Google</Text>
                         </TouchableOpacity>
 
-                        <Text className="text-center text-gray-500 text-xs uppercase">Or continue with</Text>
+                        <Text className="text-center text-primary text-xs uppercase">Or continue with</Text>
                     </View>
                     <View className="flex-1 justify-center gap-2">
                         <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm" weight="semibold">Full Name</Text>
+                            <Text className="text-sm text-primary" weight="semibold">Full Name</Text>
                             <View className=" flex flex-row items-center gap-6">
                                 <Ionicons
                                     name="person"
@@ -151,7 +151,7 @@ export default function Register() {
                             </View>
                         </View>
                         <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm" weight="semibold">Email</Text>
+                            <Text className="text-sm text-primary" weight="semibold">Email</Text>
                             <View className=" flex flex-row items-center gap-6">
                                 <MaterialIcons
                                     name="email"
@@ -171,7 +171,7 @@ export default function Register() {
                             </View>
                         </View>
                         <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm" weight="semibold">Password</Text>
+                            <Text className="text-sm text-primary" weight="semibold">Password</Text>
                             <View className=" flex flex-row items-center gap-6">
                                 <Ionicons
                                     name="lock-closed"
@@ -193,15 +193,15 @@ export default function Register() {
                                     onPress={() => setShowPassword(!showPassword)}
                                 >
                                     {showPassword ? (
-                                        <Ionicons name="eye-off" size={20}/>
+                                        <Ionicons name="eye-off" size={20} color={'#ccc'}/>
                                     ) : (
-                                        <Ionicons name="eye" size={20}/>
+                                        <Ionicons name="eye" size={20} color={'#ccc'}/>
                                     )}
                                 </TouchableOpacity>
                             </View>
                         </View>
                         <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm" weight="semibold">Confirm Password</Text>
+                            <Text className="text-sm text-primary" weight="semibold">Confirm Password</Text>
                             <View className=" flex flex-row items-center gap-6">
                                 <Ionicons
                                     name="lock-closed"
@@ -223,9 +223,9 @@ export default function Register() {
                                     onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                                 >
                                     {showConfirmPassword ? (
-                                        <Ionicons name="eye-off" size={20}/>
+                                        <Ionicons name="eye-off" size={20} color={'#ccc'}/>
                                     ) : (
-                                        <Ionicons name="eye" size={20}/>
+                                        <Ionicons name="eye" size={20} color={'#ccc'}/>
                                     )}
                                 </TouchableOpacity>
                             </View>
@@ -233,7 +233,7 @@ export default function Register() {
                     </View>
                     <View className="flex-1 justify-center items-center gap-4">
                         <TouchableOpacity
-                            className="w-full bg-btn_color rounded-lg p-3 items-center justify-center"
+                            className="w-full btn-primary"
                             onPress={handleSubmit}
                             disabled={isRegistering}
                         >
@@ -243,7 +243,7 @@ export default function Register() {
                                 <Text className="text-white" weight="semibold">Create Account</Text>
                             )}
                         </TouchableOpacity>
-                        <Text className="text-sm text-gray-500">
+                        <Text className="text-sm text-primary">
                             Already have an account?{' '}
                             <Link href="/login"
                                   className="text-blue-500" weight="semibold">

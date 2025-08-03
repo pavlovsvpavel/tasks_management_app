@@ -19,7 +19,7 @@ export const PrioritySelector = ({
                                  }: PrioritySelectorProps) => {
     return (
         <View>
-            <Text className="text-base font-semibold text-gray-700 mb-2" weight="semibold">Priority</Text>
+            <Text className="text-base font-semibold text-primary mb-2" weight="semibold">Priority</Text>
             <View className="flex-row items-center gap-4">
                 {priorities.map((level) => {
                     const isActive = currentPriority === level;
@@ -28,7 +28,7 @@ export const PrioritySelector = ({
                         <TouchableOpacity
                             key={level}
                             className={`flex-1 py-3 items-center rounded-xl border-2 ${
-                                isActive ? `${styles.activeBg} ${styles.borderColor}` : `bg-white ${styles.borderColor}`
+                                isActive ? `${styles.activeBg} ${styles.borderColor}` : `bg-card ${styles.borderColor}`
                             }`}
                             onPress={() => onPriorityChange(level)}
                         >

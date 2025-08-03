@@ -14,7 +14,7 @@ export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
 
     return (
         <TouchableOpacity
-            className="bg-white p-4 rounded-xl mb-4 shadow-sm"
+            className="bg-card p-4 rounded-xl mb-4"
             onPress={() => router.push(`/tasks/details/${task.id}`)}
         >
             <View className="flex-row justify-between items-center">
@@ -31,7 +31,7 @@ export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
                     )}
                     {task.description && (
                         <Text
-                            className="text-sm text-gray-600"
+                            className="text-sm text-secondary"
                             weight="italic"
                             numberOfLines={1}
                             ellipsizeMode="tail"
@@ -39,7 +39,7 @@ export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
                             {task.description}
                         </Text>
                     )}
-                    <Text className="text-sm text-gray-500">
+                    <Text className="text-sm text-secondary">
                         Due: {format(new Date(task.due_date), 'd MMM yyyy, HH:mm')}
                     </Text>
                     <Text className={`text-sm capitalize ${priorityColors[task.priority]}`} weight="semibold">
@@ -49,13 +49,13 @@ export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
 
                 <View className="items-center">
                     <Switch
-                        trackColor={{false: '#767577', true: '#81b0ff'}}
-                        thumbColor={task.completed ? '#3B82F6' : '#f4f3f4'}
+                        trackColor={{false: '#EF4444', true: '#6ced00'}}
+                        thumbColor={task.completed ? '#479f00' : '#ba1515'}
                         onValueChange={onPrompt}
                         value={task.completed}
                         disabled={isUpdating}
                     />
-                    <Text className="text-xs text-gray-500">{task.completed ? 'Done' : 'Pending'}</Text>
+                    <Text className="text-xs text-primary">{task.completed ? 'Done' : 'Pending'}</Text>
                 </View>
             </View>
         </TouchableOpacity>

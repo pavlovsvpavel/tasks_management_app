@@ -1,15 +1,14 @@
 import {useCallback, useState} from 'react';
 import {ScrollView, KeyboardAvoidingView} from 'react-native';
-import {View, Text, TouchableOpacity, TextInput} from '@/components/Themed';
+import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {router, useFocusEffect} from 'expo-router';
 import {Ionicons} from "@expo/vector-icons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {useApiClient} from '@/hooks/useApiClient';
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
-import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {useAlert} from "@/context/AlertContext";
 import {useApiErrorHandler} from '@/hooks/useApiErrorHandler';
-import {PrioritySelector} from '@/components/PrioritySelector';
+import TaskForm from "@/components/TaskForm";
 
 
 export default function CreateTaskScreen() {
@@ -108,103 +107,53 @@ export default function CreateTaskScreen() {
         }
     };
 
-    const textInputClass = "bg-gray-50 border border-gray-300 rounded-lg p-3 text-base text-gray-800 w-full focus:border-blue-500 focus:ring-blue-500"
-
     if (isScreenLoading) {
         return <PageLoadingSpinner/>;
     }
 
     return (
-            <KeyboardAvoidingView
-                className="flex-1"
-                behavior="height"
+        <KeyboardAvoidingView
+            className="flex-1"
+            behavior="height"
+        >
+            <ScrollView
+                className="flex-1 bg-bgnd"
+                showsVerticalScrollIndicator={false}
             >
-                <ScrollView
-                    className="flex-1"
-                    showsVerticalScrollIndicator={false}
-                >
-                    {/* Header */}
-                    <View className="flex-row justify-between items-center mb-5 px-4">
-                        <Text className="text-2xl text-primary" weight="bold">Create New Task</Text>
-                        <TouchableOpacity onPress={() => router.back()}>
-                            <Ionicons name="close-outline" size={24} color="#EF4444"/>
-                        </TouchableOpacity>
-                    </View>
-                    {/* Form Fields */}
-                    <View className="flex-1 gap-3 bg-white rounded-xl p-5">
-                        {/* Title Input */}
-                        <View>
-                            <Text className="text-base font-semibold text-gray-700 mb-2" weight="semibold">Title
-                                *</Text>
-                            <TextInput
-                                className={textInputClass}
-                                value={title}
-                                onChangeText={setTitle}
-                                placeholder="Enter task title"
-                                placeholderTextColor="#9CA3AF"
-                            />
-                        </View>
-                        {/* Description Input */}
-                        <View>
-                            <Text className="text-base font-semibold text-gray-700 mb-2"
-                                  weight="semibold">Description</Text>
-                            <TextInput
-                                className={`${textInputClass} h-28`}
-                                value={description}
-                                onChangeText={setDescription}
-                                placeholder="Add more details about the task..."
-                                placeholderTextColor="#9CA3AF"
-                                multiline
-                                textAlignVertical="top"
-                            />
-                        </View>
-                        {/* Due Date Picker */}
-                        <View>
-                            <Text className="text-base font-semibold text-gray-700 mb-2" weight="semibold">Due Date
-                                *</Text>
-                            <TouchableOpacity
-                                onPress={showDatePicker}
-                                className={`${textInputClass} flex-row items-center justify-between`}
-                            >
-                                <Text className={`text-base ${dueDate ? 'text-gray-800' : 'text-gray-400'}`}>
-                                    {formatDisplayDate(dueDate)}
-                                </Text>
-                                <Ionicons name="calendar-outline" size={20} color="#6B7280"/>
-                            </TouchableOpacity>
-                        </View>
-                        {/* Priority Buttons */}
-                        <PrioritySelector
-                            currentPriority={priority}
-                            onPriorityChange={setPriority}
-                        />
-
-                        <TouchableOpacity
-                            className="bg-btn_color rounded-lg flex-row items-center justify-center mt-4 h-[48px]"
-                            onPress={handleCreateTask}
-                            disabled={isCreating}
-                        >
-                            {isCreating ? (
-                                <ButtonSpinner/>
-
-                            ) : (
-                                <>
-                                    <Ionicons name="add-circle-outline" size={20} color="#ffffff"/>
-                                    <Text className="text-white text-base ml-2" weight="bold">Create Task</Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>
-
-                {/* Date Picker Modal */}
-                <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="datetime"
-                    onConfirm={handleConfirmDate}
-                    onCancel={hideDatePicker}
-                    date={dueDate || new Date()}
-                    minimumDate={new Date()}
+                {/* Header */}
+                <View className="flex-row justify-between items-center mb-5 px-4">
+                    <Text className="text-xl text-primary" weight="bold">Create New Task</Text>
+                    <TouchableOpacity onPress={() => router.back()}>
+                        <Ionicons name="close-outline" size={24} color="#EF4444"/>
+                    </TouchableOpacity>
+                </View>
+                {/* Form Fields */}
+                <TaskForm
+                    title={title}
+                    description={description}
+                    dueDate={dueDate}
+                    priority={priority}
+                    onTitleChange={setTitle}
+                    onDescriptionChange={setDescription}
+                    onPriorityChange={setPriority}
+                    onShowDatePicker={showDatePicker}
+                    onSubmit={handleCreateTask}
+                    isSubmitting={isCreating}
+                    submitButtonText="Create Task"
+                    submitButtonIconName="add-circle-outline"
+                    formatDisplayDate={formatDisplayDate}
                 />
-            </KeyboardAvoidingView>
+            </ScrollView>
+
+            {/* Date Picker Modal */}
+            <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="datetime"
+                onConfirm={handleConfirmDate}
+                onCancel={hideDatePicker}
+                date={dueDate || new Date()}
+                minimumDate={new Date()}
+            />
+        </KeyboardAvoidingView>
     );
 }

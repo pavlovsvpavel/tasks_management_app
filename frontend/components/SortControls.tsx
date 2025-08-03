@@ -10,11 +10,11 @@ export const SortControls = (
         onSortChange,
     }: SortControlsProps) => {
     const getButtonClass = (field: SortField) => {
-        return sortBy === field ? 'bg-btn_color' : 'bg-gray-300';
+        return sortBy === field ? 'bg-[#3B82F6]' : 'bg-white';
     };
 
     const getButtonTextClass = (field: SortField) => {
-        return sortBy === field ? 'text-white' : 'text-primary';
+        return sortBy === field ? 'text-primary' : 'text-secondary';
     };
 
     const SortButton = ({field, label}: { field: SortField, label: string }) => (
@@ -36,7 +36,7 @@ export const SortControls = (
 
     return (
         <View className="flex-row justify-end items-center mb-4 px-4 gap-3">
-            <Text className="text-sm text-gray-500">Sort by:</Text>
+            <Text className="text-sm text-primary">Sort by:</Text>
             <SortButton field="due_date" label="Due Date"/>
             <SortButton field="title" label="Title"/>
         </View>

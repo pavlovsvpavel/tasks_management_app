@@ -35,7 +35,7 @@ function TabsLayout() {
     return (
         <SafeAreaView
             edges={['top', 'left', 'right', 'bottom']}
-            className="flex-1 px-5 pt-5">
+            className="flex-1 px-5 pt-5 bg-bgnd">
             <Tabs
                 screenOptions={{
                     tabBarShowLabel: true,
@@ -50,6 +50,7 @@ function TabsLayout() {
                         paddingBottom: 10,
                         paddingTop: 10,
                         marginTop: 15,
+                        borderTopWidth: 0,
                     },
                     tabBarItemStyle: {
                         flex: 1,

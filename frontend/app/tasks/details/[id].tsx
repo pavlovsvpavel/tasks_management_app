@@ -84,8 +84,8 @@ export default function TaskDetailScreen() {
                 {text: 'Cancel', style: 'cancel'},
                 {
                     text: 'Delete',
-                    style: 'destructive', // This makes the button red on iOS
-                    onPress: deleteTask // Call the delete function on confirm
+                    style: 'destructive',
+                    onPress: deleteTask
                 },
             ]
         });
@@ -104,7 +104,7 @@ export default function TaskDetailScreen() {
                         The task you are looking for might have been deleted or does not exist.
                     </Text>
                     <TouchableOpacity onPress={() => router.back()} className="bg-btn_color rounded-lg py-2 px-6 mt-6">
-                        <Text className="text-white" weight="bold">Go Back</Text>
+                        <Text className="text-primary" weight="bold">Go Back</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -118,78 +118,74 @@ export default function TaskDetailScreen() {
     };
 
     return (
-        <SafeAreaView
-            edges={['top', 'left', 'right', 'bottom']}
-            className="flex-1 px-5">
-            <ScrollView
-                className="flex-1 py-5"
-                showsVerticalScrollIndicator={false}
-            >
-                <View className="flex-row items-center mb-5">
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Ionicons name="arrow-back" size={24} color="#333"/>
-                    </TouchableOpacity>
-                    <Text className="text-xl pl-4" weight="bold">Task Details</Text>
+        <ScrollView
+            className="flex-1 bg-bgnd"
+            showsVerticalScrollIndicator={false}
+        >
+            <View className="flex-row items-center mb-5">
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={24} color="#3B82F6"/>
+                </TouchableOpacity>
+                <Text className="text-xl text-primary pl-4" weight="bold">Task Details</Text>
+            </View>
+
+            <View className="flex-1 gap-3 bg-card rounded-xl p-5 mb-5 ">
+                <Text className="text-lg text-primary" weight="bold">{taskFromCache.title}</Text>
+                <Text className="text-sm text-secondary mt-2">
+                    Created on {format(new Date(taskFromCache.created_at), 'd MMM yyyy, HH:mm')}
+                </Text>
+
+                <View className="flex-1 justify-center">
+                    <TaskDetailRow
+                        label="Priority"
+                        value={taskFromCache.priority.charAt(0).toUpperCase() + taskFromCache.priority.slice(1)}
+                        valueColor={priorityColors[taskFromCache.priority]}
+                    />
+                    <TaskDetailRow
+                        label="Due Date"
+                        value={format(new Date(taskFromCache.due_date), 'd MMM yyyy, HH:mm')}
+                    />
+                    {taskFromCache.description && (
+                        <TaskDetailRow
+                            label="Description"
+                            value={taskFromCache.description}
+                        />
+                    )}
+                    <TaskDetailRow
+                        label="Status"
+                        value={taskFromCache.completed ? 'Completed' : 'Pending'}
+                        valueColor={taskFromCache.completed ? 'text-green-600' : 'text-red-600'}
+                    />
+                    {taskFromCache.completed_at && (
+                        <TaskDetailRow
+                            label="Completed On"
+                            value={format(new Date(taskFromCache.completed_at), 'd MMM yyyy, HH:mm')}
+                        />
+                    )}
                 </View>
 
-                <View className="flex-1 gap-3 bg-white rounded-xl p-5 mb-5 ">
-                    <Text className="text-lg text-primary" weight="bold">{taskFromCache.title}</Text>
-                    <Text className="text-sm text-gray-400 mt-2">
-                        Created on {format(new Date(taskFromCache.created_at), 'd MMM yyyy, HH:mm')}
-                    </Text>
-
-                    <View className="flex-1 justify-center">
-                        <TaskDetailRow
-                            label="Priority"
-                            value={taskFromCache.priority.charAt(0).toUpperCase() + taskFromCache.priority.slice(1)}
-                            valueColor={priorityColors[taskFromCache.priority]}
-                        />
-                        <TaskDetailRow
-                            label="Due Date"
-                            value={format(new Date(taskFromCache.due_date), 'd MMM yyyy, HH:mm')}
-                        />
-                        {taskFromCache.description && (
-                            <TaskDetailRow
-                                label="Description"
-                                value={taskFromCache.description}
-                            />
-                        )}
-                        <TaskDetailRow
-                            label="Status"
-                            value={taskFromCache.completed ? 'Completed' : 'Pending'}
-                            valueColor={taskFromCache.completed ? 'text-green-600' : 'text-red-600'}
-                        />
-                        {taskFromCache.completed_at && (
-                            <TaskDetailRow
-                                label="Completed On"
-                                value={format(new Date(taskFromCache.completed_at), 'd MMM yyyy, HH:mm')}
-                            />
-                        )}
-                    </View>
-
-                    <TouchableOpacity
-                        className="bg-blue-500 rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px]"
-                        onPress={() => router.push(`/tasks/update/${taskFromCache.id}`)}
-                    >
-                        <Ionicons name="create-outline" size={20} color="#ffffff"/>
-                        <Text className="text-white text-base ml-2" weight="bold">Update Task</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className="bg-red-600 rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px]"
-                        onPress={handleDeletePress}
-                        disabled={isDeleting}
-                    >
-                        {isDeleting ? (
-                            <ButtonSpinner/>
-                        ) : (
-                            <>
-                                <AntDesign name="delete" size={20} color="#ffffff"/>
-                                <Text className="text-white text-base ml-2" weight="bold">Delete Task</Text>
-                            </>
-                        )}
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                <TouchableOpacity
+                    className="bg-blue-500 rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px]"
+                    onPress={() => router.push(`/tasks/update/${taskFromCache.id}`)}
+                >
+                    <Ionicons name="create-outline" size={20} color="#ffffff"/>
+                    <Text className="btn-primary-text text-base ml-2" weight="bold">Update Task</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    className="bg-red-600 rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px]"
+                    onPress={handleDeletePress}
+                    disabled={isDeleting}
+                >
+                    {isDeleting ? (
+                        <ButtonSpinner/>
+                    ) : (
+                        <>
+                            <AntDesign name="delete" size={20} color="#ffffff"/>
+                            <Text className="btn-primary-text text-base ml-2" weight="bold">Delete Task</Text>
+                        </>
+                    )}
+                </TouchableOpacity>
+            </View>
+        </ScrollView>
     );
 }
