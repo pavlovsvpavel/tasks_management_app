@@ -61,10 +61,9 @@
     "profilePictureUploadPermissionsTitle": "Error",
     "profilePictureUploadPermissionsMessage": "Permission to access photo library is required!"
   },
-  "switchTo": "Switch to",
   "dark": "Dark",
   "light": "Light",
-  "mode": "Mode",
+  "automatic": "Automatic",
   "createTaskPage": {
     "createNewTask": "New Task",
     "title": "Title *",
@@ -127,7 +126,7 @@
     "userTasksItemPriority": "Priority"
   },
   "indexPage": {
-    "appName": "My Tasks",
+    "appName": "TaskFlow",
     "appHeader": "Smart task management with powerful features",
     "signInButton": "Sign In",
     "signUpButton": "Sign Up"

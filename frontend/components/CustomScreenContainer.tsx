@@ -7,7 +7,7 @@ type ScreenContainerProps = {
     style?: object;
 };
 
-export default function ScreenContainer({
+export default function CustomScreenContainer({
                                             children,
                                             edges = ['top', 'left', 'right', 'bottom'],
                                         }: ScreenContainerProps) {

@@ -7,7 +7,7 @@ import {Text} from '@/components/Themed';
 import React from "react";
 import {useTranslation} from "react-i18next";
 import {useDoubleBackExit} from '@/hooks/useDoubleBackExit';
-import ScreenContainer from '@/components/ScreenContainer';
+import CustomScreenContainer from '@/components/CustomScreenContainer';
 
 
 function TabIcon({focused, color, size, name}: TabIconProps) {
@@ -38,21 +38,20 @@ function TabsLayout() {
     console.log('TabsLayout: Rendering tabs at', new Date().toISOString());
 
     return (
-        <ScreenContainer>
+        <CustomScreenContainer>
             <Tabs
                 screenOptions={{
                     tabBarShowLabel: true,
                     headerShown: false,
-                    tabBarActiveTintColor: 'black',
-                    tabBarInactiveTintColor: 'white',
+                    tabBarActiveTintColor: '#FFFFFF',
+                    tabBarInactiveTintColor: '#A5B4FC',
                     tabBarStyle: {
                         elevation: 0,
-                        borderRadius: 50,
+                        borderRadius: 12,
                         backgroundColor: '#3B82F6',
-                        height: 60,
+                        height: 50,
                         paddingBottom: 10,
                         paddingTop: 10,
-                        marginTop: 15,
                         borderTopWidth: 0,
                     },
                     tabBarItemStyle: {
@@ -60,7 +59,6 @@ function TabsLayout() {
                         flexDirection: 'row',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        paddingHorizontal: 4,
                     },
                     tabBarLabel: ({focused, color, children}) => (
                         <Text
@@ -117,7 +115,7 @@ function TabsLayout() {
                     }}
                 />
             </Tabs>
-        </ScreenContainer>
+        </CustomScreenContainer>
     );
 }
 

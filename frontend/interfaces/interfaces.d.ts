@@ -58,15 +58,6 @@ export interface CustomAlertProps {
     buttons: AlertButton[];
 }
 
-export interface RegisterResponse {
-    message: string;
-    user?: {
-        id: string;
-        email: string;
-        full_name: string;
-    };
-}
-
 export interface TabIconProps {
     focused: boolean;
     color: string;

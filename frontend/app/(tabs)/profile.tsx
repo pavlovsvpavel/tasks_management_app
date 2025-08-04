@@ -23,7 +23,7 @@ import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {useAlert} from "@/contexts/AlertContext";
 import {useApiErrorHandler} from "@/hooks/useApiErrorHandler";
 import {useTranslation} from "react-i18next";
-import {useTheme} from "@/contexts/ThemeContext";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 
 export default function ProfileScreen() {
@@ -46,7 +46,6 @@ export default function ProfileScreen() {
     const {t, i18n} = useTranslation();
     const [showLanguageSettings, setShowLanguageSettings] = useState(false);
     const [showThemeSettings, setShowThemeSettings] = useState(false);
-    const {theme, toggleTheme} = useTheme();
     const [pictureUrl, setPictureUrl] = useState<string | null>(null);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
@@ -534,23 +533,7 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
 
                 {showThemeSettings && (
-                    <View className="flex-1 gap-3 border-t border-default mt-4 pt-4">
-                        <TouchableOpacity
-                            className="flex-row btn"
-                            onPress={toggleTheme}
-                        >
-                            <Ionicons
-                                name={theme === 'light' ? 'moon' : 'sunny'}
-                                size={24}
-                                color={theme === 'light' ? '#333' : '#FFF'}
-                            />
-                            <Text className="ml-4 text-lg dark:text-white">
-                                {t('switchTo')}{' '}
-                                {theme === 'light' ? t('dark') : t('light')}{' '}
-                                {t('mode')}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+                    <ThemeSwitcher/>
                 )}
             </View>
         </ScrollView>

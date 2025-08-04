@@ -1,9 +1,9 @@
 import {Stack} from 'expo-router';
-import ScreenContainer from '@/components/ScreenContainer';
+import CustomScreenContainer from '@/components/CustomScreenContainer';
 
 export default function TasksLayout() {
     return (
-        <ScreenContainer>
+        <CustomScreenContainer>
             <Stack
                 screenOptions={{
                     headerShown: false,
@@ -11,6 +11,6 @@ export default function TasksLayout() {
                     gestureEnabled: true,
                 }}
             />
-        </ScreenContainer>
+        </CustomScreenContainer>
     );
 }

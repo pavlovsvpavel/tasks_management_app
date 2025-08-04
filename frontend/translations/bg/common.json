@@ -61,10 +61,9 @@
     "profilePictureUploadPermissionsTitle": "Грешка",
     "profilePictureUploadPermissionsMessage": "Необходимо е разрешение за достъп до библиотека със снимки!"
   },
-  "switchTo": "Превключи към",
   "dark": "Тъмен",
   "light": "Светъл",
-  "mode": "Режим",
+  "automatic": "Автоматично",
   "createTaskPage": {
     "createNewTask": "Нова Задача",
     "title": "Име *",
@@ -127,7 +126,7 @@
     "userTasksItemPriority": "Приоритет"
   },
   "indexPage": {
-    "appName": "Моите задачи",
+    "appName": "TaskFlow",
     "appHeader": "Интелигентно управление на задачи с мощни функции",
     "signInButton": "Вход",
     "signUpButton": "Регистрация"

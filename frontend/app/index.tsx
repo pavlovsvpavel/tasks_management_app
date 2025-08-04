@@ -19,7 +19,7 @@ export default function Index() {
                     source={images.logo} className="w-28 h-28 mt-20 mx-auto"
                 />
                 <View className="gap-8">
-                    <View className="flex-1 justify-center items-center">
+                    <View className="justify-center items-center">
                         <Text className="text-3xl text-primary mt-6" weight="bold">{t('indexPage.appName')}</Text>
                         <Text className="text-m text-center text-primary mt-4">
                             {t('indexPage.appHeader')}

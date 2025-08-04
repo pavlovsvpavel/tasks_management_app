@@ -1,63 +1,60 @@
 import {createContext, useState, useContext, useEffect, ReactNode, useMemo, useCallback} from 'react';
 import {useColorScheme} from 'nativewind';
 import * as SecureStore from 'expo-secure-store';
-import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
+import {PageLoadingSpinner} from '@/components/PageLoadingSpinner';
+
+
+type ThemePreference = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
     theme: 'light' | 'dark';
-    toggleTheme: () => void;
-    setTheme: (theme: 'light' | 'dark') => void;
+    themePreference: ThemePreference;
+    setThemePreference: (preference: ThemePreference) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const THEME_PREFERENCE_KEY = 'theme-preference';
+
 export const ThemeProvider = ({children}: { children: ReactNode }) => {
     const {colorScheme, setColorScheme} = useColorScheme();
+    const [themePreference, setThemePreferenceState] = useState<ThemePreference>('system');
     const [isThemeLoading, setIsThemeLoading] = useState(true);
 
     useEffect(() => {
-        const loadTheme = async () => {
+        const loadThemePreference = async () => {
             try {
-                const savedTheme = await SecureStore.getItemAsync('app-theme');
-                if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-                    setColorScheme(savedTheme);
+                const savedPreference = await SecureStore.getItemAsync(THEME_PREFERENCE_KEY);
+                if (savedPreference && ['light', 'dark', 'system'].includes(savedPreference)) {
+                    const pref = savedPreference as ThemePreference;
+                    setColorScheme(pref);
+                    setThemePreferenceState(pref);
                 }
             } catch (error) {
-                console.error('Failed to load theme from storage', error);
+                console.error('Failed to load theme preference from storage', error);
             } finally {
                 setIsThemeLoading(false);
             }
         };
-        loadTheme();
+        loadThemePreference();
     }, [setColorScheme]);
 
 
-    const toggleTheme = useCallback(async () => {
-        const newTheme = colorScheme === 'light' ? 'dark' : 'light';
-        setColorScheme(newTheme);
+    const setThemePreference = useCallback(async (preference: ThemePreference) => {
+        setColorScheme(preference);
+        setThemePreferenceState(preference);
         try {
-            await SecureStore.setItemAsync('app-theme', newTheme);
+            await SecureStore.setItemAsync(THEME_PREFERENCE_KEY, preference);
         } catch (error) {
-            console.error('Failed to save theme to storage', error);
-        }
-    }, [colorScheme, setColorScheme]);
-
-    const setTheme = useCallback(async (theme: 'light' | 'dark') => {
-        setColorScheme(theme);
-        try {
-            await SecureStore.setItemAsync('app-theme', theme);
-        } catch (error) {
-            console.error('Failed to save theme to storage', error);
+            console.error('Failed to save theme preference to storage', error);
         }
     }, [setColorScheme]);
-
 
     const value = useMemo(() => ({
         theme: colorScheme as 'light' | 'dark',
-        toggleTheme,
-        setTheme,
-    }), [colorScheme, toggleTheme, setTheme]);
-
+        themePreference,
+        setThemePreference,
+    }), [colorScheme, themePreference, setThemePreference]);
 
     if (isThemeLoading) {
         return <PageLoadingSpinner/>;

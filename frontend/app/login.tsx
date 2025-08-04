@@ -9,7 +9,7 @@ import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {useAlert} from "@/contexts/AlertContext";
 import {useApiClient} from "@/hooks/useApiClient";
 import {useTranslation} from "react-i18next";
-import ScreenContainer from '@/components/ScreenContainer';
+import CustomScreenContainer from '@/components/CustomScreenContainer';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -79,9 +79,8 @@ export default function Login() {
     const inputClass = "input-default border-default text-primary pl-10 w-full focus:border-blue-500 focus:ring-blue-500";
 
     return (
-        <ScreenContainer>
+        <CustomScreenContainer>
             <ScrollView
-                className="px-5"
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{paddingVertical: 30, flexGrow: 1}}
             >
@@ -183,6 +182,6 @@ export default function Login() {
                     </View>
                 </View>
             </ScrollView>
-        </ScreenContainer>
+        </CustomScreenContainer>
     );
 }

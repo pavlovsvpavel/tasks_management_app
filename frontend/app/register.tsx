@@ -9,7 +9,7 @@ import {useAlert} from "@/contexts/AlertContext";
 import {useApiClient} from "@/hooks/useApiClient";
 import {ValidationError} from "@/utils/errors";
 import {useTranslation} from "react-i18next";
-import ScreenContainer from '@/components/ScreenContainer';
+import CustomScreenContainer from '@/components/CustomScreenContainer';
 
 export default function Register() {
     const [isRegistering, setIsRegistering] = useState(false);
@@ -105,9 +105,8 @@ export default function Register() {
     const inputClass = "input-default border-default text-primary pl-10 w-full focus:border-blue-500 focus:ring-blue-500";
 
     return (
-        <ScreenContainer>
+        <CustomScreenContainer>
             <ScrollView
-                className="px-5"
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{paddingVertical: 30, flexGrow: 1}}
             >
@@ -254,6 +253,6 @@ export default function Register() {
                     </View>
                 </View>
             </ScrollView>
-        </ScreenContainer>
+        </CustomScreenContainer>
     );
 }
