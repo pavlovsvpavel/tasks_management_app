@@ -3,6 +3,7 @@ import {Switch} from 'react-native';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {format} from 'date-fns';
 import {TaskItemProps} from '@/interfaces/interfaces';
+import {useTranslation} from "react-i18next";
 
 
 export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
@@ -11,6 +12,7 @@ export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
         medium: 'text-amber-600',
         high: 'text-red-600',
     };
+    const {t} = useTranslation();
 
     return (
         <TouchableOpacity
@@ -40,10 +42,10 @@ export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
                         </Text>
                     )}
                     <Text className="text-sm text-secondary">
-                        Due: {format(new Date(task.due_date), 'd MMM yyyy, HH:mm')}
+                        {t('userTasks.userTasksItemDueDate')}: {format(new Date(task.due_date), 'd MMM yyyy, HH:mm')}
                     </Text>
                     <Text className={`text-sm capitalize ${priorityColors[task.priority]}`} weight="semibold">
-                        {task.priority} Priority
+                        {t('userTasks.userTasksItemPriority')}: {t(`priority.${task.priority}`)}
                     </Text>
                 </View>
 
@@ -55,7 +57,9 @@ export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
                         value={task.completed}
                         disabled={isUpdating}
                     />
-                    <Text className="text-xs text-primary">{task.completed ? 'Done' : 'Pending'}</Text>
+                    <Text className="text-xs text-primary">
+                        {t(task.completed ? 'taskStatus.completed' : 'taskStatus.pending')}
+                    </Text>
                 </View>
             </View>
         </TouchableOpacity>

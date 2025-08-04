@@ -8,9 +8,10 @@ import {useApiClient} from '@/hooks/useApiClient';
 import {PageLoadingSpinner} from '@/components/PageLoadingSpinner';
 import {useApiErrorHandler} from '@/hooks/useApiErrorHandler';
 import {TaskResponse} from '@/interfaces/interfaces';
-import {useAlert} from '@/context/AlertContext';;
-import {useTaskCache} from '@/context/TaskCacheContext';
+import {useAlert} from '@/contexts/AlertContext';
+import {useTaskCache} from '@/contexts/TaskCacheContext';
 import TaskForm from "@/components/TaskForm";
+import {useTranslation} from "react-i18next";
 
 
 export default function UpdateTaskScreen() {
@@ -31,6 +32,7 @@ export default function UpdateTaskScreen() {
     const [dueDate, setDueDate] = useState<Date | null>(null);
     const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const {t} = useTranslation();
 
 
     useEffect(() => {
@@ -62,10 +64,20 @@ export default function UpdateTaskScreen() {
         if (!title || !dueDate) {
             showAlert(
                 {
-                    title: 'Missing Fields',
-                    message: 'Please fill out all fields marked with *',
+                    title: t('updateTaskPage.missingFieldsTitle'),
+                    message: t('updateTaskPage.missingFieldsMessage'),
                     buttons: [{text: 'OK'}]
                 });
+            return;
+        }
+
+        const now = new Date();
+        if (dueDate < now) {
+            showAlert({
+                title: t('updateTaskPage.invalidDateTitle'),
+                message: t('updateTaskPage.invalidDateMessage'),
+                buttons: [{text: 'OK'}]
+            });
             return;
         }
 
@@ -85,8 +97,8 @@ export default function UpdateTaskScreen() {
             updateTaskInCache(updatedTask);
 
             showAlert({
-                title: 'Task Updated',
-                message: 'Your task has been updated successfully.',
+                title: t('updateTaskPage.successFieldsTitle'),
+                message: t('updateTaskPage.successFieldsMessage'),
                 buttons: [{text: 'OK', onPress: () => router.back()}],
             });
         } catch (error) {
@@ -103,7 +115,7 @@ export default function UpdateTaskScreen() {
         hideDatePicker();
     };
     const formatDisplayDate = (date: Date | null) => {
-        if (!date) return 'Select a date and time';
+        if (!date) return t('updateTaskPage.dueDateDescription');
         return new Intl.DateTimeFormat('en-GB', {dateStyle: 'long', timeStyle: 'short'}).format(date);
     };
 
@@ -111,14 +123,13 @@ export default function UpdateTaskScreen() {
         return <PageLoadingSpinner/>;
     }
 
-
     return (
         <KeyboardAvoidingView
             className="flex-1"
             behavior="height"
         >
             <ScrollView
-                className="flex-1 bg-bgnd"
+                className="bg-bgnd"
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header */}
@@ -126,7 +137,7 @@ export default function UpdateTaskScreen() {
                     <TouchableOpacity onPress={() => router.back()}>
                         <Ionicons name="arrow-back" size={24} color='#3B82F6'/>
                     </TouchableOpacity>
-                    <Text className="text-xl text-primary pl-4" weight="bold">Update Task</Text>
+                    <Text className="text-xl text-primary pl-4" weight="bold">{t('updateTaskPage.updateTask')}</Text>
                 </View>
                 {/* Form Fields */}
                 <TaskForm
@@ -140,7 +151,7 @@ export default function UpdateTaskScreen() {
                     onShowDatePicker={showDatePicker}
                     onSubmit={handleUpdateTask}
                     isSubmitting={isUpdating}
-                    submitButtonText="Save Changes"
+                    submitButtonText={t('updateTaskPage.button')}
                     submitButtonIconName="save-outline"
                     formatDisplayDate={formatDisplayDate}
                 />

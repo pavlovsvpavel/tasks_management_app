@@ -6,12 +6,12 @@ import {Ionicons} from '@expo/vector-icons';
 import {useApiClient} from '@/hooks/useApiClient';
 import {PageLoadingSpinner} from '@/components/PageLoadingSpinner';
 import {useApiErrorHandler} from '@/hooks/useApiErrorHandler';
-import {useAlert} from '@/context/AlertContext';
+import {useAlert} from '@/contexts/AlertContext';
 import {TaskItem} from '@/components/TaskItem';
 import {SortControls} from '@/components/SortControls';
 import {TaskResponse, SortField, SortDirection} from '@/interfaces/interfaces';
-import { useTaskCache } from '@/context/TaskCacheContext';
-import { useTranslation } from 'react-i18next';
+import {useTaskCache} from '@/contexts/TaskCacheContext';
+import {useTranslation} from 'react-i18next';
 
 
 export default function UserTasksScreen() {
@@ -23,7 +23,7 @@ export default function UserTasksScreen() {
     const [updatingTaskId, setUpdatingTaskId] = useState<number | null>(null);
     const [sortBy, setSortBy] = useState<SortField>('due_date');
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
     const errorHandlerOptions = useMemo(() => ({
         validationTitles: {
@@ -55,16 +55,25 @@ export default function UserTasksScreen() {
     );
 
     const promptForStatusChange = (task: TaskResponse) => {
-        const newStatus = !task.completed;
-        const actionText = newStatus ? 'complete' : 'pending';
+        const actionKey = task.completed
+            ? 'userTasks.userTaskStatusChangeActionTextPending'
+            : 'userTasks.userTaskStatusChangeActionTextComplete';
+
+        const actionText = t(actionKey);
+
         showAlert({
-            title: `Mark as ${actionText}?`,
-            message: `Are you sure you want to mark this task as ${actionText}?`,
+            title: t('userTasks.userTaskStatusChangeTitle', {action: actionText}),
+            message: t('userTasks.userTaskStatusChangeMessage', {action: actionText}),
             buttons: [
-                {text: 'No', style: 'cancel'},
-                {text: 'Yes', onPress: () => handleToggleComplete(task, newStatus)},
+                {text: t('userTasks.userTaskStatusChangeButtonNo'), style: 'cancel'},
+                {
+                    text: t('userTasks.userTaskStatusChangeButtonYes'),
+                    onPress: () => handleToggleComplete(task, !task.completed)
+                },
             ],
         });
+
+        console.log(t('userTasks.userTaskStatusChangeTitle', { action: 'complete' }));
     };
 
     const handleToggleComplete = async (task: TaskResponse, completed: boolean) => {
@@ -113,7 +122,7 @@ export default function UserTasksScreen() {
     }
 
     return (
-        <View className="flex-1 bg-bgnd">
+        <View className="bg-bgnd">
             <FlatList
                 data={sortedTasks}
                 keyExtractor={item => item.id.toString()}

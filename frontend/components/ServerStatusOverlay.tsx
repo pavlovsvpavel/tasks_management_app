@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import { View, Text, TouchableOpacity } from '@/components/Themed';
-import {useServerStatus} from "@/context/ServerStatusContext";
-import {useRetry} from "@/context/RetryContext";
+import {useServerStatus} from "@/contexts/ServerStatusContext";
+import {useRetry} from "@/contexts/RetryContext";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
 
 export default function ServerStatusOverlay() {

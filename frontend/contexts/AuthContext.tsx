@@ -10,8 +10,8 @@ import React, {
 import {AuthContextType, TokenPair} from '@/interfaces/interfaces';
 import {getTokens, saveTokensToStorage, deleteTokensFromStorage} from '@/utils/tokenStorage';
 import {validateAndRefreshTokens, TokenValidationError} from '@/services/TokenAuth';
-import {useRetry} from "@/context/RetryContext";
-import {useServerStatus} from "@/context/ServerStatusContext";
+import {useRetry} from "@/contexts/RetryContext";
+import {useServerStatus} from "@/contexts/ServerStatusContext";
 import {useAlert} from './AlertContext';
 
 const AuthContext = createContext<AuthContextType>({

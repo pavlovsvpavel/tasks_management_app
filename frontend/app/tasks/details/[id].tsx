@@ -1,5 +1,4 @@
 import {router, useLocalSearchParams} from 'expo-router';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ScrollView} from 'react-native';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
@@ -10,9 +9,10 @@ import {useApiErrorHandler} from '@/hooks/useApiErrorHandler';
 import {TaskResponse} from '@/interfaces/interfaces';
 import {format} from 'date-fns';
 import {TaskDetailRow} from "@/components/TaskDetailRow";
-import {useTaskCache} from '@/context/TaskCacheContext';
-import {useAlert} from "@/context/AlertContext";
+import {useTaskCache} from '@/contexts/TaskCacheContext';
+import {useAlert} from "@/contexts/AlertContext";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
+import {useTranslation} from "react-i18next";
 
 
 export default function TaskDetailScreen() {
@@ -29,6 +29,7 @@ export default function TaskDetailScreen() {
     const taskFromCache = getTaskFromCache(taskId);
     const [isLoading, setIsLoading] = useState(!taskFromCache);
     const {showAlert} = useAlert();
+    const {t} = useTranslation();
 
     const fetchTask = useCallback(async () => {
         if (!taskId) return;
@@ -50,11 +51,8 @@ export default function TaskDetailScreen() {
         }
     }, [taskFromCache, fetchTask]);
 
-    const [isDeleting, setIsDeleting] = useState(false); // Add deleting state
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    // ... your fetchTask and useEffect logic ...
-
-    // --- 1. Create the function that actually performs the deletion ---
     const deleteTask = async () => {
         setIsDeleting(true);
         try {
@@ -62,10 +60,9 @@ export default function TaskDetailScreen() {
                 method: 'DELETE',
             });
 
-            // On success, show a confirmation and navigate away
             showAlert({
-                title: 'Task Deleted',
-                message: 'The task has been successfully deleted.',
+                title: t('deleteTaskPage.successFieldsTitle'),
+                message: t('deleteTaskPage.successFieldsMessage'),
                 buttons: [{text: 'OK', onPress: () => router.navigate('/(tabs)/userTasks')}]
             });
 
@@ -78,12 +75,12 @@ export default function TaskDetailScreen() {
 
     const handleDeletePress = () => {
         showAlert({
-            title: 'Delete Task?',
-            message: 'Are you sure you want to permanently delete this task? This action cannot be undone.',
+            title: t('deleteTaskPage.onPressButtonTitle'),
+            message: t('deleteTaskPage.onPressButtonMessage'),
             buttons: [
-                {text: 'Cancel', style: 'cancel'},
+                {text: t('deleteTaskPage.onPressButtonCancel'), style: 'cancel'},
                 {
-                    text: 'Delete',
+                    text: t('deleteTaskPage.onPressButtonDelete'),
                     style: 'destructive',
                     onPress: deleteTask
                 },
@@ -97,17 +94,16 @@ export default function TaskDetailScreen() {
 
     if (!taskFromCache) {
         return (
-            <SafeAreaView className="flex-1">
-                <View className="flex-1 justify-center items-center p-10">
-                    <Text className="text-lg text-red-600" weight="bold">Task Not Found</Text>
-                    <Text className="text-center text-primary mt-2" weight="normal">
-                        The task you are looking for might have been deleted or does not exist.
-                    </Text>
-                    <TouchableOpacity onPress={() => router.back()} className="bg-btn_color rounded-lg py-2 px-6 mt-6">
-                        <Text className="text-primary" weight="bold">Go Back</Text>
-                    </TouchableOpacity>
-                </View>
-            </SafeAreaView>
+            <View className="flex-1 justify-center items-center p-10">
+                <Text className="text-lg text-red-600"
+                      weight="bold">{t('detailsTaskPage.notFoundTaskHeader')}</Text>
+                <Text className="text-center text-primary mt-2" weight="normal">
+                    {t('detailsTaskPage.notFoundTaskMessage')}
+                </Text>
+                <TouchableOpacity onPress={() => router.back()} className="bg-btn_color rounded-lg py-2 px-6 mt-6">
+                    <Text className="text-primary" weight="bold">{t('detailsTaskPage.notFoundTaskButton')}</Text>
+                </TouchableOpacity>
+            </View>
         );
     }
 
@@ -119,57 +115,64 @@ export default function TaskDetailScreen() {
 
     return (
         <ScrollView
-            className="flex-1 bg-bgnd"
+            className="bg-bgnd"
             showsVerticalScrollIndicator={false}
         >
             <View className="flex-row items-center mb-5">
                 <TouchableOpacity onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color="#3B82F6"/>
                 </TouchableOpacity>
-                <Text className="text-xl text-primary pl-4" weight="bold">Task Details</Text>
+                <Text className="text-xl text-primary pl-4" weight="bold">{t('detailsTaskPage.taskDetails')}</Text>
             </View>
 
-            <View className="flex-1 gap-3 bg-card rounded-xl p-5 mb-5 ">
+            <View className="gap-3 bg-card rounded-xl p-5 mb-5 ">
                 <Text className="text-lg text-primary" weight="bold">{taskFromCache.title}</Text>
-                <Text className="text-sm text-secondary mt-2">
-                    Created on {format(new Date(taskFromCache.created_at), 'd MMM yyyy, HH:mm')}
-                </Text>
+                <View className="py-4 border-b border-default">
+                    <Text className="text-sm text-secondary mt-2" weight="semibold">
+                        {t('detailsTaskPage.taskDetailsCreatedOn')}
+                    </Text>
+                    <Text className="text-base text-primary mt-1">
+                        {format(new Date(taskFromCache.created_at), 'd MMM yyyy, HH:mm')}
+                    </Text>
+                </View>
 
-                <View className="flex-1 justify-center">
+                <View className="justify-center">
                     <TaskDetailRow
-                        label="Priority"
-                        value={taskFromCache.priority.charAt(0).toUpperCase() + taskFromCache.priority.slice(1)}
+                        label={t('detailsTaskPage.taskDetailRowPriority')}
+                        value={t(`priority.${taskFromCache.priority}`)}
                         valueColor={priorityColors[taskFromCache.priority]}
                     />
                     <TaskDetailRow
-                        label="Due Date"
+                        label={t('detailsTaskPage.taskDetailRowDueDate')}
                         value={format(new Date(taskFromCache.due_date), 'd MMM yyyy, HH:mm')}
                     />
                     {taskFromCache.description && (
                         <TaskDetailRow
-                            label="Description"
+                            label={t('detailsTaskPage.taskDetailRowDescription')}
                             value={taskFromCache.description}
                         />
                     )}
                     <TaskDetailRow
-                        label="Status"
-                        value={taskFromCache.completed ? 'Completed' : 'Pending'}
+                        label={t('detailsTaskPage.taskDetailRowStatus')}
+                        value={t(taskFromCache.completed ? 'taskStatus.completed' : 'taskStatus.pending')}
                         valueColor={taskFromCache.completed ? 'text-green-600' : 'text-red-600'}
                     />
                     {taskFromCache.completed_at && (
                         <TaskDetailRow
-                            label="Completed On"
+                            label={t('detailsTaskPage.taskDetailRowCompletedOn')}
                             value={format(new Date(taskFromCache.completed_at), 'd MMM yyyy, HH:mm')}
                         />
                     )}
                 </View>
 
                 <TouchableOpacity
-                    className="bg-blue-500 rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px]"
+                    disabled={taskFromCache.completed}
+                    className={`rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px] 
+                        ${taskFromCache.completed ? 'bg-bgnd' : 'bg-blue-500'}`}
                     onPress={() => router.push(`/tasks/update/${taskFromCache.id}`)}
                 >
                     <Ionicons name="create-outline" size={20} color="#ffffff"/>
-                    <Text className="btn-primary-text text-base ml-2" weight="bold">Update Task</Text>
+                    <Text className="btn-primary-text text-base ml-2" weight="bold">{t('detailsTaskPage.button')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     className="bg-red-600 rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px]"
@@ -181,7 +184,8 @@ export default function TaskDetailScreen() {
                     ) : (
                         <>
                             <AntDesign name="delete" size={20} color="#ffffff"/>
-                            <Text className="btn-primary-text text-base ml-2" weight="bold">Delete Task</Text>
+                            <Text className="btn-primary-text text-base ml-2"
+                                  weight="bold">{t('deleteTaskPage.button')}</Text>
                         </>
                     )}
                 </TouchableOpacity>

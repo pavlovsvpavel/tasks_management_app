@@ -1,15 +1,15 @@
 import {useState} from 'react';
 import {ScrollView} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {View, Text, TouchableOpacity, TextInput} from '@/components/Themed';
 import {router} from 'expo-router';
 import {Link} from '@/components/Themed';
 import {FontAwesome5, MaterialIcons, Ionicons} from '@expo/vector-icons';
 import {ButtonSpinner} from "@/components/ButtonSpinner";
-import {useAlert} from "@/context/AlertContext";
+import {useAlert} from "@/contexts/AlertContext";
 import {useApiClient} from "@/hooks/useApiClient";
 import {ValidationError} from "@/utils/errors";
-
+import {useTranslation} from "react-i18next";
+import ScreenContainer from '@/components/ScreenContainer';
 
 export default function Register() {
     const [isRegistering, setIsRegistering] = useState(false);
@@ -24,6 +24,7 @@ export default function Register() {
 
     const {showAlert} = useAlert();
     const {apiClient} = useApiClient();
+    const {t} = useTranslation();
 
     const handleSubmit = async () => {
         const {full_name, email, password, confirmPassword} = formData;
@@ -104,34 +105,34 @@ export default function Register() {
     const inputClass = "input-default border-default text-primary pl-10 w-full focus:border-blue-500 focus:ring-blue-500";
 
     return (
-        <SafeAreaView
-            edges={['top', 'left', 'right', 'bottom']}
-            className="flex-1 bg-bgnd">
+        <ScreenContainer>
             <ScrollView
-                className="flex-1 py-10 px-5"
+                className="px-5"
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={{paddingVertical: 30, flexGrow: 1}}
             >
-                <View className="flex-1 justify-center gap-4">
-                    <View className=" flex-1 justify-center items-center gap-2 mb-8">
-                        <Text className="text-xl text-primary" weight="bold">Create your account</Text>
+                <View className="justify-center gap-4">
+                    <View className="justify-center items-center gap-2 mb-8">
+                        <Text className="text-xl text-primary" weight="bold">{t('registerPage.pageHeader')}</Text>
                         <Text className="text-sm text-primary">
-                            Join and start organizing your tasks
+                            {t('registerPage.pageSubHeader')}
                         </Text>
                     </View>
-                    <View className="flex-1 justify-center items-center gap-6">
+                    <View className="justify-center items-center gap-6">
                         <TouchableOpacity
                             className="bg-card w-full rounded-lg px-8 py-3 flex-row items-center justify-center"
                             onPress={handleGoogleSignUp}
                         >
                             <FontAwesome5 name="google" size={24} color="#4285F4"/>
-                            <Text className="ml-4 text-primary" weight="bold">Sign up with Google</Text>
+                            <Text className="ml-4 text-primary" weight="bold">{t('registerPage.googleButton')}</Text>
                         </TouchableOpacity>
 
-                        <Text className="text-center text-primary text-xs uppercase">Or continue with</Text>
+                        <Text
+                            className="text-center text-primary text-xs uppercase">{t('registerPage.continueWith')}</Text>
                     </View>
-                    <View className="flex-1 justify-center gap-2">
-                        <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm text-primary" weight="semibold">Full Name</Text>
+                    <View className="flex-1 justify-center gap-6">
+                        <View className="justify-center gap-2">
+                            <Text className="text-sm text-primary" weight="semibold">{t('fullName')}</Text>
                             <View className=" flex flex-row items-center gap-6">
                                 <Ionicons
                                     name="person"
@@ -144,14 +145,14 @@ export default function Register() {
                                     keyboardType="email-address"
                                     value={formData.full_name}
                                     onChangeText={(text) => setFormData(prev => ({...prev, full_name: text}))}
-                                    placeholder="Enter your full name"
+                                    placeholder={t('fullNamePlaceholder')}
                                     className={inputClass}
                                     placeholderTextColor="#9CA3AF"
                                 />
                             </View>
                         </View>
-                        <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm text-primary" weight="semibold">Email</Text>
+                        <View className="justify-center gap-2">
+                            <Text className="text-sm text-primary" weight="semibold">{t('email')}</Text>
                             <View className=" flex flex-row items-center gap-6">
                                 <MaterialIcons
                                     name="email"
@@ -164,14 +165,14 @@ export default function Register() {
                                     keyboardType="email-address"
                                     value={formData.email}
                                     onChangeText={(text) => setFormData(prev => ({...prev, email: text}))}
-                                    placeholder="Enter your email"
+                                    placeholder={t('emailPlaceholder')}
                                     className={inputClass}
                                     placeholderTextColor="#9CA3AF"
                                 />
                             </View>
                         </View>
-                        <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm text-primary" weight="semibold">Password</Text>
+                        <View className="justify-center gap-2">
+                            <Text className="text-sm text-primary" weight="semibold">{t('password')}</Text>
                             <View className=" flex flex-row items-center gap-6">
                                 <Ionicons
                                     name="lock-closed"
@@ -184,7 +185,7 @@ export default function Register() {
                                     secureTextEntry={!showPassword}
                                     value={formData.password}
                                     onChangeText={(text) => setFormData(prev => ({...prev, password: text}))}
-                                    placeholder="Enter your password"
+                                    placeholder={t('passwordPlaceholder')}
                                     className={inputClass}
                                     placeholderTextColor="#9CA3AF"
                                 />
@@ -200,8 +201,8 @@ export default function Register() {
                                 </TouchableOpacity>
                             </View>
                         </View>
-                        <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm text-primary" weight="semibold">Confirm Password</Text>
+                        <View className="justify-center gap-2">
+                            <Text className="text-sm text-primary" weight="semibold">{t('confirmPassword')}</Text>
                             <View className=" flex flex-row items-center gap-6">
                                 <Ionicons
                                     name="lock-closed"
@@ -214,7 +215,7 @@ export default function Register() {
                                     secureTextEntry={!showConfirmPassword}
                                     value={formData.confirmPassword}
                                     onChangeText={(text) => setFormData(prev => ({...prev, confirmPassword: text}))}
-                                    placeholder="Confirm your password"
+                                    placeholder={t('confirmPasswordPlaceholder')}
                                     className={inputClass}
                                     placeholderTextColor="#9CA3AF"
                                 />
@@ -233,26 +234,26 @@ export default function Register() {
                     </View>
                     <View className="flex-1 justify-center items-center gap-4">
                         <TouchableOpacity
-                            className="w-full btn-primary"
+                            className="w-full btn-primary mt-8"
                             onPress={handleSubmit}
                             disabled={isRegistering}
                         >
                             {isRegistering ? (
                                 <ButtonSpinner/>
                             ) : (
-                                <Text className="text-white" weight="semibold">Create Account</Text>
+                                <Text className="text-white" weight="semibold">{t('registerPage.signUpButton')}</Text>
                             )}
                         </TouchableOpacity>
                         <Text className="text-sm text-primary">
-                            Already have an account?{' '}
+                            {t('registerPage.haveAccount')}{' '}
                             <Link href="/login"
                                   className="text-blue-500" weight="semibold">
-                                Sign in
+                                {t('registerPage.signInLink')}
                             </Link>
                         </Text>
                     </View>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </ScreenContainer>
     );
 }

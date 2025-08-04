@@ -1,6 +1,8 @@
 import React from 'react';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {PrioritySelectorProps, TaskResponse} from '@/interfaces/interfaces';
+import {useTranslation} from "react-i18next";
+
 
 type Priority = TaskResponse['priority'];
 
@@ -17,9 +19,11 @@ export const PrioritySelector = ({
                                      currentPriority,
                                      onPriorityChange,
                                  }: PrioritySelectorProps) => {
+
+    const {t} = useTranslation();
     return (
         <View>
-            <Text className="text-base font-semibold text-primary mb-2" weight="semibold">Priority</Text>
+            <Text className="text-base font-semibold text-primary mb-2" weight="semibold">{t('createTaskPage.priority')}</Text>
             <View className="flex-row items-center gap-4">
                 {priorities.map((level) => {
                     const isActive = currentPriority === level;
@@ -37,7 +41,7 @@ export const PrioritySelector = ({
                                     isActive ? 'text-white' : styles.textColor
                                 }`}
                             >
-                                {level.charAt(0).toUpperCase() + level.slice(1)}
+                                {t(`priority.${level}`)}
                             </Text>
                         </TouchableOpacity>
                     );

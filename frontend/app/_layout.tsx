@@ -1,19 +1,19 @@
 import {Stack} from "expo-router";
 import './globals.css';
-import '../i18n';
+import '../services/i18n';
 import {useFonts} from "expo-font";
 import {View} from "react-native";
 import {StatusBar} from 'expo-status-bar';
-import {RetryProvider} from "@/context/RetryContext";
-import {AlertProvider} from "@/context/AlertContext";
+import {RetryProvider} from "@/contexts/RetryContext";
+import {AlertProvider} from "@/contexts/AlertContext";
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
-import {ServerStatusProvider, useServerStatus} from "@/context/ServerStatusContext";
+import {ServerStatusProvider, useServerStatus} from "@/contexts/ServerStatusContext";
 import ServerStatusOverlay from "@/components/ServerStatusOverlay";
-import {AuthProvider, useAuth} from '@/context/AuthContext';
-import {RefreshProvider} from "@/context/RefreshContext";
-import {TaskCacheProvider} from "@/context/TaskCacheContext";
-import {ThemeProvider} from '@/context/ThemeContext';
-import {useTheme} from '@/context/ThemeContext';
+import {AuthProvider, useAuth} from '@/contexts/AuthContext';
+import {RefreshProvider} from "@/contexts/RefreshContext";
+import {TaskCacheProvider} from "@/contexts/TaskCacheContext";
+import {ThemeProvider} from '@/contexts/ThemeContext';
+import {useTheme} from '@/contexts/ThemeContext';
 
 export default function RootLayout() {
     return (
@@ -77,7 +77,12 @@ function RootNavigator() {
     const isAuthenticated = !!accessToken;
 
     return (
-        <Stack>
+        <Stack
+            screenOptions={{
+                animation: 'slide_from_right',
+                gestureEnabled: true,
+            }}
+        >
             <Stack.Protected guard={isAuthenticated}>
                 <Stack.Screen
                     name="(tabs)"
@@ -85,7 +90,7 @@ function RootNavigator() {
                 />
                 <Stack.Screen
                     name="tasks"
-                    options={{ headerShown: false }}
+                    options={{headerShown: false}}
                 />
             </Stack.Protected>
 

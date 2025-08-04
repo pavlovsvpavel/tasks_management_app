@@ -4,6 +4,7 @@ import {PrioritySelector} from "@/components/PrioritySelector";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {TaskFormProps} from "@/interfaces/interfaces";
 import React from "react";
+import {useTranslation} from "react-i18next";
 
 
 const textInputClass = "input-default border-default text-primary focus:border-blue-500 focus:ring-blue-500";
@@ -29,28 +30,29 @@ const TaskForm: React.FC<TaskFormProps> = ({
     submitButtonIconName,
     formatDisplayDate,
 }) => {
+    const {t} = useTranslation();
     return (
         <View className="flex-1 gap-3 bg-card rounded-xl p-5">
             {/* Title Input */}
             <View>
-                <Text className={labelClass} weight="semibold">Title *</Text>
+                <Text className={labelClass} weight="semibold">{t('createTaskPage.title')}</Text>
                 <TextInput
                     className={textInputClass}
                     value={title}
                     onChangeText={onTitleChange}
-                    placeholder="Enter task title"
+                    placeholder={t('createTaskPage.titlePlaceholder')}
                     placeholderTextColor="#9CA3AF"
                 />
             </View>
 
             {/* Description Input */}
             <View>
-                <Text className={labelClass} weight="semibold">Description</Text>
+                <Text className={labelClass} weight="semibold">{t('createTaskPage.description')}</Text>
                 <TextInput
                     className={`${textInputClass} h-32`}
                     value={description}
                     onChangeText={onDescriptionChange}
-                    placeholder="Add more details about the task..."
+                    placeholder={t('createTaskPage.descriptionPlaceholder')}
                     placeholderTextColor="#9CA3AF"
                     multiline
                     textAlignVertical="top"
@@ -59,7 +61,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
             {/* Due Date Picker */}
             <View>
-                <Text className={labelClass} weight="semibold">Due Date *</Text>
+                <Text className={labelClass} weight="semibold">{t('createTaskPage.dueDate')}</Text>
                 <TouchableOpacity
                     onPress={onShowDatePicker}
                     className={`${textInputClass} flex-row items-center justify-between`}

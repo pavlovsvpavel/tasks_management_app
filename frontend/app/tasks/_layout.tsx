@@ -1,16 +1,16 @@
 import {Stack} from 'expo-router';
-import {SafeAreaView} from "react-native-safe-area-context";
+import ScreenContainer from '@/components/ScreenContainer';
 
 export default function TasksLayout() {
     return (
-        <SafeAreaView
-            edges={['top', 'left', 'right', 'bottom']}
-            className="flex-1 px-5 pt-5 bg-bgnd">
+        <ScreenContainer>
             <Stack
                 screenOptions={{
                     headerShown: false,
+                    animation: 'slide_from_right',
+                    gestureEnabled: true,
                 }}
             />
-        </SafeAreaView>
+        </ScreenContainer>
     );
 }

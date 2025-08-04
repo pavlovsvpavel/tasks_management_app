@@ -1,11 +1,14 @@
 import {Redirect, Tabs} from 'expo-router';
 import {Ionicons} from '@expo/vector-icons';
 import {TabIconProps} from "@/interfaces/interfaces";
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useAuth} from "@/context/AuthContext";
+import {useAuth} from "@/contexts/AuthContext";
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
 import {Text} from '@/components/Themed';
 import React from "react";
+import {useTranslation} from "react-i18next";
+import {useDoubleBackExit} from '@/hooks/useDoubleBackExit';
+import ScreenContainer from '@/components/ScreenContainer';
+
 
 function TabIcon({focused, color, size, name}: TabIconProps) {
     return (
@@ -19,6 +22,8 @@ function TabIcon({focused, color, size, name}: TabIconProps) {
 
 function TabsLayout() {
     const {isAuthenticated, isLoading: isAuthLoading} = useAuth();
+    const {t} = useTranslation();
+    useDoubleBackExit();
 
     if (isAuthLoading) {
         console.log('TabsLayout: Session loading, showing spinner at', new Date().toISOString());
@@ -33,9 +38,7 @@ function TabsLayout() {
     console.log('TabsLayout: Rendering tabs at', new Date().toISOString());
 
     return (
-        <SafeAreaView
-            edges={['top', 'left', 'right', 'bottom']}
-            className="flex-1 px-5 pt-5 bg-bgnd">
+        <ScreenContainer>
             <Tabs
                 screenOptions={{
                     tabBarShowLabel: true,
@@ -71,7 +74,7 @@ function TabsLayout() {
                 <Tabs.Screen
                     name="userTasks"
                     options={{
-                        title: 'Tasks',
+                        title: t('yourTasks'),
                         headerShown: false,
                         tabBarIcon: ({focused, color, size}) => (
                             <TabIcon
@@ -86,7 +89,7 @@ function TabsLayout() {
                 <Tabs.Screen
                     name="createTask"
                     options={{
-                        title: 'Create Task',
+                        title: t('createTask'),
                         headerShown: false,
                         tabBarIcon: ({focused, color, size}) => (
                             <TabIcon
@@ -101,7 +104,7 @@ function TabsLayout() {
                 <Tabs.Screen
                     name="profile"
                     options={{
-                        title: 'Profile',
+                        title: t('profile'),
                         headerShown: false,
                         tabBarIcon: ({focused, color, size}) => (
                             <TabIcon
@@ -114,7 +117,8 @@ function TabsLayout() {
                     }}
                 />
             </Tabs>
-        </SafeAreaView>
+        </ScreenContainer>
     );
 }
+
 export default React.memo(TabsLayout);

@@ -2,6 +2,7 @@ import React from 'react';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {Ionicons} from '@expo/vector-icons';
 import {SortControlsProps, SortField, SortDirection} from '@/interfaces/interfaces';
+import {useTranslation} from "react-i18next";
 
 export const SortControls = (
     {
@@ -9,6 +10,7 @@ export const SortControls = (
         sortDirection,
         onSortChange,
     }: SortControlsProps) => {
+    const {t} = useTranslation();
     const getButtonClass = (field: SortField) => {
         return sortBy === field ? 'bg-[#3B82F6]' : 'bg-white';
     };
@@ -36,9 +38,9 @@ export const SortControls = (
 
     return (
         <View className="flex-row justify-end items-center mb-4 px-4 gap-3">
-            <Text className="text-sm text-primary">Sort by:</Text>
-            <SortButton field="due_date" label="Due Date"/>
-            <SortButton field="title" label="Title"/>
+            <Text className="text-sm text-primary">{t('userTasks.userTasksSortTitle')}</Text>
+            <SortButton field="due_date" label={t('userTasks.userTasksSortByDueDate')}/>
+            <SortButton field="title" label={t('userTasks.userTasksSortByTitle')}/>
         </View>
     );
 };

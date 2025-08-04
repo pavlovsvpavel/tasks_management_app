@@ -1,15 +1,15 @@
 import {useState} from 'react';
 import {ScrollView} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {View, Text, TouchableOpacity, TextInput} from '@/components/Themed';
 import {Link} from '@/components/Themed';
 import {FontAwesome5, MaterialIcons, Ionicons} from '@expo/vector-icons';
-import {useAuth} from '@/context/AuthContext';
+import {useAuth} from '@/contexts/AuthContext';
 import {ValidationError} from '@/utils/errors';
 import {ButtonSpinner} from "@/components/ButtonSpinner";
-import {useAlert} from "@/context/AlertContext";
+import {useAlert} from "@/contexts/AlertContext";
 import {useApiClient} from "@/hooks/useApiClient";
-
+import {useTranslation} from "react-i18next";
+import ScreenContainer from '@/components/ScreenContainer';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -19,6 +19,7 @@ export default function Login() {
     const {setTokens} = useAuth();
     const {apiClient} = useApiClient();
     const {showAlert} = useAlert();
+    const {t} = useTranslation();
 
     const handleSubmit = async () => {
         if (!email.trim() || !password) {
@@ -78,35 +79,34 @@ export default function Login() {
     const inputClass = "input-default border-default text-primary pl-10 w-full focus:border-blue-500 focus:ring-blue-500";
 
     return (
-        <SafeAreaView
-            edges={['top', 'left', 'right', 'bottom']}
-            className="flex-1 bg-bgnd"
-        >
+        <ScreenContainer>
             <ScrollView
-                className="flex-1 py-12 px-5"
+                className="px-5"
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={{paddingVertical: 30, flexGrow: 1}}
             >
                 <View className="flex-1 justify-center gap-4">
-                    <View className=" flex-1 justify-center items-center gap-2 mb-8">
-                        <Text className="text-xl text-primary" weight="bold">Welcome back</Text>
+                    <View className="justify-center items-center gap-2 mb-8">
+                        <Text className="text-xl text-primary" weight="bold">{t('loginPage.pageHeader')}</Text>
                         <Text className="text-sm text-primary">
-                            Sign in to your account to continue
+                            {t('loginPage.pageSubHeader')}
                         </Text>
                     </View>
-                    <View className="flex-1 justify-center items-center gap-6">
+                    <View className="justify-center items-center gap-6">
                         <TouchableOpacity
                             className="bg-card w-full rounded-lg px-8 py-3 flex-row items-center justify-center"
                             onPress={handleGoogleLogin}
                         >
                             <FontAwesome5 name="google" size={24} color="#4285F4"/>
-                            <Text className="ml-4 text-primary" weight="bold">Sign in with Google</Text>
+                            <Text className="ml-4 text-primary" weight="bold">{t('loginPage.googleButton')}</Text>
                         </TouchableOpacity>
 
-                        <Text className="text-center text-primary text-xs uppercase">Or continue with</Text>
+                        <Text
+                            className="text-center text-primary text-xs uppercase">{t('loginPage.continueWith')}</Text>
                     </View>
-                    <View className="flex-1 justify-center gap-2">
-                        <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm text-primary" weight="semibold">Email</Text>
+                    <View className="justify-center gap-6">
+                        <View className="justify-center gap-2">
+                            <Text className="text-sm text-primary" weight="semibold">{t('email')}</Text>
                             <View className=" flex flex-row items-center gap-6">
                                 <MaterialIcons
                                     name="email"
@@ -119,14 +119,14 @@ export default function Login() {
                                     keyboardType="email-address"
                                     value={email}
                                     onChangeText={setEmail}
-                                    placeholder="Enter your email"
+                                    placeholder={t('emailPlaceholder')}
                                     className={inputClass}
                                     placeholderTextColor="#9CA3AF"
                                 />
                             </View>
                         </View>
-                        <View className="flex-1 justify-center gap-2">
-                            <Text className="text-sm text-primary" weight="semibold">Password</Text>
+                        <View className="justify-center gap-2">
+                            <Text className="text-sm text-primary" weight="semibold">{t('password')}</Text>
                             <View className="flex flex-row items-center gap-6">
                                 <Ionicons
                                     name="lock-closed"
@@ -139,7 +139,7 @@ export default function Login() {
                                     secureTextEntry={!showPassword}
                                     value={password}
                                     onChangeText={setPassword}
-                                    placeholder="Enter your password"
+                                    placeholder={t('passwordPlaceholder')}
                                     className={inputClass}
                                     placeholderTextColor="#9CA3AF"
                                 />
@@ -162,27 +162,27 @@ export default function Login() {
                         {/*    </Link>*/}
                         {/*</View>*/}
                     </View>
-                    <View className="flex-1 justify-center items-center gap-4">
+                    <View className="justify-center items-center gap-4">
                         <TouchableOpacity
-                            className="w-full btn-primary"
+                            className="w-full btn-primary mt-8"
                             onPress={handleSubmit}
                             disabled={isLoggingIn}
                         >
                             {isLoggingIn ? (
                                 <ButtonSpinner/>
                             ) : (
-                                <Text className="text-white" weight="semibold">Sign In</Text>
+                                <Text className="text-white" weight="semibold">{t('loginPage.signInButton')}</Text>
                             )}
                         </TouchableOpacity>
                         <Text className="text-sm text-primary">
-                            Don't have an account?{' '}
+                            {t('loginPage.dontHaveAccount')}{' '}
                             <Link href="/register" className="text-blue-500" weight="semibold">
-                                Sign up
+                                {t('loginPage.signUpLink')}
                             </Link>
                         </Text>
                     </View>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </ScreenContainer>
     );
 }

@@ -6,10 +6,10 @@ import {Ionicons} from "@expo/vector-icons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {useApiClient} from '@/hooks/useApiClient';
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
-import {useAlert} from "@/context/AlertContext";
+import {useAlert} from "@/contexts/AlertContext";
 import {useApiErrorHandler} from '@/hooks/useApiErrorHandler';
 import TaskForm from "@/components/TaskForm";
-
+import {useTranslation} from "react-i18next";
 
 export default function CreateTaskScreen() {
     const {showAlert} = useAlert();
@@ -21,6 +21,7 @@ export default function CreateTaskScreen() {
     const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isScreenLoading, setIsScreenLoading] = useState(true);
+    const {t} = useTranslation();
 
     useFocusEffect(
         useCallback(() => {
@@ -48,7 +49,7 @@ export default function CreateTaskScreen() {
     };
 
     const formatDisplayDate = (date: Date | null) => {
-        if (!date) return 'Select a date and time';
+        if (!date) return t('createTaskPage.dueDateDescription');
 
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -69,8 +70,8 @@ export default function CreateTaskScreen() {
     const handleCreateTask = async () => {
         if (!title || !dueDate || !priority) {
             showAlert({
-                title: 'Missing Fields',
-                message: 'Please fill out all fields marked with *',
+                title: t('createTaskPage.missingFieldsTitle'),
+                message: t('createTaskPage.missingFieldsMessage'),
                 buttons: [{text: 'OK'}]
             });
             return;
@@ -91,8 +92,8 @@ export default function CreateTaskScreen() {
 
             await response.json();
             showAlert({
-                title: 'Task created',
-                message: 'Your task created successfully.',
+                title: t('createTaskPage.successFieldsTitle'),
+                message: t('createTaskPage.successFieldsMessage'),
                 buttons: [{text: 'OK'}]
             });
 
@@ -117,12 +118,12 @@ export default function CreateTaskScreen() {
             behavior="height"
         >
             <ScrollView
-                className="flex-1 bg-bgnd"
+                className="bg-bgnd"
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header */}
                 <View className="flex-row justify-between items-center mb-5 px-4">
-                    <Text className="text-xl text-primary" weight="bold">Create New Task</Text>
+                    <Text className="text-xl text-primary" weight="bold">{t('createTaskPage.createNewTask')}</Text>
                     <TouchableOpacity onPress={() => router.back()}>
                         <Ionicons name="close-outline" size={24} color="#EF4444"/>
                     </TouchableOpacity>
@@ -139,8 +140,8 @@ export default function CreateTaskScreen() {
                     onShowDatePicker={showDatePicker}
                     onSubmit={handleCreateTask}
                     isSubmitting={isCreating}
-                    submitButtonText="Create Task"
-                    submitButtonIconName="add-circle-outline"
+                    submitButtonText={t('createTaskPage.button')}
+                    submitButtonIconName="save-outline"
                     formatDisplayDate={formatDisplayDate}
                 />
             </ScrollView>

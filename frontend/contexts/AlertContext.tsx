@@ -21,9 +21,9 @@ export const AlertProvider = ({children}: { children: ReactNode }) => {
         const wrappedButtons = options.buttons.map(button => ({
             ...button,
             onPress: () => {
-                setIsVisible(false); // Hide alert first
+                setIsVisible(false);
                 if (button.onPress) {
-                    button.onPress(); // Then run original action
+                    button.onPress();
                 }
             }
         }));

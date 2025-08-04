@@ -7,10 +7,11 @@ import {
 } from 'react-native';
 import {Image} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as SecureStore from 'expo-secure-store';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {useFocusEffect} from "expo-router";
-import {useAuth} from "@/context/AuthContext";
-import {useRefresh} from '@/context/RefreshContext';
+import {useAuth} from "@/contexts/AuthContext";
+import {useRefresh} from '@/contexts/RefreshContext';
 import {Ionicons, MaterialCommunityIcons} from "@expo/vector-icons";
 import {useApiClient} from '@/hooks/useApiClient';
 import {
@@ -19,10 +20,10 @@ import {
 } from '@/utils/errors';
 import {PageLoadingSpinner} from "@/components/PageLoadingSpinner";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
-import {useAlert} from "@/context/AlertContext";
+import {useAlert} from "@/contexts/AlertContext";
 import {useApiErrorHandler} from "@/hooks/useApiErrorHandler";
 import {useTranslation} from "react-i18next";
-import {useTheme} from "@/context/ThemeContext";
+import {useTheme} from "@/contexts/ThemeContext";
 
 
 export default function ProfileScreen() {
@@ -49,8 +50,15 @@ export default function ProfileScreen() {
     const [pictureUrl, setPictureUrl] = useState<string | null>(null);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
-    const changeLanguage = (lng: 'en' | 'bg') => {
-        i18n.changeLanguage(lng);
+
+    const changeLanguage = async (lng: 'en' | 'bg') => {
+        try {
+            await i18n.changeLanguage(lng);
+            await SecureStore.setItemAsync('user-language', lng);
+            console.log(`Language successfully saved: ${lng}`);
+        } catch (error) {
+            console.error("Failed to change or save language:", error);
+        }
     };
 
 
@@ -259,7 +267,7 @@ export default function ProfileScreen() {
 
     return (
         <ScrollView
-            className="flex-1 bg-bgnd"
+            className="bg-bgnd"
             showsVerticalScrollIndicator={false}
             refreshControl={
                 <RefreshControl
@@ -460,7 +468,7 @@ export default function ProfileScreen() {
 
                             ) : (
                                 <>
-                                    <Ionicons name="lock-closed-outline" size={20} color="#ffffff"/>
+                                    <Ionicons name="save-outline" size={20} color="#ffffff"/>
                                     <Text className="text-white text-base ml-2" weight="bold">
                                         {t('confirmPasswordChange')}
                                     </Text>
@@ -519,7 +527,7 @@ export default function ProfileScreen() {
                     onPress={() => setShowThemeSettings(!showThemeSettings)}
                 >
                     <View className="flex-row items-center">
-                        <MaterialCommunityIcons name="theme-light-dark" size={24} color="#6B7280" />
+                        <MaterialCommunityIcons name="theme-light-dark" size={24} color="#6B7280"/>
                         <Text className="ml-3 text-base text-primary" weight="semibold">{t('theme')}</Text>
                     </View>
                     <Ionicons name={showThemeSettings ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>

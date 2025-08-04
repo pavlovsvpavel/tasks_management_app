@@ -1,8 +1,7 @@
 import {useCallback} from 'react';
-import {useAlert} from '@/context/AlertContext';
+import {useAlert} from '@/contexts/AlertContext';
 import {ServerDownError, SessionExpiredError, SessionRefreshedError, ValidationError} from '@/utils/errors';
 import {ErrorHandlerOptions} from "@/interfaces/interfaces";
-
 
 /**
  * A custom hook to provide a universal API error handler.
@@ -22,9 +21,10 @@ import {ErrorHandlerOptions} from "@/interfaces/interfaces";
  *   handleApiError(error, 'task');
  * }
  */
+
 export const useApiErrorHandler = (options: ErrorHandlerOptions = {}) => {
-    const { showAlert } = useAlert();
-    const { validationTitles = {} } = options;
+    const {showAlert} = useAlert();
+    const {validationTitles = {}} = options;
 
     return useCallback((error: unknown, context: string) => {
         console.error(`An API error occurred in context "${context}":`, error);

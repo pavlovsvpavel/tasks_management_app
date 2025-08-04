@@ -149,3 +149,7 @@ export interface TaskFormProps {
     submitButtonIconName: ComponentProps<typeof Ionicons>['name'];
     formatDisplayDate: (date: Date | null) => string;
 }
+
+export interface ApiClientOptions extends RequestInit {
+    retryOn401?: boolean;
+}
