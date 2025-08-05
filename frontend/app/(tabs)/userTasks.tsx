@@ -12,6 +12,7 @@ import {SortControls} from '@/components/SortControls';
 import {TaskResponse, SortField, SortDirection} from '@/interfaces/interfaces';
 import {useTaskCache} from '@/contexts/TaskCacheContext';
 import {useTranslation} from 'react-i18next';
+import {cancelNotification} from "@/services/NotificationService";
 
 
 export default function UserTasksScreen() {
@@ -72,16 +73,25 @@ export default function UserTasksScreen() {
                 },
             ],
         });
-
-        console.log(t('userTasks.userTaskStatusChangeTitle', { action: 'complete' }));
     };
 
     const handleToggleComplete = async (task: TaskResponse, completed: boolean) => {
+        if (completed && task.notification_id) {
+            try {
+                console.log(`Task ${task.id} marked as complete. Cancelling notification ID: ${task.notification_id}`);
+                await cancelNotification(task.notification_id);
+            } catch (error) {
+                console.error("Failed to cancel notification, but proceeding with task update:", error);
+            }
+        }
         setUpdatingTaskId(task.id);
         try {
             const response = await apiClient(`/tasks/update/${task.id}`, {
                 method: 'PATCH',
-                body: JSON.stringify({completed}),
+                body: JSON.stringify({
+                    completed: completed,
+                    notification_id: null
+                }),
             });
             const updatedTask: TaskResponse = await response.json();
             updateTaskInCache(updatedTask);

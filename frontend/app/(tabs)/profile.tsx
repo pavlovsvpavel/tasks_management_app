@@ -495,29 +495,31 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
 
                 {showLanguageSettings && (
-                    <View className="flex-row justify-between border-t border-default mt-4 pt-4">
+                    <View className="justify-between gap-3 border-t border-default mt-4 pt-4">
                         <TouchableOpacity
-                            className="flex-row items-center p-3 rounded-lg input-bgnd"
+                            className="flex-row items-center justify-between p-3 rounded-lg"
                             onPress={() => changeLanguage('en')}
                         >
+                            <Text className="text-base text-primary">English</Text>
                             <Ionicons
                                 name={i18n.language === 'en' ? 'radio-button-on' : 'radio-button-off'}
                                 size={24}
                                 color={i18n.language === 'en' ? '#3B82F6' : '#9CA3AF'}
                             />
-                            <Text className="ml-3 text-base dark:text-white">English</Text>
+
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            className="flex-row items-center p-3 rounded-lg input-bgnd"
+                            className="flex-row items-center justify-between p-3 rounded-lg"
                             onPress={() => changeLanguage('bg')}
                         >
+                            <Text className="text-base text-primary">Български</Text>
                             <Ionicons
                                 name={i18n.language === 'bg' ? 'radio-button-on' : 'radio-button-off'}
                                 size={24}
                                 color={i18n.language === 'bg' ? '#3B82F6' : '#9CA3AF'}
                             />
-                            <Text className="ml-3 text-base dark:text-white">Български</Text>
+
                         </TouchableOpacity>
                     </View>
                 )}

@@ -77,7 +77,8 @@
     "missingFieldsTitle": "Липсващи Полета",
     "missingFieldsMessage": "Моля попълнете всички задължителни полета *",
     "successFieldsTitle": "Задачата е създадена",
-    "successFieldsMessage": "Вашата задача е създадена успешно."
+    "successFieldsMessage": "Вашата задача е създадена успешно.",
+    "reminderLabel": "Напомняне"
   },
   "updateTaskPage": {
     "updateTask": "Промяна - задача",
@@ -102,7 +103,7 @@
   "detailsTaskPage": {
     "notFoundTaskHeader": "Задачата не е намерена",
     "notFoundTaskMessage": "Задачата, която търсите, може да е била изтрита или да не съществува.",
-    "notFoundTaskButton": "Go Back",
+    "notFoundTaskButton": "Назад",
     "taskDetails": "Задача - детайли",
     "taskDetailsCreatedOn": "Създадена на",
     "taskDetailRowPriority": "Приоритет",
@@ -151,5 +152,13 @@
   },
   "common": {
     "exitMessage": "Докоснете или прекарайте пръст отново, за да излезете!"
+  },
+  "reminderOptions": {
+    "label": "Задай напомняне",
+    "minutesBefore": "{{count}} минути преди",
+    "hourBefore": "1 час преди",
+    "hoursBefore": "{{count}} часа преди",
+    "onDueDate": "На датата на падеж",
+    "noReminder": "Без напомняне"
   }
 }

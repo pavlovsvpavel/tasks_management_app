@@ -21,11 +21,13 @@ class TaskCreate(TaskBase):
         return value
 
 
-class TaskUpdate(TaskBase):
+class TaskUpdate(BaseModel):
     title: Optional[str] = None
-    completed: Optional[bool] = False
+    description: Optional[str] = None
+    completed: Optional[bool] = None
     due_date: Optional[datetime] = None
     priority: Optional[str] = None
+    notification_id: Optional[str] = None
 
     @field_validator("due_date")
     @classmethod
@@ -41,6 +43,7 @@ class TaskResponse(TaskBase):
     user_id: int
     created_at: datetime
     completed_at: Optional[datetime] = None
+    notification_id: Optional[str] = None
 
     class Config:
         from_attributes = True

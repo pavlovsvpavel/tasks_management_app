@@ -77,7 +77,8 @@
     "missingFieldsTitle": "Missing Fields",
     "missingFieldsMessage": "Please fill out all fields marked with *",
     "successFieldsTitle": "Task created",
-    "successFieldsMessage": "Your task created successfully."
+    "successFieldsMessage": "Your task created successfully.",
+    "reminderLabel": "Reminder"
   },
   "updateTaskPage": {
     "updateTask": "Update Task",
@@ -102,7 +103,7 @@
   "detailsTaskPage": {
     "notFoundTaskHeader": "Task Not Found",
     "notFoundTaskMessage": "The task you are looking for might have been deleted or does not exist.",
-    "notFoundTaskButton": "Назад",
+    "notFoundTaskButton": "Back",
     "taskDetails": "Task Details",
     "taskDetailsCreatedOn": "Created on",
     "taskDetailRowPriority": "Priority",
@@ -151,5 +152,13 @@
   },
   "common": {
     "exitMessage": "Tap or swipe again to exit!"
+  },
+  "reminderOptions": {
+    "label": "Set a reminder",
+    "minutesBefore": "{{count}} minutes before",
+    "hourBefore": "1 hour before",
+    "hoursBefore": "{{count}} hours before",
+    "onDueDate": "On due date",
+    "noReminder": "No reminder"
   }
 }

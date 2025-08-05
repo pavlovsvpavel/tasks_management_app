@@ -14,6 +14,7 @@ import {RefreshProvider} from "@/contexts/RefreshContext";
 import {TaskCacheProvider} from "@/contexts/TaskCacheContext";
 import {ThemeProvider} from '@/contexts/ThemeContext';
 import {useTheme} from '@/contexts/ThemeContext';
+import { useNotifications } from '@/hooks/useNotifications';
 
 
 export default function RootLayout() {
@@ -40,6 +41,8 @@ function AppContent() {
     const {isServerDown, isInitialCheckComplete} = useServerStatus();
     const {isLoading: isAuthLoading} = useAuth();
     const {theme} = useTheme();
+
+    useNotifications();
 
     const [fontsLoaded] = useFonts({
         'ubuntu-normal': require('../assets/fonts/Ubuntu-Regular.ttf'),

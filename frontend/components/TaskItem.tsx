@@ -55,7 +55,7 @@ export const TaskItem = ({task, onPrompt, isUpdating}: TaskItemProps) => {
                         thumbColor={task.completed ? '#479f00' : '#ba1515'}
                         onValueChange={onPrompt}
                         value={task.completed}
-                        disabled={isUpdating}
+                        disabled={task.completed || isUpdating}
                     />
                     <Text className="text-xs text-primary">
                         {t(task.completed ? 'taskStatus.completed' : 'taskStatus.pending')}

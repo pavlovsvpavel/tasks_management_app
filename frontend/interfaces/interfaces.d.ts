@@ -67,12 +67,9 @@ export interface TabIconProps {
 
 export interface Task {
     id: number;
-    name: string;
-    description: string;
-    created_at: datetime;
-    completed_at: datetime;
-    completed: boolean;
-    user_id: number;
+    title: string;
+    dueDate: string;
+    notification_id: string | null;
 }
 
 export interface ErrorHandlerOptions {
@@ -89,6 +86,7 @@ export interface TaskResponse {
     priority: 'low' | 'medium' | 'high';
     created_at: string;
     completed_at: string | null;
+    notification_id: string | null;
 }
 
 export type SortField = 'due_date' | 'title';
@@ -139,8 +137,25 @@ export interface TaskFormProps {
     submitButtonText: string;
     submitButtonIconName: ComponentProps<typeof Ionicons>['name'];
     formatDisplayDate: (date: Date | null) => string;
+
+    reminderOffset: number | null;
+    onReminderChange: (value: number | null) => void;
+    reminderOptions: { label: string; value: number | null }[];
 }
 
 export interface ApiClientOptions extends RequestInit {
     retryOn401?: boolean;
+}
+
+export export type ReminderOption = {
+    label: string;
+    value: number | null;
+};
+
+export interface ReminderPickerModalProps {
+    isVisible: boolean;
+    onClose: () => void;
+    options: ReminderOption[];
+    onSelect: (value: number | null) => void;
+    currentValue: number | null;
 }

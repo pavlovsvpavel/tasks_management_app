@@ -8,7 +8,8 @@ import React from "react";
 import {useTranslation} from "react-i18next";
 import {useDoubleBackExit} from '@/hooks/useDoubleBackExit';
 import CustomScreenContainer from '@/components/CustomScreenContainer';
-
+import {themeColors} from "@/constants/colors";
+import {useTheme} from '@/contexts/ThemeContext';
 
 function TabIcon({focused, color, size, name}: TabIconProps) {
     return (
@@ -23,6 +24,8 @@ function TabIcon({focused, color, size, name}: TabIconProps) {
 function TabsLayout() {
     const {isAuthenticated, isLoading: isAuthLoading} = useAuth();
     const {t} = useTranslation();
+    const {theme} = useTheme();
+    const colors = themeColors[theme];
     useDoubleBackExit();
 
     if (isAuthLoading) {
@@ -43,13 +46,12 @@ function TabsLayout() {
                 screenOptions={{
                     tabBarShowLabel: true,
                     headerShown: false,
-                    tabBarActiveTintColor: '#FFFFFF',
-                    tabBarInactiveTintColor: '#A5B4FC',
+                    tabBarActiveTintColor: colors.tabBarActive,
+                    tabBarInactiveTintColor: colors.tabBarInactive,
                     tabBarStyle: {
                         elevation: 0,
-                        borderRadius: 12,
-                        backgroundColor: '#3B82F6',
-                        height: 50,
+                        backgroundColor: colors.tabBarBackground,
+                        height: 55,
                         paddingBottom: 10,
                         paddingTop: 10,
                         borderTopWidth: 0,

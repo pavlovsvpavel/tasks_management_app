@@ -12,7 +12,7 @@ export const SortControls = (
     }: SortControlsProps) => {
     const {t} = useTranslation();
     const getButtonClass = (field: SortField) => {
-        return sortBy === field ? 'bg-[#3B82F6]' : 'bg-white';
+        return sortBy === field ? 'bg-[#3B82F6]' : 'btn-inactive';
     };
 
     const getButtonTextClass = (field: SortField) => {

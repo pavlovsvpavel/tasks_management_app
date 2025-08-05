@@ -1,4 +1,4 @@
-import {useCallback, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {ScrollView, KeyboardAvoidingView} from 'react-native';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {router, useFocusEffect} from 'expo-router';
@@ -10,6 +10,18 @@ import {useAlert} from "@/contexts/AlertContext";
 import {useApiErrorHandler} from '@/hooks/useApiErrorHandler';
 import TaskForm from "@/components/TaskForm";
 import {useTranslation} from "react-i18next";
+import {TaskResponse} from "@/interfaces/interfaces";
+import {scheduleTaskNotification} from "@/services/NotificationService";
+import {getReminderOptions} from "@/utils/reminderOptions";
+
+const reminderOptions = [
+    {label: '2 minutes before', value: 2}, // For test purposes
+    {label: '15 minutes before', value: 15},
+    {label: '30 minutes before', value: 30},
+    {label: '1 hour before', value: 60},
+    {label: '2 hours before', value: 120},
+    {label: 'No reminder', value: null},
+];
 
 export default function CreateTaskScreen() {
     const {showAlert} = useAlert();
@@ -22,6 +34,9 @@ export default function CreateTaskScreen() {
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isScreenLoading, setIsScreenLoading] = useState(true);
     const {t} = useTranslation();
+    const [reminderOffset, setReminderOffset] = useState<number | null>(30);
+
+    const reminderOptions = useMemo(() => getReminderOptions(t), [t]);
 
     useFocusEffect(
         useCallback(() => {
@@ -90,7 +105,40 @@ export default function CreateTaskScreen() {
                 retryOn401: false,
             });
 
-            await response.json();
+            const createdTask: TaskResponse = await response.json();
+
+            if (createdTask) {
+                const newNotificationId = await scheduleTaskNotification({
+                        id: createdTask.id,
+                        title: createdTask.title,
+                        dueDate: createdTask.due_date,
+                        notification_id: null
+                    }, reminderOffset
+                );
+                console.log('[Create Task] Scheduling complete. Notification ID is:', newNotificationId);
+
+                if (newNotificationId) {
+                    try {
+                        console.log(`[Create Task] Attempting to PATCH task ${createdTask.id} with notification_id: ${newNotificationId}`);
+
+                        const updateResponse = await apiClient(`/tasks/update/${createdTask.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                notification_id: newNotificationId
+                            }),
+                        });
+
+                        if (!updateResponse.ok) {
+                            console.error('[Create Task] Failed to update task with notification ID. Status:', updateResponse.status);
+                        } else {
+                            console.log('[Create Task] Successfully updated task with notification ID.');
+                        }
+
+                    } catch (updateError) {
+                        console.error('[Create Task] Error during the notification ID update PATCH call:', updateError);
+                    }
+                }
+            }
             showAlert({
                 title: t('createTaskPage.successFieldsTitle'),
                 message: t('createTaskPage.successFieldsMessage'),
@@ -143,6 +191,9 @@ export default function CreateTaskScreen() {
                     submitButtonText={t('createTaskPage.button')}
                     submitButtonIconName="save-outline"
                     formatDisplayDate={formatDisplayDate}
+                    reminderOffset={reminderOffset}
+                    onReminderChange={setReminderOffset}
+                    reminderOptions={reminderOptions}
                 />
             </ScrollView>
 

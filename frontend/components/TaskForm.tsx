@@ -3,34 +3,54 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import {PrioritySelector} from "@/components/PrioritySelector";
 import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {TaskFormProps} from "@/interfaces/interfaces";
-import React from "react";
+import React, {useState} from "react";
 import {useTranslation} from "react-i18next";
+import ReminderPickerModal from "@/components/ReminderPickerModal";
 
 
 const textInputClass = "input-default border-default text-primary focus:border-blue-500 focus:ring-blue-500";
 const labelClass = "text-base font-semibold text-primary mb-2";
-
 export type Priority = 'low' | 'medium' | 'high';
 
-const TaskForm: React.FC<TaskFormProps> = ({
-    title,
-    description,
-    dueDate,
-    priority,
+const TaskForm: React.FC<TaskFormProps> = (
+    {
+        title,
+        description,
+        dueDate,
+        priority,
 
-    onTitleChange,
-    onDescriptionChange,
-    onPriorityChange,
+        onTitleChange,
+        onDescriptionChange,
+        onPriorityChange,
 
-    onShowDatePicker,
-    onSubmit,
+        onShowDatePicker,
+        onSubmit,
 
-    isSubmitting,
-    submitButtonText,
-    submitButtonIconName,
-    formatDisplayDate,
-}) => {
+        isSubmitting,
+        submitButtonText,
+        submitButtonIconName,
+        formatDisplayDate,
+
+        reminderOffset,
+        onReminderChange,
+        reminderOptions
+    }
+) => {
     const {t} = useTranslation();
+    const [isReminderPickerVisible, setReminderPickerVisibility] = useState(false);
+    const showReminderPicker = () => setReminderPickerVisibility(true);
+    const hideReminderPicker = () => setReminderPickerVisibility(false);
+
+    const handleSelectReminder = (value: number | null) => {
+        onReminderChange(value);
+        hideReminderPicker();
+    };
+
+    const formatDisplayReminder = (value: number | null) => {
+        const selectedOption = reminderOptions.find(opt => opt.value === value);
+        return selectedOption ? selectedOption.label : 'Select a reminder';
+    };
+
     return (
         <View className="flex-1 gap-3 bg-card rounded-xl p-5">
             {/* Title Input */}
@@ -73,10 +93,31 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 </TouchableOpacity>
             </View>
 
+            {/* Reminder Time Picker Modal */}
+            <View>
+                <Text className={labelClass} weight="semibold">{t('createTaskPage.reminderLabel')}</Text>
+                <TouchableOpacity
+                    onPress={showReminderPicker}
+                    className={`${textInputClass} flex-row items-center justify-between`}
+                >
+                    <Text className={`text-base ${reminderOffset !== null ? 'text-primary' : 'text-secondary'}`}>
+                        {formatDisplayReminder(reminderOffset)}
+                    </Text>
+                    <Ionicons name="alarm-outline" size={20} color="#6B7280"/>
+                </TouchableOpacity>
+            </View>
+
             {/* Priority Buttons */}
             <PrioritySelector
                 currentPriority={priority}
                 onPriorityChange={onPriorityChange}
+            />
+            <ReminderPickerModal
+                isVisible={isReminderPickerVisible}
+                onClose={hideReminderPicker}
+                options={reminderOptions}
+                onSelect={handleSelectReminder}
+                currentValue={reminderOffset}
             />
 
             {/* Dynamic Submit Button */}

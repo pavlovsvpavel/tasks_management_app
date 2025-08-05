@@ -4,11 +4,15 @@
 
 @layer components {
     .bg-bgnd {
-        @apply bg-[#d6d6d6] dark:bg-[#252525];
+        @apply bg-[#ffffff] dark:bg-[#000000];
     }
 
     .bg-card {
-        @apply bg-[#ffffff] dark:bg-[#121212] rounded-xl;
+        @apply bg-[#e4e4e4] dark:bg-[#252525] rounded-xl;
+    }
+
+    .btn-inactive {
+        @apply bg-[#a5a5a5] dark:bg-[#a5a5a5];
     }
 
     .text-primary {
@@ -16,7 +20,7 @@
     }
 
     .text-secondary {
-        @apply text-[#939393] dark:text-[#BDBDBD];
+        @apply text-[#686868] dark:text-[#BDBDBD];
     }
 
     .btn {
@@ -32,7 +36,7 @@
     }
 
     .border-default {
-        @apply border-[#d1d5db] dark:border-[#d1d5db];
+        @apply border-[#7c7c7c] dark:border-[#FFFFFF];
     }
 
     .border-focused{

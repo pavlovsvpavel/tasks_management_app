@@ -94,14 +94,14 @@ export default function TaskDetailScreen() {
 
     if (!taskFromCache) {
         return (
-            <View className="flex-1 justify-center items-center p-10">
+            <View className="flex-1 bg-card justify-center items-center gap-4 px-10">
                 <Text className="text-lg text-red-600"
                       weight="bold">{t('detailsTaskPage.notFoundTaskHeader')}</Text>
-                <Text className="text-center text-primary mt-2" weight="normal">
+                <Text className="text-center text-primary" weight="normal">
                     {t('detailsTaskPage.notFoundTaskMessage')}
                 </Text>
-                <TouchableOpacity onPress={() => router.back()} className="bg-btn_color rounded-lg py-2 px-6 mt-6">
-                    <Text className="text-primary" weight="bold">{t('detailsTaskPage.notFoundTaskButton')}</Text>
+                <TouchableOpacity onPress={() => router.back()} className="bg-blue-500 rounded-lg py-3 px-4">
+                    <Text className="text-primary px-4" weight="bold">{t('detailsTaskPage.notFoundTaskButton')}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -168,7 +168,7 @@ export default function TaskDetailScreen() {
                 <TouchableOpacity
                     disabled={taskFromCache.completed}
                     className={`rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px] 
-                        ${taskFromCache.completed ? 'bg-bgnd' : 'bg-blue-500'}`}
+                        ${taskFromCache.completed ? 'btn-inactive' : 'bg-blue-500'}`}
                     onPress={() => router.push(`/tasks/update/${taskFromCache.id}`)}
                 >
                     <Ionicons name="create-outline" size={20} color="#ffffff"/>

@@ -13,6 +13,7 @@ import {validateAndRefreshTokens, TokenValidationError} from '@/services/TokenAu
 import {useRetry} from "@/contexts/RetryContext";
 import {useServerStatus} from "@/contexts/ServerStatusContext";
 import {useAlert} from './AlertContext';
+import {cancelAllNotifications} from "@/services/NotificationService";
 
 const AuthContext = createContext<AuthContextType>({
     isAuthenticated: false,
@@ -69,6 +70,7 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
     const logout = useCallback(async () => {
         console.log('[AuthContext] User logout initiated.');
         await clearTokens(false);
+        await cancelAllNotifications();
     }, [clearTokens]);
 
     useEffect(() => {

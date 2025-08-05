@@ -1,5 +1,5 @@
 import {router, useLocalSearchParams} from 'expo-router';
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {ScrollView, KeyboardAvoidingView,} from 'react-native';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {Ionicons} from '@expo/vector-icons';
@@ -12,7 +12,8 @@ import {useAlert} from '@/contexts/AlertContext';
 import {useTaskCache} from '@/contexts/TaskCacheContext';
 import TaskForm from "@/components/TaskForm";
 import {useTranslation} from "react-i18next";
-
+import {scheduleTaskNotification, cancelNotification} from '@/services/NotificationService';
+import {getReminderOptions} from "@/utils/reminderOptions";
 
 export default function UpdateTaskScreen() {
     const {id} = useLocalSearchParams();
@@ -33,7 +34,10 @@ export default function UpdateTaskScreen() {
     const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const {t} = useTranslation();
+    const [originalNotificationId, setOriginalNotificationId] = useState<string | null>(null);
+    const [reminderOffset, setReminderOffset] = useState<number | null>(30);
 
+    const reminderOptions = useMemo(() => getReminderOptions(t), [t]);
 
     useEffect(() => {
         if (!id) return;
@@ -48,6 +52,14 @@ export default function UpdateTaskScreen() {
                 setDescription(task.description || '');
                 setDueDate(new Date(task.due_date));
                 setPriority(task.priority);
+                setOriginalNotificationId(task.notification_id);
+
+                if (!task.notification_id) {
+                    setReminderOffset(null);
+                } else {
+                    setReminderOffset(30);
+                }
+
             } catch (error) {
                 handleApiError(error, 'fetch-task');
                 router.back();
@@ -83,6 +95,18 @@ export default function UpdateTaskScreen() {
 
         setIsUpdating(true);
         try {
+            if (originalNotificationId) {
+                await cancelNotification(originalNotificationId);
+            }
+            const taskIdAsNumber = parseInt(id as string, 10);
+            const newNotificationId = await scheduleTaskNotification({
+                    id: taskIdAsNumber,
+                    title: title,
+                    dueDate: dueDate.toISOString(),
+                    notification_id: null,
+                },
+                reminderOffset
+            );
             const response = await apiClient(`/tasks/update/${id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({
@@ -90,6 +114,7 @@ export default function UpdateTaskScreen() {
                     description,
                     priority,
                     due_date: dueDate.toISOString(),
+                    notification_id: newNotificationId
                 }),
             });
             const updatedTask: TaskResponse = await response.json();
@@ -154,6 +179,9 @@ export default function UpdateTaskScreen() {
                     submitButtonText={t('updateTaskPage.button')}
                     submitButtonIconName="save-outline"
                     formatDisplayDate={formatDisplayDate}
+                    reminderOffset={reminderOffset}
+                    onReminderChange={setReminderOffset}
+                    reminderOptions={reminderOptions}
                 />
             </ScrollView>
 

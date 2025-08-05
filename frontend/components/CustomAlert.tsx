@@ -20,7 +20,7 @@ const buttonClasses = {
         text: 'text-white'
     },
     cancel: {
-        button: 'bg-gray-200',
+        button: 'bg-white',
         text: 'text-gray-800'
     },
 };
