@@ -31,7 +31,10 @@ services:
 
   admin_panel:
     container_name: adminpanel-tasks-app
-    build: ./backend/admin_panel
+    image: ppavlovp/private_images:tasks-app-admin_panel
+#    build:
+#      context: ./backend/admin_panel
+#      dockerfile: Dockerfile
     ports:
       - "8501:8501"
     env_file:
