@@ -6,6 +6,7 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./backend/envs/.env.dev
+    restart: always
     ports:
       - "5433:5432"
     healthcheck:
@@ -30,6 +31,18 @@ services:
       db:
         condition: service_healthy
 
+  admin_panel:
+    container_name: adminpanel-tasks-app
+    build: ./backend/admin_panel
+    ports:
+      - "8501:8501"
+    env_file:
+      - ./backend/admin_panel/.env
+    restart: always
+    depends_on:
+      - backend
+      - db
+
   nginx:
     container_name: nginx-tasks-app
     build:
@@ -42,6 +55,7 @@ services:
     restart: always
     depends_on:
       - backend
+      - admin_panel
 
 volumes:
   postgres_data:

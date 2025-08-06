@@ -41,6 +41,9 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/opt/venv/bin:$PATH"
 ENV APP_HOME=/home/app
+ENV STREAMLIT_SERVER_PORT=8501
+ENV STREAMLIT_SERVER_HEADLESS=true
+ENV STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
 
 # Install only essential runtime dependencies
 RUN apt-get update -y && \
@@ -49,22 +52,38 @@ RUN apt-get update -y && \
     gettext && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user with secure defaults
+RUN groupadd -r ubuntu && \
+    useradd -r -g ubuntu -d $APP_HOME -s /bin/false ubuntu && \
+    mkdir -p $APP_HOME && \
+    chown ubuntu:ubuntu $APP_HOME
+
 # Copy virtual environment from builder
-COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder --chown=appuser:appuser /opt/venv /opt/venv
 
-# Create non-root user and app directory
-RUN useradd -m ubuntu
 WORKDIR $APP_HOME
-
-# Change ownership of the WORKDIR itself so the 'ubuntu' user can write to it
-RUN chown ubuntu:ubuntu $APP_HOME
 
 # Copy application code
 COPY --chown=ubuntu:ubuntu . .
 
-# Entrypoint setup
-RUN chmod +x $APP_HOME/entrypoint.sh && \
-    [ -f entrypoint.sh ] && \
-    [ -x entrypoint.sh ] || exit 1
+# Configure Streamlit for reverse proxy
+RUN mkdir -p /home/ubuntu/.streamlit && \
+    echo "\n\
+    [server]\n\
+    port = 8501\n\
+    address = '0.0.0.0'\n\
+    baseUrlPath = '/admin_panel'\n\
+    enableCORS = false\n\
+    enableXsrfProtection = true\n\
+    \n\
+    [browser]\n\
+    gatherUsageStats = false\n\
+    " > /home/ubuntu/.streamlit/config.toml && \
+    chown -R ubuntu:ubuntu /home/ubuntu/.streamlit
 
-ENTRYPOINT ["/home/app/entrypoint.sh"]
+USER ubuntu
+
+EXPOSE 8501
+
+ENTRYPOINT ["streamlit", "run"]
+CMD ["streamlit_admin.py", "--server.port=8501", "--server.address=0.0.0.0"]

@@ -11,10 +11,15 @@ dependencies = [
     "gunicorn>=23.0.0",
     "httpx>=0.28.1",
     "passlib>=1.7.4",
-    "pip>=25.1.1",
     "psycopg[binary,c]>=3.2.9",
     "python-dotenv>=1.1.1",
     "python-jose[cryptography]>=3.5.0",
     "sqlalchemy>=2.0.41",
     "uvicorn>=0.35.0",
+]
+
+[dependency-groups]
+dev = [
+    "pip>=25.2",
+    "streamlit>=1.48.0",
 ]

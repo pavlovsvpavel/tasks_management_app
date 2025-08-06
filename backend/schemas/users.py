@@ -22,6 +22,7 @@ class UserResponse(UserBase):
     created_at: datetime
     last_login: Optional[datetime] = None
     picture: Optional[str] = None
+    is_active: bool
 
     class Config:
         from_attributes = True
@@ -44,3 +45,8 @@ class LoginResponse(BaseModel):
 
 class PictureUpdateRequest(BaseModel):
     picture: str
+
+
+class AdminUserUpdate(BaseModel):
+    is_active: Optional[bool] = None
+    new_password: Optional[str] = None

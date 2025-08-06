@@ -50,14 +50,6 @@ async def get_current_user(
     return user
 
 
-# async def validate_user_status(user: User):
-#     if not user.is_active:
-#         raise HTTPException(
-#             status_code=status.HTTP_403_FORBIDDEN,
-#             detail="User account is disabled"
-#         )
-
-
 async def get_user_by_email(db: AsyncSession, email: EmailStr) -> User | None:
     query = select(User).where(User.email == email)
     result = await db.execute(query)
@@ -117,7 +109,7 @@ async def create_user(db: AsyncSession, user_data) -> User:
 
 
 async def create_oauth_user(db: AsyncSession, email: str, google_id: str,
-                      full_name: str = None, picture: str = None) -> User:
+                            full_name: str = None, picture: str = None) -> User:
     """Create a user from OAuth provider"""
     db_user = User(
         email=email,
@@ -140,16 +132,6 @@ async def update_last_login(db: AsyncSession, user: User):
     return user
 
 
-# async def get_user_by_id(db: AsyncSession, user_id: int):
-#     """Get user by ID"""
-#
-#     query = select(User).where(User.id == user_id)
-#     result = await db.execute(query)
-#     user = result.scalars().first()
-#
-#     return user
-
-
 async def update_user_full_name(db: AsyncSession, user_id: int, user_update: UserUpdate):
     db_user = await db.get(User, user_id)
     if not db_user:
@@ -166,9 +148,6 @@ async def update_user_full_name(db: AsyncSession, user_id: int, user_update: Use
 
 async def change_user_password(db: AsyncSession, user: User, password_data: UserChangePassword):
     """Change user password after verifying current password"""
-    # user = await get_user_by_id(db, user_id)
-    # if not user:
-    #     return None
 
     if not verify_password(password_data.current_password, user.hashed_password):
         return False

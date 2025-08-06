@@ -1,6 +1,7 @@
 import datetime
 import uuid
 
+from fastapi import Header
 from jose import jwt, JWTError, ExpiredSignatureError
 from passlib.context import CryptContext
 from starlette import status
@@ -42,7 +43,7 @@ def _create_token(data: dict, expires_delta: datetime.timedelta, token_type: str
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-async def validate_token(token: str, expected_type:str):
+async def validate_token(token: str, expected_type: str):
     try:
         payload = jwt.decode(
             token,
@@ -55,7 +56,8 @@ async def validate_token(token: str, expected_type:str):
             raise JWTError(f"Invalid token type. Expected: {expected_type}")
 
         exp_timestamp = payload.get("exp")
-        if exp_timestamp and datetime.datetime.now(datetime.UTC) > datetime.datetime.fromtimestamp(exp_timestamp, tz=datetime.timezone.utc):
+        if exp_timestamp and datetime.datetime.now(datetime.UTC) > datetime.datetime.fromtimestamp(exp_timestamp,
+                                                                                                   tz=datetime.timezone.utc):
             raise JWTError("Token expired")
 
         return payload
@@ -75,3 +77,8 @@ async def validate_token(token: str, expected_type:str):
             detail=f"Invalid token: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"}
         )
+
+
+async def verify_admin(x_admin_token: str = Header(...)):
+    if x_admin_token != settings.ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail="Invalid admin token")

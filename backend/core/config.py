@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str
     GOOGLE_REDIRECT_URI: str
     FRONTEND_HOME_URL: str
+    ADMIN_TOKEN: str
 
     @model_validator(mode='after')
     def assemble_db_connection(self) -> 'Settings':
