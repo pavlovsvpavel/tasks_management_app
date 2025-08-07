@@ -130,13 +130,12 @@
     "appName": "TaskFlow",
     "appHeader": "Smart task management with powerful features",
     "signInButton": "Sign In",
-    "signUpButton": "Sign Up"
+    "signUpButton": "Sign Up",
+    "googleButton": "Continue with Google"
   },
   "loginPage": {
     "pageHeader": "Welcome back",
     "pageSubHeader": "Sign in to your account to continue",
-    "googleButton": "Sign in with Google",
-    "continueWith": "Or continue with",
     "signInButton": "Sign In",
     "dontHaveAccount": "Don't have an account?",
     "signUpLink": "Sign up"
@@ -144,8 +143,6 @@
   "registerPage": {
     "pageHeader": "Create your account",
     "pageSubHeader": "Join and start organizing your tasks",
-    "googleButton": "Sign up with Google",
-    "continueWith": "Or continue with",
     "signUpButton": "Sign Up",
     "haveAccount": "Already have an account?",
     "signInLink": "Sign in"

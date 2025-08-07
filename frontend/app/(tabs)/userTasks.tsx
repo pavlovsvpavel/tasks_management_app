@@ -132,7 +132,7 @@ export default function UserTasksScreen() {
     }
 
     return (
-        <View className="bg-bgnd">
+        <View className="flex-1 bg-bgnd">
             <FlatList
                 data={sortedTasks}
                 keyExtractor={item => item.id.toString()}
@@ -163,8 +163,8 @@ export default function UserTasksScreen() {
                 ListEmptyComponent={
                     <View className="flex-1 justify-center items-center mt-20">
                         <Ionicons name="file-tray-outline" size={64} color="#676767"/>
-                        <Text className="text-lg text-text_primary mt-4" weight="bold">{t('noTasks')}</Text>
-                        <Text className="text-dark-100" weight="normal">{t('noTasksDescription')}</Text>
+                        <Text className="text-lg text-primary mt-4" weight="bold">{t('noTasks')}</Text>
+                        <Text className="text-secondary" weight="normal">{t('noTasksDescription')}</Text>
                     </View>
                 }
             />

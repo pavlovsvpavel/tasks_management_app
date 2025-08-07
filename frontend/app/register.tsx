@@ -3,7 +3,7 @@ import {ScrollView} from 'react-native';
 import {View, Text, TouchableOpacity, TextInput} from '@/components/Themed';
 import {router} from 'expo-router';
 import {Link} from '@/components/Themed';
-import {FontAwesome5, MaterialIcons, Ionicons} from '@expo/vector-icons';
+import {MaterialIcons, Ionicons} from '@expo/vector-icons';
 import {ButtonSpinner} from "@/components/ButtonSpinner";
 import {useAlert} from "@/contexts/AlertContext";
 import {useApiClient} from "@/hooks/useApiClient";
@@ -94,14 +94,6 @@ export default function Register() {
         }
     };
 
-    const handleGoogleSignUp = async () => {
-        showAlert({
-            title: "Coming Soon",
-            message: "Google Sign-Up will be available in a future update!",
-            buttons: [{text: "Got it!"}],
-        });
-    };
-
     const inputClass = "input-default border-default text-primary pl-10 w-full focus:border-blue-500 focus:ring-blue-500";
 
     return (
@@ -116,18 +108,6 @@ export default function Register() {
                         <Text className="text-sm text-primary">
                             {t('registerPage.pageSubHeader')}
                         </Text>
-                    </View>
-                    <View className="justify-center items-center gap-6">
-                        <TouchableOpacity
-                            className="bg-card w-full rounded-lg px-8 py-3 flex-row items-center justify-center"
-                            onPress={handleGoogleSignUp}
-                        >
-                            <FontAwesome5 name="google" size={24} color="#4285F4"/>
-                            <Text className="ml-4 text-primary" weight="bold">{t('registerPage.googleButton')}</Text>
-                        </TouchableOpacity>
-
-                        <Text
-                            className="text-center text-primary text-xs uppercase">{t('registerPage.continueWith')}</Text>
                     </View>
                     <View className="flex-1 justify-center gap-6">
                         <View className="justify-center gap-2">

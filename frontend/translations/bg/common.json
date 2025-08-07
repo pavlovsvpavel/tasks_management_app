@@ -130,13 +130,12 @@
     "appName": "TaskFlow",
     "appHeader": "Интелигентно управление на задачи с мощни функции",
     "signInButton": "Вход",
-    "signUpButton": "Регистрация"
+    "signUpButton": "Регистрация",
+    "googleButton": "Продължете с Google"
   },
   "loginPage": {
     "pageHeader": "Добре дошли отново",
     "pageSubHeader": "Влезте в профила си, за да продължите",
-    "googleButton": "Вход с Google",
-    "continueWith": "Или продължете с",
     "signInButton": "Вход",
     "dontHaveAccount": "Нямате акаунт?",
     "signUpLink": "Регистрация"
@@ -144,8 +143,6 @@
   "registerPage": {
     "pageHeader": "Създайте своя акаунт",
     "pageSubHeader": "Присъединете се и започнете да организирате задачите си",
-    "googleButton": "Регистрация с Google",
-    "continueWith": "Или продължете с",
     "signUpButton": "Регистрация",
     "haveAccount": "Вече имате акаунт?",
     "signInLink": "Вход"

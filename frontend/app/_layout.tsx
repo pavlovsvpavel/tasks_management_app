@@ -14,7 +14,7 @@ import {RefreshProvider} from "@/contexts/RefreshContext";
 import {TaskCacheProvider} from "@/contexts/TaskCacheContext";
 import {ThemeProvider} from '@/contexts/ThemeContext';
 import {useTheme} from '@/contexts/ThemeContext';
-import { useNotifications } from '@/hooks/useNotifications';
+import {useNotifications} from '@/hooks/useNotifications';
 
 
 export default function RootLayout() {
@@ -113,8 +113,16 @@ function RootNavigator() {
                     name="register"
                     options={{headerShown: false}}
                 />
+                <Stack.Screen
+                    name="login-success"
+                    options={{headerShown: false}}
+                />
+                <Stack.Screen
+                    name="login-failure"
+                    options={{headerShown: false}}
+                />
             </Stack.Protected>
         </Stack>
-    )
+    );
 }
 

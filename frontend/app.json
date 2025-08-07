@@ -2,10 +2,10 @@
   "expo": {
     "name": "TaskFlow",
     "slug": "tasks-management-app",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
-    "scheme": "tasks",
+    "scheme": "tasks-app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "android": {

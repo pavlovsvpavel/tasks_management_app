@@ -16,7 +16,7 @@ export const SortControls = (
     };
 
     const getButtonTextClass = (field: SortField) => {
-        return sortBy === field ? 'text-primary' : 'text-secondary';
+        return sortBy === field ? 'text-white' : 'text-white';
     };
 
     const SortButton = ({field, label}: { field: SortField, label: string }) => (
