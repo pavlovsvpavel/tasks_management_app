@@ -1,8 +1,11 @@
 import datetime
+import time
 import uuid
+from typing import Dict, Any, Optional
 
 from fastapi import Header
-from jose import jwt, JWTError, ExpiredSignatureError
+from httpx import AsyncClient
+from jose import jwt, JWTError, ExpiredSignatureError, jwk
 from passlib.context import CryptContext
 from starlette import status
 from starlette.exceptions import HTTPException
@@ -82,3 +85,59 @@ async def validate_token(token: str, expected_type: str):
 async def verify_admin(x_admin_token: str = Header(...)):
     if x_admin_token != settings.ADMIN_TOKEN:
         raise HTTPException(status_code=403, detail="Invalid admin token")
+
+
+GOOGLE_KEYS_URL = "https://www.googleapis.com/oauth2/v3/certs"
+google_public_keys: Dict[str, Any] = {}
+last_key_fetch_time: float = 0
+KEY_CACHE_LIFETIME_SECONDS = 3600
+
+
+async def get_google_public_keys():
+    """
+    Fetches and caches Google's public keys for verifying ID tokens.
+    """
+    global google_public_keys, last_key_fetch_time
+
+    current_time = time.time()
+    if not google_public_keys or (current_time - last_key_fetch_time > KEY_CACHE_LIFETIME_SECONDS):
+        async with AsyncClient() as client:
+            response = await client.get(GOOGLE_KEYS_URL)
+            response.raise_for_status()
+            jwks = response.json()
+
+            google_public_keys = {key['kid']: jwk.construct(key) for key in jwks['keys']}
+            last_key_fetch_time = current_time
+
+    return google_public_keys
+
+
+async def verify_google_id_token(token: str, client_id: str, access_token: Optional[str] = None) -> dict:
+    """
+    Verifies a Google ID token and returns the payload if valid.
+    """
+    try:
+        keys = await get_google_public_keys()
+
+        unverified_header = jwt.get_unverified_header(token)
+        kid = unverified_header.get("kid")
+        if not kid:
+            raise JWTError("'kid' not found in token header")
+
+        public_key = keys.get(kid)
+        if not public_key:
+            raise JWTError("Public key not found")
+
+        pem_key = public_key.to_pem().decode('utf-8')
+        payload = jwt.decode(
+            token=token,
+            key=pem_key,
+            algorithms=["RS256"],
+            audience=client_id,
+            issuer="https://accounts.google.com",
+            access_token=access_token
+        )
+        return payload
+
+    except JWTError as e:
+        raise ValueError(f"Invalid Google Token: {e}")

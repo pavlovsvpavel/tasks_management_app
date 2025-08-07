@@ -1,20 +1,21 @@
 import time
+import urllib.parse
+from typing import Optional
 
-from fastapi import APIRouter, Depends, Header
+import httpx
+from fastapi import APIRouter, Depends, Header, Body, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from httpx import AsyncClient
 from jose import jwt, JWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from starlette.exceptions import HTTPException
-from starlette.responses import RedirectResponse
-from core.cookies import CookieManager
+from starlette.responses import JSONResponse, RedirectResponse
 from db.database import get_db
 from core.config import settings
 from models.users import User
 from services.user_service import get_user_by_google_id, create_oauth_user, update_last_login
-from core.security import create_access_token, create_refresh_token, validate_token
+from core.security import create_access_token, create_refresh_token, validate_token, verify_google_id_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -114,74 +115,87 @@ async def refresh_token_route(
         )
 
 
-@router.get("/login/google")
-async def login_google():
+@router.get("/google/login")
+async def google_login_start():
+    """
+    Initiates the Google OAuth flow.
+    This endpoint creates a state token and redirects the user to Google's login page.
+    """
+    state_payload = {"exp": int(time.time()) + 600}
+    state_token = jwt.encode(state_payload, settings.STATE_SECRET_KEY, algorithm="HS256")
+
     google_auth_url = (
         f"https://accounts.google.com/o/oauth2/v2/auth"
         f"?response_type=code"
         f"&client_id={settings.GOOGLE_CLIENT_ID}"
         f"&redirect_uri={settings.GOOGLE_REDIRECT_URI}"
         f"&scope=openid%20email%20profile"
+        f"&state={state_token}"
+        f"&access_type=offline"
     )
 
-    return RedirectResponse(google_auth_url)
+    return RedirectResponse(url=google_auth_url)
 
 
-@router.get("/callback")
-async def auth_google_callback(
-        code: str = None,
-        error: str = None,
+@router.get("/google/callback")
+async def google_auth_callback(
+        code: str = Query(...),
+        state: str = Query(...),
         db: AsyncSession = Depends(get_db)
 ):
-    if error:
-        return RedirectResponse(url="{settings.FRONTEND_HOME_URL}")
-
-    if not code:
-        return RedirectResponse(url="{settings.FRONTEND_HOME_URL}")
+    """
+    Handles the callback from Google. Verifies state, exchanges code for tokens,
+    logs in the user, and redirects back to the mobile app with our tokens.
+    """
+    failure_url = f"{settings.FRONTEND_REDIRECT_SCHEME}://login-failure?error=auth_failed"
 
     try:
-        token_url = "https://oauth2.googleapis.com/token"
-        token_data = {
-            "code": code,
-            "client_id": settings.GOOGLE_CLIENT_ID,
-            "client_secret": settings.GOOGLE_CLIENT_SECRET,
-            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
-            "grant_type": "authorization_code",
-        }
+        jwt.decode(state, settings.STATE_SECRET_KEY, algorithms=["HS256"])
+    except JWTError:
+        print("!!! Invalid state token received.")
+        return RedirectResponse(url=failure_url)
 
-        async with AsyncClient() as client:
+    token_url = "https://oauth2.googleapis.com/token"
+    token_data = {
+        "code": code,
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "client_secret": settings.GOOGLE_CLIENT_SECRET,
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "grant_type": "authorization_code",
+    }
+
+    try:
+        async with httpx.AsyncClient() as client:
             token_response = await client.post(token_url, data=token_data)
             token_response.raise_for_status()
             token_json = token_response.json()
 
-            access_token = token_json["access_token"]
-            user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
-            headers = {"Authorization": f"Bearer {access_token}"}
-            user_info_response = await client.get(user_info_url, headers=headers)
-            user_info_response.raise_for_status()
-            user_info = user_info_response.json()
+        id_token = token_json["id_token"]
+        access_token_from_google = token_json.get("access_token")
+        user_info = await verify_google_id_token(
+            token=id_token,
+            client_id=settings.GOOGLE_CLIENT_ID,
+            access_token=access_token_from_google
+        )
 
-        user = await get_user_by_google_id(db, user_info["sub"])
+        user = await get_user_by_google_id(db, google_id=user_info["sub"])
         if not user:
-            user = await create_oauth_user(
-                db,
-                email=user_info["email"],
-                google_id=user_info["sub"],
-                full_name=user_info.get("name"),
-                picture=user_info.get("picture")
-            )
-
-        access_token = create_access_token(data={"sub": str(user.id)})
-        refresh_token = create_refresh_token(data={"sub": str(user.id)})
+            user = await create_oauth_user(db=db, email=user_info["email"], google_id=user_info["sub"],
+                                           full_name=user_info.get("name"), picture=user_info.get("picture"))
 
         await update_last_login(db, user)
-        response = RedirectResponse(url=settings.FRONTEND_HOME_URL)
+        app_access_token = create_access_token(data={"sub": str(user.id)})
+        app_refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
-        cookie_mgr = CookieManager(response)
-        cookie_mgr.set_access_token(access_token)
-        cookie_mgr.set_refresh_token(refresh_token)
+        success_url = (
+            f"{settings.FRONTEND_REDIRECT_SCHEME}://login-success"
+            f"?access_token={app_access_token}"
+            f"&refresh_token={app_refresh_token}"
+        )
 
-        return response
+        return RedirectResponse(url=success_url)
 
     except Exception as e:
-        return RedirectResponse(f"{settings.FRONTEND_HOME_URL}?error={str(e)}")
+        error_message = urllib.parse.quote(str(e))
+        failure_url_with_error = f"{settings.FRONTEND_REDIRECT_SCHEME}://login-failure?error={error_message}"
+        return RedirectResponse(url=failure_url_with_error)

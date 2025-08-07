@@ -27,7 +27,9 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
     GOOGLE_REDIRECT_URI: str
-    FRONTEND_HOME_URL: str
+    GOOGLE_AUTH_URL: str
+    FRONTEND_REDIRECT_SCHEME: str
+    STATE_SECRET_KEY: str
     ADMIN_TOKEN: str
 
     @model_validator(mode='after')

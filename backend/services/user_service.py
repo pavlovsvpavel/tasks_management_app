@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import EmailStr
@@ -116,7 +118,9 @@ async def create_oauth_user(db: AsyncSession, email: str, google_id: str,
         google_id=google_id,
         full_name=full_name,
         picture=picture,
-        is_verified=True
+        is_verified=True,
+        is_active=True,
+        last_login=datetime.now(timezone.utc)
     )
     db.add(db_user)
     await db.commit()

@@ -19,4 +19,8 @@ class User(Base):
     last_login = Column(DateTime(timezone=True), nullable=True, server_default=func.now())
     is_active = Column(Boolean, default=True)
 
-    tasks = relationship("Task", back_populates="user")
+    tasks = relationship(
+        "Task",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
