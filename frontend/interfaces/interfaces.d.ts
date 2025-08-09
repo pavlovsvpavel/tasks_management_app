@@ -2,6 +2,7 @@ import {Ionicons} from "@expo/vector-icons";
 import {AlertButton} from "@/components/CustomAlert";
 import {ComponentProps} from "react";
 import {Priority} from "@/components/TaskForm";
+import {DateFilterValue} from "@/components/DateScroller";
 
 export interface ServerStatusContextType {
     isServerDown: boolean;
@@ -89,7 +90,7 @@ export interface TaskResponse {
     notification_id: string | null;
 }
 
-export type SortField = 'due_date' | 'title';
+export type SortField = 'due_date' | 'status';
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortControlsProps {
@@ -158,4 +159,11 @@ export interface ReminderPickerModalProps {
     options: ReminderOption[];
     onSelect: (value: number | null) => void;
     currentValue: number | null;
+}
+
+export type DateFilterValue = string | null;
+
+export interface DateScrollerProps {
+    selectedDate: DateFilterValue;
+    onSelectDate: (date: DateFilterValue) => void;
 }

@@ -1,6 +1,6 @@
 import {useFocusEffect} from 'expo-router';
 import {useCallback, useState, useMemo} from 'react';
-import {FlatList} from 'react-native';
+import {FlatList, RefreshControl, TouchableOpacity} from 'react-native';
 import {View, Text} from '@/components/Themed';
 import {Ionicons} from '@expo/vector-icons';
 import {useApiClient} from '@/hooks/useApiClient';
@@ -9,13 +9,16 @@ import {useApiErrorHandler} from '@/hooks/useApiErrorHandler';
 import {useAlert} from '@/contexts/AlertContext';
 import {TaskItem} from '@/components/TaskItem';
 import {SortControls} from '@/components/SortControls';
-import {TaskResponse, SortField, SortDirection} from '@/interfaces/interfaces';
+import {TaskResponse, SortField, SortDirection, DateFilterValue} from '@/interfaces/interfaces';
 import {useTaskCache} from '@/contexts/TaskCacheContext';
 import {useTranslation} from 'react-i18next';
 import {cancelNotification} from "@/services/NotificationService";
+import {DateScroller} from '@/components/DateScroller';
+import {useRefresh} from "@/contexts/RefreshContext";
 
 
 export default function UserTasksScreen() {
+    const {registerRefreshHandler, unregisterRefreshHandler, triggerRefresh, isRefreshing} = useRefresh();
     const {apiClient} = useApiClient();
     const {showAlert} = useAlert();
     const {updateTaskInCache} = useTaskCache();
@@ -25,6 +28,9 @@ export default function UserTasksScreen() {
     const [sortBy, setSortBy] = useState<SortField>('due_date');
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
     const {t} = useTranslation();
+    const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [dateFilter, setDateFilter] = useState<DateFilterValue>(null);
+
 
     const errorHandlerOptions = useMemo(() => ({
         validationTitles: {
@@ -114,17 +120,37 @@ export default function UserTasksScreen() {
         }
     };
 
+    const filteredTasks = useMemo(() => {
+        if (!dateFilter) {
+            return tasks;
+        }
+
+        return tasks.filter(task => {
+            if (!task.due_date) return false;
+            return task.due_date.startsWith(dateFilter);
+        });
+
+    }, [tasks, dateFilter]);
+
     const sortedTasks = useMemo(() => {
-        return [...tasks].sort((a, b) => {
+        return [...filteredTasks].sort((a, b) => {
             let comparison = 0;
             if (sortBy === 'due_date') {
                 comparison = new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-            } else if (sortBy === 'title') {
-                comparison = a.title.localeCompare(b.title);
+            } else if (sortBy === 'status') {
+                comparison = Number(a.completed) - Number(b.completed);
             }
             return sortDirection === 'desc' ? comparison * -1 : comparison;
         });
-    }, [tasks, sortBy, sortDirection]);
+    }, [filteredTasks, sortBy, sortDirection]);
+
+    useFocusEffect(
+        useCallback(() => {
+            registerRefreshHandler(fetchTasks);
+            return () => unregisterRefreshHandler();
+        }, [registerRefreshHandler, unregisterRefreshHandler, fetchTasks])
+    );
+
 
 
     if (isLoading) {
@@ -134,7 +160,16 @@ export default function UserTasksScreen() {
     return (
         <View className="flex-1 bg-bgnd">
             <FlatList
+                refreshControl={
+                <RefreshControl
+                    refreshing={isRefreshing}
+                    onRefresh={triggerRefresh}
+                    tintColor="#3B82F6"
+                    colors={['#3B82F6']}
+                />
+            }
                 data={sortedTasks}
+                showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id.toString()}
                 renderItem={({item}) => (
                     <TaskItem
@@ -145,20 +180,37 @@ export default function UserTasksScreen() {
                 )}
                 contentContainerStyle={{paddingHorizontal: 0, paddingBottom: 0}}
                 ListHeaderComponent={
-                    <>
-                        <Text className="text-xl text-primary mb-5 px-4" weight="bold">
-                            {t('yourTasks')}
-                        </Text>
-                        {tasks.length > 0 && (
-                            <View className="px-4">
-                                <SortControls
-                                    sortBy={sortBy}
-                                    sortDirection={sortDirection}
-                                    onSortChange={handleSortChange}
+                    <View>
+                        <View className="flex-row justify-between items-center mb-4">
+                            <Text className="text-xl text-primary" weight="bold">
+                                {t('yourTasks')}
+                            </Text>
+                            <TouchableOpacity onPress={() => setIsFilterVisible(!isFilterVisible)}>
+                                <Ionicons
+                                    name={isFilterVisible ? "close-circle" : "options-outline"}
+                                    size={26}
+                                    color={isFilterVisible ? '#EF4444' : '#3B82F6'}
+                                />
+                            </TouchableOpacity>
+                        </View>
+
+                        {isFilterVisible && (
+                            <View className="bg-card p-4 rounded-xl mb-4">
+                                <DateScroller
+                                    selectedDate={dateFilter}
+                                    onSelectDate={setDateFilter}
                                 />
                             </View>
                         )}
-                    </>
+
+                        {sortedTasks.length > 0 && (
+                            <SortControls
+                                sortBy={sortBy}
+                                sortDirection={sortDirection}
+                                onSortChange={handleSortChange}
+                            />
+                        )}
+                    </View>
                 }
                 ListEmptyComponent={
                     <View className="flex-1 justify-center items-center mt-20">

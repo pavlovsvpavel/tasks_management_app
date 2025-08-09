@@ -77,7 +77,9 @@
     "missingFieldsTitle": "Липсващи Полета",
     "missingFieldsMessage": "Моля попълнете всички задължителни полета *",
     "successFieldsTitle": "Задачата е създадена",
-    "successFieldsMessage": "Вашата задача е създадена успешно.",
+    "successFieldsMessage": "Какво бихте искали да направите след това?",
+    "successFieldsButtonCreateAnother": "Създайте друга",
+    "successFieldsButtonViewTasks": "Виж задачите",
     "reminderLabel": "Напомняне"
   },
   "updateTaskPage": {
@@ -122,13 +124,16 @@
     "userTaskStatusChangeButtonYes": "Да",
     "userTasksSortTitle": "Сортирай по:",
     "userTasksSortByDueDate": "Краен Срок",
-    "userTasksSortByTitle": "Име",
+    "userTasksSortByStatus": "Статус",
     "userTasksItemDueDate": "Краен Срок",
-    "userTasksItemPriority": "Приоритет"
+    "userTasksItemPriority": "Приоритет",
+    "userTasksFilterAllTasksButton": "Всички задачи",
+    "userTasksFilterSelectMonth": "Избери месец",
+    "userTasksFilterSelectDay": "Избери ден"
   },
   "indexPage": {
     "appName": "TaskFlow",
-    "appHeader": "Интелигентно управление на задачи с мощни функции",
+    "appHeader": "Интелигентно управление на задачи",
     "signInButton": "Вход",
     "signUpButton": "Регистрация",
     "googleButton": "Продължете с Google"
@@ -148,7 +153,7 @@
     "signInLink": "Вход"
   },
   "common": {
-    "exitMessage": "Докоснете или прекарайте пръст отново, за да излезете!"
+    "exitMessage": "Докоснете или прекарайте пръст отново!"
   },
   "reminderOptions": {
     "label": "Задай напомняне",

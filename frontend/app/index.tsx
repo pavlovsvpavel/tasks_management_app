@@ -43,11 +43,11 @@ export default function Index() {
 
                     <View className="gap-8">
                         <Link href="/login"
-                              className="bg-blue-500 text-center text-white px-8 py-4 rounded-lg" weight="bold">
+                              className="bg-blue-500 text-center text-lg text-white px-8 py-3 rounded-lg" weight="bold">
                             {t('indexPage.signInButton')}
                         </Link>
                         <Link href="/register"
-                              className="bg-blue-500 text-center text-white px-8 py-4 rounded-lg" weight="bold">
+                              className="bg-blue-500 text-center text-lg text-white px-8 py-3 rounded-lg" weight="bold">
                             {t('indexPage.signUpButton')}
                         </Link>
 

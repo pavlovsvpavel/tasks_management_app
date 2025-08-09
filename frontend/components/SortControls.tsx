@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {Ionicons} from '@expo/vector-icons';
-import {SortControlsProps, SortField, SortDirection} from '@/interfaces/interfaces';
+import {SortControlsProps, SortField} from '@/interfaces/interfaces';
 import {useTranslation} from "react-i18next";
 
 export const SortControls = (
@@ -37,10 +37,10 @@ export const SortControls = (
     );
 
     return (
-        <View className="flex-row justify-end items-center mb-4 px-4 gap-3">
+        <View className="flex-row justify-end items-center mb-4 gap-3">
             <Text className="text-sm text-primary">{t('userTasks.userTasksSortTitle')}</Text>
             <SortButton field="due_date" label={t('userTasks.userTasksSortByDueDate')}/>
-            <SortButton field="title" label={t('userTasks.userTasksSortByTitle')}/>
+            <SortButton field="status" label={t('userTasks.userTasksSortByStatus')}/>
         </View>
     );
 };

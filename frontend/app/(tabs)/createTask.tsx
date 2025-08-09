@@ -14,14 +14,6 @@ import {TaskResponse} from "@/interfaces/interfaces";
 import {scheduleTaskNotification} from "@/services/NotificationService";
 import {getReminderOptions} from "@/utils/reminderOptions";
 
-const reminderOptions = [
-    {label: '2 minutes before', value: 2}, // For test purposes
-    {label: '15 minutes before', value: 15},
-    {label: '30 minutes before', value: 30},
-    {label: '1 hour before', value: 60},
-    {label: '2 hours before', value: 120},
-    {label: 'No reminder', value: null},
-];
 
 export default function CreateTaskScreen() {
     const {showAlert} = useAlert();
@@ -35,7 +27,6 @@ export default function CreateTaskScreen() {
     const [isScreenLoading, setIsScreenLoading] = useState(true);
     const {t} = useTranslation();
     const [reminderOffset, setReminderOffset] = useState<number | null>(30);
-
     const reminderOptions = useMemo(() => getReminderOptions(t), [t]);
 
     useFocusEffect(
@@ -142,7 +133,19 @@ export default function CreateTaskScreen() {
             showAlert({
                 title: t('createTaskPage.successFieldsTitle'),
                 message: t('createTaskPage.successFieldsMessage'),
-                buttons: [{text: 'OK'}]
+                buttons: [
+                    {
+                        text: t('createTaskPage.successFieldsButtonCreateAnother'),
+                        onPress: () => {
+                        },
+                        style: 'cancel'
+                    },
+                    {
+                        text: t('createTaskPage.successFieldsButtonViewTasks'),
+                        onPress: () => router.push('/userTasks'),
+                        style: 'default'
+                    }
+                ]
             });
 
             setTitle('');
@@ -170,7 +173,7 @@ export default function CreateTaskScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header */}
-                <View className="flex-row justify-between items-center mb-5 px-4">
+                <View className="flex-row justify-between items-center mb-5">
                     <Text className="text-xl text-primary" weight="bold">{t('createTaskPage.createNewTask')}</Text>
                     <TouchableOpacity onPress={() => router.back()}>
                         <Ionicons name="close-outline" size={24} color="#EF4444"/>

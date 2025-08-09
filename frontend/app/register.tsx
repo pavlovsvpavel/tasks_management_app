@@ -94,13 +94,14 @@ export default function Register() {
         }
     };
 
-    const inputClass = "input-default border-default text-primary pl-10 w-full focus:border-blue-500 focus:ring-blue-500";
+    const inputClass = "input-default border-default text-primary h-[50px] pl-10 w-full focus:border-blue-500 focus:ring-blue-500";
+    const iconsClass = "absolute left-3 top-4.5 z-10";
 
     return (
         <CustomScreenContainer>
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{paddingVertical: 30, flexGrow: 1}}
+                contentContainerStyle={{paddingVertical: 30, flexGrow: 0}}
             >
                 <View className="justify-center gap-4">
                     <View className="justify-center items-center gap-2 mb-8">
@@ -117,7 +118,7 @@ export default function Register() {
                                     name="person"
                                     size={20}
                                     color="#9CA3AF"
-                                    className="absolute left-3 top-3.5 z-10"
+                                    className={iconsClass}
                                 />
                                 <TextInput
                                     id="full_name"
@@ -137,7 +138,7 @@ export default function Register() {
                                     name="email"
                                     size={20}
                                     color="#9CA3AF"
-                                    className="absolute left-3 top-3.5 z-10"
+                                    className={iconsClass}
                                 />
                                 <TextInput
                                     id="email"
@@ -157,7 +158,7 @@ export default function Register() {
                                     name="lock-closed"
                                     size={20}
                                     color="#9CA3AF"
-                                    className="absolute left-3 top-3.5 z-10"
+                                    className={iconsClass}
                                 />
                                 <TextInput
                                     id="password"
@@ -169,7 +170,7 @@ export default function Register() {
                                     placeholderTextColor="#9CA3AF"
                                 />
                                 <TouchableOpacity
-                                    className="absolute right-3 top-3.5"
+                                    className="absolute right-3 top-4.5 z-10"
                                     onPress={() => setShowPassword(!showPassword)}
                                 >
                                     {showPassword ? (
@@ -187,7 +188,7 @@ export default function Register() {
                                     name="lock-closed"
                                     size={20}
                                     color="#9CA3AF"
-                                    className="absolute left-3 top-3.5 z-10"
+                                    className={iconsClass}
                                 />
                                 <TextInput
                                     id="confirm_password"
@@ -199,7 +200,7 @@ export default function Register() {
                                     placeholderTextColor="#9CA3AF"
                                 />
                                 <TouchableOpacity
-                                    className="absolute right-3 top-3.5"
+                                    className="absolute right-3 top-4.5"
                                     onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                                 >
                                     {showConfirmPassword ? (
@@ -220,10 +221,10 @@ export default function Register() {
                             {isRegistering ? (
                                 <ButtonSpinner/>
                             ) : (
-                                <Text className="text-white" weight="semibold">{t('registerPage.signUpButton')}</Text>
+                                <Text className="text-lg text-white" weight="semibold">{t('registerPage.signUpButton')}</Text>
                             )}
                         </TouchableOpacity>
-                        <Text className="text-sm text-primary">
+                        <Text className="text-lg text-primary">
                             {t('registerPage.haveAccount')}{' '}
                             <Link href="/login"
                                   className="text-blue-500" weight="semibold">

@@ -34,7 +34,7 @@ export default function SignInWithGoogleButton({
                         marginRight: 6,
                     }}
                 />
-                <Text className="text-black">
+                <Text className="text-lg text-black">
                     {t('indexPage.googleButton')}
                 </Text>
             </View>

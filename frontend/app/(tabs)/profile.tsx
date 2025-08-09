@@ -35,6 +35,7 @@ export default function ProfileScreen() {
     const [isSaving, setIsSaving] = useState(false);
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
+    const [authProvider, setAuthProvider] = useState('');
     const [editing, setEditing] = useState(false);
     const [showPasswordChange, setShowPasswordChange] = useState(false);
     const [currentPassword, setCurrentPassword] = useState('');
@@ -74,11 +75,14 @@ export default function ProfileScreen() {
                 method: 'GET'
             });
             const user = await response.json();
+            const provider = user.auth_provider || 'local';
 
             console.log('Profile details fetched successfully:', {fullName: user.full_name, email: user.email});
             setFullName(user.full_name || '');
             setEmail(user.email);
             setPictureUrl(user.picture);
+            setAuthProvider(provider);
+
             return user;
         } catch (error) {
             if (error instanceof ServerDownError) {
@@ -277,7 +281,7 @@ export default function ProfileScreen() {
                 />
             }
         >
-            <View className="flex-row justify-between items-center mb-5 px-4">
+            <View className="flex-row justify-between items-center mb-5">
                 <Text className="text-xl text-primary" weight="bold">{t('profile')}</Text>
                 <TouchableOpacity
                     onPress={() =>
@@ -376,107 +380,110 @@ export default function ProfileScreen() {
                 )}
             </View>
 
-            <View className={sectionClass}>
-                <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg text-primary" weight="bold">{t('security')}</Text>
-                    <Ionicons name="shield-checkmark-outline" size={22} color="#3B82F6"/>
+            {authProvider === 'local' && (
+                <View className={sectionClass}>
+                    <View className="flex-row justify-between items-center mb-5">
+                        <Text className="text-lg text-primary" weight="bold">{t('security')}</Text>
+                        <Ionicons name="shield-checkmark-outline" size={22} color="#3B82F6"/>
+                    </View>
+
+                    <TouchableOpacity
+                        className="expandable-btn"
+                        onPress={() => setShowPasswordChange(!showPasswordChange)}
+                    >
+                        <View className="flex-row items-center">
+                            <Ionicons name="lock-closed-outline" size={20} color="#6B7280"/>
+                            <Text className="ml-3 text-base text-primary" weight="semibold">{t('changePassword')}</Text>
+                        </View>
+                        <Ionicons name={showPasswordChange ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
+                    </TouchableOpacity>
+
+                    {showPasswordChange && (
+                        <View className="border-t border-default  mt-4 pt-4">
+                            <View className="mb-4 relative">
+                                <Text className="text-sm text-primary mb-1.5"
+                                      weight="semibold">{t('currentPassword')}</Text>
+                                <TextInput
+                                    className={`input-default text-primary ${focusedInput === 'current' ? 'border-focused' : 'border-default'}`}
+                                    onFocus={() => setFocusedInput('current')}
+                                    onBlur={() => setFocusedInput(null)}
+                                    value={currentPassword}
+                                    onChangeText={setCurrentPassword}
+                                    secureTextEntry={!showCurrentPassword}
+                                    placeholder={t('currentPasswordPlaceholder')}
+                                    placeholderTextColor="#9CA3AF"
+                                />
+                                <TouchableOpacity
+                                    className="absolute right-3 top-10"
+                                    onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                                >
+                                    <Ionicons name={showCurrentPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
+                                </TouchableOpacity>
+                            </View>
+
+                            <View className="mb-4 relative">
+                                <Text className="text-sm text-primary mb-1.5"
+                                      weight="semibold">{t('newPassword')}</Text>
+                                <TextInput
+                                    className={`input-default text-primary ${focusedInput === 'new' ? 'border-focused' : 'border-default'}`}
+                                    onFocus={() => setFocusedInput('new')}
+                                    onBlur={() => setFocusedInput(null)}
+                                    value={newPassword}
+                                    onChangeText={setNewPassword}
+                                    secureTextEntry={!showNewPassword}
+                                    placeholder={t('newPasswordPlaceholder')}
+                                    placeholderTextColor="#9CA3AF"
+                                />
+                                <TouchableOpacity
+                                    className="absolute right-3 top-10"
+                                    onPress={() => setShowNewPassword(!showNewPassword)}
+                                >
+                                    <Ionicons name={showNewPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
+                                </TouchableOpacity>
+                            </View>
+
+                            <View className="mb-4 relative">
+                                <Text className="text-sm text-primary mb-1.5"
+                                      weight="semibold">{t('confirmNewPassword')}</Text>
+                                <TextInput
+                                    className={`input-default text-primary ${focusedInput === 'confirm' ? 'border-focused' : 'border-default'}`}
+                                    onFocus={() => setFocusedInput('confirm')}
+                                    onBlur={() => setFocusedInput(null)}
+                                    value={confirmPassword}
+                                    onChangeText={setConfirmPassword}
+                                    secureTextEntry={!showConfirmPassword}
+                                    placeholder={t('confirmNewPasswordPlaceholder')}
+                                    placeholderTextColor="#9CA3AF"
+                                />
+                                <TouchableOpacity
+                                    className="absolute right-3 top-10"
+                                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                                >
+                                    <Ionicons name={showConfirmPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
+                                </TouchableOpacity>
+                            </View>
+
+                            <TouchableOpacity
+                                className="btn-primary"
+                                onPress={handleChangePassword}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? (
+                                    <ButtonSpinner/>
+
+                                ) : (
+                                    <>
+                                        <Ionicons name="save-outline" size={20} color="#ffffff"/>
+                                        <Text className="text-white text-base ml-2" weight="bold">
+                                            {t('confirmPasswordChange')}
+                                        </Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
-
-                <TouchableOpacity
-                    className="expandable-btn"
-                    onPress={() => setShowPasswordChange(!showPasswordChange)}
-                >
-                    <View className="flex-row items-center">
-                        <Ionicons name="lock-closed-outline" size={20} color="#6B7280"/>
-                        <Text className="ml-3 text-base text-primary" weight="semibold">{t('changePassword')}</Text>
-                    </View>
-                    <Ionicons name={showPasswordChange ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
-                </TouchableOpacity>
-
-                {showPasswordChange && (
-                    <View className="border-t border-default  mt-4 pt-4">
-                        <View className="mb-4 relative">
-                            <Text className="text-sm text-primary mb-1.5"
-                                  weight="semibold">{t('currentPassword')}</Text>
-                            <TextInput
-                                className={`input-default text-primary ${focusedInput === 'current' ? 'border-focused' : 'border-default'}`}
-                                onFocus={() => setFocusedInput('current')}
-                                onBlur={() => setFocusedInput(null)}
-                                value={currentPassword}
-                                onChangeText={setCurrentPassword}
-                                secureTextEntry={!showCurrentPassword}
-                                placeholder={t('currentPasswordPlaceholder')}
-                                placeholderTextColor="#9CA3AF"
-                            />
-                            <TouchableOpacity
-                                className="absolute right-3 top-10"
-                                onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                            >
-                                <Ionicons name={showCurrentPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View className="mb-4 relative">
-                            <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('newPassword')}</Text>
-                            <TextInput
-                                className={`input-default text-primary ${focusedInput === 'new' ? 'border-focused' : 'border-default'}`}
-                                onFocus={() => setFocusedInput('new')}
-                                onBlur={() => setFocusedInput(null)}
-                                value={newPassword}
-                                onChangeText={setNewPassword}
-                                secureTextEntry={!showNewPassword}
-                                placeholder={t('newPasswordPlaceholder')}
-                                placeholderTextColor="#9CA3AF"
-                            />
-                            <TouchableOpacity
-                                className="absolute right-3 top-10"
-                                onPress={() => setShowNewPassword(!showNewPassword)}
-                            >
-                                <Ionicons name={showNewPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View className="mb-4 relative">
-                            <Text className="text-sm text-primary mb-1.5"
-                                  weight="semibold">{t('confirmNewPassword')}</Text>
-                            <TextInput
-                                className={`input-default text-primary ${focusedInput === 'confirm' ? 'border-focused' : 'border-default'}`}
-                                onFocus={() => setFocusedInput('confirm')}
-                                onBlur={() => setFocusedInput(null)}
-                                value={confirmPassword}
-                                onChangeText={setConfirmPassword}
-                                secureTextEntry={!showConfirmPassword}
-                                placeholder={t('confirmNewPasswordPlaceholder')}
-                                placeholderTextColor="#9CA3AF"
-                            />
-                            <TouchableOpacity
-                                className="absolute right-3 top-10"
-                                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                            >
-                                <Ionicons name={showConfirmPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
-                            </TouchableOpacity>
-                        </View>
-
-                        <TouchableOpacity
-                            className="btn-primary"
-                            onPress={handleChangePassword}
-                            disabled={isSaving}
-                        >
-                            {isSaving ? (
-                                <ButtonSpinner/>
-
-                            ) : (
-                                <>
-                                    <Ionicons name="save-outline" size={20} color="#ffffff"/>
-                                    <Text className="text-white text-base ml-2" weight="bold">
-                                        {t('confirmPasswordChange')}
-                                    </Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
+            )}
             <View className={`${sectionClass} gap-4`}>
                 <View className="flex-row justify-between items-center mb-5">
                     <Text className="text-lg text-primary" weight="bold">{t('settings')}</Text>
