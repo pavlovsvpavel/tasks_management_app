@@ -1,5 +1,8 @@
-## Android application for tasks management.
-## Technologies used:&nbsp;&nbsp;&nbsp;[![Technologies](https://skillicons.dev/icons?i=python,fastapi,react,typescript,tailwindcss,postgres,nginx,docker,gcp)](https://skillicons.dev)
+**Android app for tasks management**
+---
+**Technologies used:**
+
+[![Technologies](https://skillicons.dev/icons?i=python,fastapi,react,typescript,tailwindcss,postgres,nginx,docker,gcp)](https://skillicons.dev)
 
 ---
 :arrow_forward: **App screens**
