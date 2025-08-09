@@ -23,6 +23,7 @@ class UserResponse(UserBase):
     last_login: Optional[datetime] = None
     picture: Optional[str] = None
     is_active: bool
+    auth_provider: Optional[str] = None
 
     class Config:
         from_attributes = True

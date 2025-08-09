@@ -18,6 +18,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True, server_default=func.now())
     is_active = Column(Boolean, default=True)
+    auth_provider = Column(String, nullable=True)
 
     tasks = relationship(
         "Task",

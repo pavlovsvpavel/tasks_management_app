@@ -102,7 +102,8 @@ async def create_user(db: AsyncSession, user_data) -> User:
     db_user = User(
         email=user_data.email,
         hashed_password=hashed_password,
-        full_name=user_data.full_name
+        full_name=user_data.full_name,
+        auth_provider='local'
     )
     db.add(db_user)
     await db.commit()
@@ -120,7 +121,8 @@ async def create_oauth_user(db: AsyncSession, email: str, google_id: str,
         picture=picture,
         is_verified=True,
         is_active=True,
-        last_login=datetime.now(timezone.utc)
+        last_login=datetime.now(timezone.utc),
+        auth_provider = "google"
     )
     db.add(db_user)
     await db.commit()
