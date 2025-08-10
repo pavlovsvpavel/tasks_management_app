@@ -1,7 +1,9 @@
 {
   "yourTasks": "Tasks",
-  "noTasks": "No tasks yet.",
+  "noTasks": "No Tasks Yet",
   "noTasksDescription": "Use the \"Create Task\" tab to add one!",
+  "noTasksMatchFilter": "No Tasks Found",
+  "noTasksMatchFilterDescription": "Try adjusting your date range or clearing the filter to see your tasks.",
   "createTask": "Create Task",
   "profile": "Profile",
   "priority": {
@@ -127,9 +129,8 @@
     "userTasksSortByStatus": "Status",
     "userTasksItemDueDate": "Due Date",
     "userTasksItemPriority": "Priority",
-    "userTasksFilterAllTasksButton": "All tasks",
-    "userTasksFilterSelectMonth": "Select month",
-    "userTasksFilterSelectDay": "Select day"
+    "userTasksFilterClearFilter": "Clear",
+    "userTasksFilterTodayFilter": "Today"
   },
   "indexPage": {
     "appName": "TaskFlow",

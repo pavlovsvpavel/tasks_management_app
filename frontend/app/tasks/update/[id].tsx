@@ -1,6 +1,6 @@
 import {router, useLocalSearchParams} from 'expo-router';
 import {useEffect, useMemo, useState} from 'react';
-import {ScrollView, KeyboardAvoidingView,} from 'react-native';
+import {ScrollView} from 'react-native';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {Ionicons} from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -36,7 +36,6 @@ export default function UpdateTaskScreen() {
     const {t} = useTranslation();
     const [originalNotificationId, setOriginalNotificationId] = useState<string | null>(null);
     const [reminderOffset, setReminderOffset] = useState<number | null>(30);
-
     const reminderOptions = useMemo(() => getReminderOptions(t), [t]);
 
     useEffect(() => {
@@ -149,21 +148,19 @@ export default function UpdateTaskScreen() {
     }
 
     return (
-        <KeyboardAvoidingView
-            className="flex-1"
-            behavior="height"
+        <View
+            className="flex-1 bg-bgnd"
         >
+            {/* Header */}
+            <View className="flex-row items-center mb-5">
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={24} color='#3B82F6'/>
+                </TouchableOpacity>
+                <Text className="text-xl text-primary pl-4" weight="bold">{t('updateTaskPage.updateTask')}</Text>
+            </View>
             <ScrollView
-                className="bg-bgnd"
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header */}
-                <View className="flex-row items-center mb-5">
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Ionicons name="arrow-back" size={24} color='#3B82F6'/>
-                    </TouchableOpacity>
-                    <Text className="text-xl text-primary pl-4" weight="bold">{t('updateTaskPage.updateTask')}</Text>
-                </View>
                 {/* Form Fields */}
                 <TaskForm
                     title={title}
@@ -194,6 +191,6 @@ export default function UpdateTaskScreen() {
                 date={dueDate || new Date()}
                 minimumDate={new Date()}
             />
-        </KeyboardAvoidingView>
+        </View>
     );
 }

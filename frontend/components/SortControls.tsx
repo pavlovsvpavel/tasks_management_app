@@ -37,7 +37,7 @@ export const SortControls = (
     );
 
     return (
-        <View className="flex-row justify-end items-center mb-4 gap-3">
+        <View className="flex-row justify-end items-center gap-x-5 mb-4">
             <Text className="text-sm text-primary">{t('userTasks.userTasksSortTitle')}</Text>
             <SortButton field="due_date" label={t('userTasks.userTasksSortByDueDate')}/>
             <SortButton field="status" label={t('userTasks.userTasksSortByStatus')}/>

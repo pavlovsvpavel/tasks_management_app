@@ -1,7 +1,9 @@
 {
   "yourTasks": "Задачи",
-  "noTasks": "Все още няма задачи.",
+  "noTasks": "Все още няма задачи",
   "noTasksDescription": "Използвайте таба \"Създай Задача\", за да добавите!",
+  "noTasksMatchFilter": "Не са намерени задачи",
+  "noTasksMatchFilterDescription": "Опитайте да коригирате диапазона от дати или да изчистите филтъра, за да видите задачите си.",
   "createTask": "Нова Задача",
   "profile": "Профил",
   "priority": {
@@ -127,9 +129,8 @@
     "userTasksSortByStatus": "Статус",
     "userTasksItemDueDate": "Краен Срок",
     "userTasksItemPriority": "Приоритет",
-    "userTasksFilterAllTasksButton": "Всички задачи",
-    "userTasksFilterSelectMonth": "Избери месец",
-    "userTasksFilterSelectDay": "Избери ден"
+    "userTasksFilterClearFilter": "Изчисти",
+    "userTasksFilterTodayFilter": "Днес"
   },
   "indexPage": {
     "appName": "TaskFlow",

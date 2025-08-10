@@ -1,5 +1,5 @@
 import {useCallback, useMemo, useState} from 'react';
-import {ScrollView, KeyboardAvoidingView} from 'react-native';
+import {ScrollView} from 'react-native';
 import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {router, useFocusEffect} from 'expo-router';
 import {Ionicons} from "@expo/vector-icons";
@@ -164,21 +164,19 @@ export default function CreateTaskScreen() {
     }
 
     return (
-        <KeyboardAvoidingView
-            className="flex-1"
-            behavior="height"
+        <View
+            className="flex-1 bg-bgnd"
         >
+            {/* Header */}
+            <View className="flex-row justify-between items-center mb-5">
+                <Text className="text-xl text-primary" weight="bold">{t('createTaskPage.createNewTask')}</Text>
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Ionicons name="close-outline" size={24} color="#EF4444"/>
+                </TouchableOpacity>
+            </View>
             <ScrollView
-                className="bg-bgnd"
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header */}
-                <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-xl text-primary" weight="bold">{t('createTaskPage.createNewTask')}</Text>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Ionicons name="close-outline" size={24} color="#EF4444"/>
-                    </TouchableOpacity>
-                </View>
                 {/* Form Fields */}
                 <TaskForm
                     title={title}
@@ -209,6 +207,6 @@ export default function CreateTaskScreen() {
                 date={dueDate || new Date()}
                 minimumDate={new Date()}
             />
-        </KeyboardAvoidingView>
+        </View>
     );
 }

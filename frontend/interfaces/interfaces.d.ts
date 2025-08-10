@@ -161,9 +161,27 @@ export interface ReminderPickerModalProps {
     currentValue: number | null;
 }
 
-export type DateFilterValue = string | null;
+export type DateRange = {
+    startDate: string | null;
+    endDate: string | null;
+};
 
-export interface DateScrollerProps {
-    selectedDate: DateFilterValue;
-    onSelectDate: (date: DateFilterValue) => void;
+export interface TaskEmptyProps {
+    totalTaskCount: number;
+    isFilterActive: boolean;
+}
+
+export interface TaskListHeaderProps {
+    isSortingVisible: boolean;
+    isFilterVisible: boolean;
+    onSortPress: () => void;
+    onFilterPress: () => void;
+}
+
+export interface FilterPanelProps {
+    dateRange: { startDate: string | null; endDate: string | null; };
+    calendarKey: number;
+    onDateChange: (params: { startDate: DateType, endDate: DateType }) => void;
+    onTodayPress: () => void;
+    onClearPress: () => void;
 }

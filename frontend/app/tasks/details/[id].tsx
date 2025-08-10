@@ -114,82 +114,83 @@ export default function TaskDetailScreen() {
     };
 
     return (
-        <ScrollView
-            className="bg-bgnd"
-            showsVerticalScrollIndicator={false}
-        >
+        <View className="flex-1 bg-bgnd">
             <View className="flex-row items-center mb-5">
                 <TouchableOpacity onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color="#3B82F6"/>
                 </TouchableOpacity>
                 <Text className="text-xl text-primary pl-4" weight="bold">{t('detailsTaskPage.taskDetails')}</Text>
             </View>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+            >
+                <View className="gap-3 bg-card rounded-xl p-5 mb-5 ">
+                    <Text className="text-lg text-primary" weight="bold">{taskFromCache.title}</Text>
+                    <View className="py-4 border-b border-default">
+                        <Text className="text-sm text-secondary mt-2" weight="semibold">
+                            {t('detailsTaskPage.taskDetailsCreatedOn')}
+                        </Text>
+                        <Text className="text-base text-primary mt-1">
+                            {format(new Date(taskFromCache.created_at), 'd MMM yyyy, HH:mm')}
+                        </Text>
+                    </View>
 
-            <View className="gap-3 bg-card rounded-xl p-5 mb-5 ">
-                <Text className="text-lg text-primary" weight="bold">{taskFromCache.title}</Text>
-                <View className="py-4 border-b border-default">
-                    <Text className="text-sm text-secondary mt-2" weight="semibold">
-                        {t('detailsTaskPage.taskDetailsCreatedOn')}
-                    </Text>
-                    <Text className="text-base text-primary mt-1">
-                        {format(new Date(taskFromCache.created_at), 'd MMM yyyy, HH:mm')}
-                    </Text>
-                </View>
-
-                <View className="justify-center">
-                    <TaskDetailRow
-                        label={t('detailsTaskPage.taskDetailRowPriority')}
-                        value={t(`priority.${taskFromCache.priority}`)}
-                        valueColor={priorityColors[taskFromCache.priority]}
-                    />
-                    <TaskDetailRow
-                        label={t('detailsTaskPage.taskDetailRowDueDate')}
-                        value={format(new Date(taskFromCache.due_date), 'd MMM yyyy, HH:mm')}
-                    />
-                    {taskFromCache.description && (
+                    <View className="justify-center">
                         <TaskDetailRow
-                            label={t('detailsTaskPage.taskDetailRowDescription')}
-                            value={taskFromCache.description}
+                            label={t('detailsTaskPage.taskDetailRowPriority')}
+                            value={t(`priority.${taskFromCache.priority}`)}
+                            valueColor={priorityColors[taskFromCache.priority]}
                         />
-                    )}
-                    <TaskDetailRow
-                        label={t('detailsTaskPage.taskDetailRowStatus')}
-                        value={t(taskFromCache.completed ? 'taskStatus.completed' : 'taskStatus.pending')}
-                        valueColor={taskFromCache.completed ? 'text-green-600' : 'text-red-600'}
-                    />
-                    {taskFromCache.completed_at && (
                         <TaskDetailRow
-                            label={t('detailsTaskPage.taskDetailRowCompletedOn')}
-                            value={format(new Date(taskFromCache.completed_at), 'd MMM yyyy, HH:mm')}
+                            label={t('detailsTaskPage.taskDetailRowDueDate')}
+                            value={format(new Date(taskFromCache.due_date), 'd MMM yyyy, HH:mm')}
                         />
-                    )}
-                </View>
+                        {taskFromCache.description && (
+                            <TaskDetailRow
+                                label={t('detailsTaskPage.taskDetailRowDescription')}
+                                value={taskFromCache.description}
+                            />
+                        )}
+                        <TaskDetailRow
+                            label={t('detailsTaskPage.taskDetailRowStatus')}
+                            value={t(taskFromCache.completed ? 'taskStatus.completed' : 'taskStatus.pending')}
+                            valueColor={taskFromCache.completed ? 'text-green-600' : 'text-red-600'}
+                        />
+                        {taskFromCache.completed_at && (
+                            <TaskDetailRow
+                                label={t('detailsTaskPage.taskDetailRowCompletedOn')}
+                                value={format(new Date(taskFromCache.completed_at), 'd MMM yyyy, HH:mm')}
+                            />
+                        )}
+                    </View>
 
-                <TouchableOpacity
-                    disabled={taskFromCache.completed}
-                    className={`rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px] 
+                    <TouchableOpacity
+                        disabled={taskFromCache.completed}
+                        className={`rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px] 
                         ${taskFromCache.completed ? 'btn-inactive' : 'bg-blue-500'}`}
-                    onPress={() => router.push(`/tasks/update/${taskFromCache.id}`)}
-                >
-                    <Ionicons name="create-outline" size={20} color="#ffffff"/>
-                    <Text className="btn-primary-text text-base ml-2" weight="bold">{t('detailsTaskPage.button')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className="bg-red-600 rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px]"
-                    onPress={handleDeletePress}
-                    disabled={isDeleting}
-                >
-                    {isDeleting ? (
-                        <ButtonSpinner/>
-                    ) : (
-                        <>
-                            <AntDesign name="delete" size={20} color="#ffffff"/>
-                            <Text className="btn-primary-text text-base ml-2"
-                                  weight="bold">{t('deleteTaskPage.button')}</Text>
-                        </>
-                    )}
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+                        onPress={() => router.push(`/tasks/update/${taskFromCache.id}`)}
+                    >
+                        <Ionicons name="create-outline" size={20} color="#ffffff"/>
+                        <Text className="btn-primary-text text-base ml-2"
+                              weight="bold">{t('detailsTaskPage.button')}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        className="bg-red-600 rounded-lg py-3 flex-row items-center justify-center mt-8 h-[48px]"
+                        onPress={handleDeletePress}
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? (
+                            <ButtonSpinner/>
+                        ) : (
+                            <>
+                                <AntDesign name="delete" size={20} color="#ffffff"/>
+                                <Text className="btn-primary-text text-base ml-2"
+                                      weight="bold">{t('deleteTaskPage.button')}</Text>
+                            </>
+                        )}
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </View>
     );
 }

@@ -49,18 +49,14 @@ export default function ProfileScreen() {
     const [showThemeSettings, setShowThemeSettings] = useState(false);
     const [pictureUrl, setPictureUrl] = useState<string | null>(null);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
-
-
     const changeLanguage = async (lng: 'en' | 'bg') => {
         try {
             await i18n.changeLanguage(lng);
             await SecureStore.setItemAsync('user-language', lng);
-            console.log(`Language successfully saved: ${lng}`);
         } catch (error) {
             console.error("Failed to change or save language:", error);
         }
     };
-
 
     const handleApiError = useApiErrorHandler({
         validationTitles: {
@@ -269,17 +265,8 @@ export default function ProfileScreen() {
 
 
     return (
-        <ScrollView
-            className="bg-bgnd"
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-                <RefreshControl
-                    refreshing={isRefreshing}
-                    onRefresh={triggerRefresh}
-                    tintColor="#3B82F6"
-                    colors={['#3B82F6']}
-                />
-            }
+        <View
+            className="flex-1 bg-bgnd"
         >
             <View className="flex-row justify-between items-center mb-5">
                 <Text className="text-xl text-primary" weight="bold">{t('profile')}</Text>
@@ -302,249 +289,266 @@ export default function ProfileScreen() {
                     <Ionicons name="log-out-outline" size={24} color="#EF4444"/>
                 </TouchableOpacity>
             </View>
-
-            <View className={`${sectionClass} items-center`}>
-                <View className="relative mb-4">
-                    <View className="w-20 h-20 rounded-full items-center justify-center overflow-hidden">
-                        {pictureUrl ? (
-                            <Image source={{uri: pictureUrl}} className="w-full h-full"/>
-                        ) : (
-                            <Ionicons name="person" size={40} color="#6B7280"/>
-                        )}
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={triggerRefresh}
+                        tintColor="#3B82F6"
+                        colors={['#3B82F6']}
+                    />
+                }
+            >
+                <View className={`${sectionClass} items-center`}>
+                    <View className="relative mb-4">
+                        <View
+                            className="w-20 h-20 rounded-full border-2 border-default items-center justify-center overflow-hidden">
+                            {pictureUrl ? (
+                                <Image source={{uri: pictureUrl}} className="w-full h-full"/>
+                            ) : (
+                                <Ionicons name="person" size={40} color="#6B7280"/>
+                            )}
+                        </View>
+                        <TouchableOpacity
+                            className="absolute bottom-0 right-0 bg-white rounded-xl w-6 h-6 items-center justify-center"
+                            onPress={handlePickAndUploadImage}
+                            disabled={isSaving}
+                        >
+                            <Ionicons name="camera" size={16} color="#3B82F6"/>
+                        </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                        className="absolute bottom-0 right-0 bg-white rounded-xl w-6 h-6 items-center justify-center"
-                        onPress={handlePickAndUploadImage}
-                        disabled={isSaving}
-                    >
-                        <Ionicons name="camera" size={16} color="#3B82F6"/>
-                    </TouchableOpacity>
+
+                    <View className="items-center">
+                        <Text className="text-xl text-primary mb-1" weight="bold">{fullName}</Text>
+                        <Text className="text-base text-secondary">{email}</Text>
+                    </View>
                 </View>
 
-                <View className="items-center">
-                    <Text className="text-xl text-primary mb-1" weight="bold">{fullName}</Text>
-                    <Text className="text-base text-secondary">{email}</Text>
-                </View>
-            </View>
-
-            <View className={sectionClass}>
-                <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg text-primary" weight="bold">{t('personalInformation')}</Text>
-                    <TouchableOpacity onPress={() => setEditing(!editing)}>
-                        <MaterialCommunityIcons
-                            name={editing ? "account-cancel" : "account-edit"}
-                            size={24}
-                            color="#3B82F6"
-                        />
-                    </TouchableOpacity>
-                </View>
-
-                <View className="mb-4">
-                    <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('fullName')}</Text>
-                    <TextInput
-                        className={`input-default border-default ${editing ? 'border-blue-500 text-primary' : 'text-secondary'}`}
-                        value={fullName}
-                        onChangeText={setFullName}
-                        editable={editing}
-                        placeholder={t('fullNamePlaceholder')}
-                        placeholderTextColor="#9CA3AF"
-                    />
-                </View>
-
-                <View className="mb-4">
-                    <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('email')}</Text>
-                    <TextInput
-                        className="input-default text-secondary border-default"
-                        value={email}
-                        editable={false}
-                        placeholder={t('emailPlaceholder')}
-                        placeholderTextColor="#9CA3AF"
-                    />
-                </View>
-
-                {editing && (
-                    <TouchableOpacity
-                        className="btn-primary"
-                        onPress={handleProfileChanges}
-                        disabled={isSaving}
-                    >
-                        {isSaving ? (
-                            <ButtonSpinner/>
-                        ) : (
-                            <>
-                                <Ionicons name="save-outline" size={18} color="#ffffff"/>
-                                <Text className="btn-primary-text" weight="bold">{t('saveProfileChanges')}</Text>
-                            </>
-                        )}
-                    </TouchableOpacity>
-                )}
-            </View>
-
-            {authProvider === 'local' && (
                 <View className={sectionClass}>
                     <View className="flex-row justify-between items-center mb-5">
-                        <Text className="text-lg text-primary" weight="bold">{t('security')}</Text>
-                        <Ionicons name="shield-checkmark-outline" size={22} color="#3B82F6"/>
+                        <Text className="text-lg text-primary" weight="bold">{t('personalInformation')}</Text>
+                        <TouchableOpacity onPress={() => setEditing(!editing)}>
+                            <MaterialCommunityIcons
+                                name={editing ? "account-cancel" : "account-edit"}
+                                size={24}
+                                color="#3B82F6"
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                    <View className="mb-4">
+                        <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('fullName')}</Text>
+                        <TextInput
+                            className={`input-default border-default ${editing ? 'border-blue-500 text-primary' : 'text-secondary'}`}
+                            value={fullName}
+                            onChangeText={setFullName}
+                            editable={editing}
+                            placeholder={t('fullNamePlaceholder')}
+                            placeholderTextColor="#9CA3AF"
+                        />
+                    </View>
+
+                    <View className="mb-4">
+                        <Text className="text-sm text-primary mb-1.5" weight="semibold">{t('email')}</Text>
+                        <TextInput
+                            className="input-default text-secondary border-default"
+                            value={email}
+                            editable={false}
+                            placeholder={t('emailPlaceholder')}
+                            placeholderTextColor="#9CA3AF"
+                        />
+                    </View>
+
+                    {editing && (
+                        <TouchableOpacity
+                            className="btn-primary"
+                            onPress={handleProfileChanges}
+                            disabled={isSaving}
+                        >
+                            {isSaving ? (
+                                <ButtonSpinner/>
+                            ) : (
+                                <>
+                                    <Ionicons name="save-outline" size={18} color="#ffffff"/>
+                                    <Text className="btn-primary-text" weight="bold">{t('saveProfileChanges')}</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                {authProvider === 'local' && (
+                    <View className={sectionClass}>
+                        <View className="flex-row justify-between items-center mb-5">
+                            <Text className="text-lg text-primary" weight="bold">{t('security')}</Text>
+                            <Ionicons name="shield-checkmark-outline" size={22} color="#3B82F6"/>
+                        </View>
+
+                        <TouchableOpacity
+                            className="expandable-btn"
+                            onPress={() => setShowPasswordChange(!showPasswordChange)}
+                        >
+                            <View className="flex-row items-center">
+                                <Ionicons name="lock-closed-outline" size={20} color="#6B7280"/>
+                                <Text className="ml-3 text-base text-primary"
+                                      weight="semibold">{t('changePassword')}</Text>
+                            </View>
+                            <Ionicons name={showPasswordChange ? "chevron-up" : "chevron-down"} size={20}
+                                      color="#6B7280"/>
+                        </TouchableOpacity>
+
+                        {showPasswordChange && (
+                            <View className="border-t border-default  mt-4 pt-4">
+                                <View className="mb-4 relative">
+                                    <Text className="text-sm text-primary mb-1.5"
+                                          weight="semibold">{t('currentPassword')}</Text>
+                                    <TextInput
+                                        className={`input-default text-primary ${focusedInput === 'current' ? 'border-focused' : 'border-default'}`}
+                                        onFocus={() => setFocusedInput('current')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        value={currentPassword}
+                                        onChangeText={setCurrentPassword}
+                                        secureTextEntry={!showCurrentPassword}
+                                        placeholder={t('currentPasswordPlaceholder')}
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                    <TouchableOpacity
+                                        className="absolute right-3 top-10"
+                                        onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                                    >
+                                        <Ionicons name={showCurrentPassword ? "eye-off" : "eye"} size={20}
+                                                  color="#6B7280"/>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View className="mb-4 relative">
+                                    <Text className="text-sm text-primary mb-1.5"
+                                          weight="semibold">{t('newPassword')}</Text>
+                                    <TextInput
+                                        className={`input-default text-primary ${focusedInput === 'new' ? 'border-focused' : 'border-default'}`}
+                                        onFocus={() => setFocusedInput('new')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        value={newPassword}
+                                        onChangeText={setNewPassword}
+                                        secureTextEntry={!showNewPassword}
+                                        placeholder={t('newPasswordPlaceholder')}
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                    <TouchableOpacity
+                                        className="absolute right-3 top-10"
+                                        onPress={() => setShowNewPassword(!showNewPassword)}
+                                    >
+                                        <Ionicons name={showNewPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View className="mb-4 relative">
+                                    <Text className="text-sm text-primary mb-1.5"
+                                          weight="semibold">{t('confirmNewPassword')}</Text>
+                                    <TextInput
+                                        className={`input-default text-primary ${focusedInput === 'confirm' ? 'border-focused' : 'border-default'}`}
+                                        onFocus={() => setFocusedInput('confirm')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        value={confirmPassword}
+                                        onChangeText={setConfirmPassword}
+                                        secureTextEntry={!showConfirmPassword}
+                                        placeholder={t('confirmNewPasswordPlaceholder')}
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                    <TouchableOpacity
+                                        className="absolute right-3 top-10"
+                                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    >
+                                        <Ionicons name={showConfirmPassword ? "eye-off" : "eye"} size={20}
+                                                  color="#6B7280"/>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <TouchableOpacity
+                                    className="btn-primary"
+                                    onPress={handleChangePassword}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? (
+                                        <ButtonSpinner/>
+
+                                    ) : (
+                                        <>
+                                            <Ionicons name="save-outline" size={20} color="#ffffff"/>
+                                            <Text className="text-white text-base ml-2" weight="bold">
+                                                {t('confirmPasswordChange')}
+                                            </Text>
+                                        </>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                )}
+                <View className={`${sectionClass} gap-4`}>
+                    <View className="flex-row justify-between items-center mb-5">
+                        <Text className="text-lg text-primary" weight="bold">{t('settings')}</Text>
+                        <Ionicons name="settings-outline" size={22} color="#3B82F6"/>
                     </View>
 
                     <TouchableOpacity
                         className="expandable-btn"
-                        onPress={() => setShowPasswordChange(!showPasswordChange)}
+                        onPress={() => setShowLanguageSettings(!showLanguageSettings)}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="lock-closed-outline" size={20} color="#6B7280"/>
-                            <Text className="ml-3 text-base text-primary" weight="semibold">{t('changePassword')}</Text>
+                            <Ionicons name="language" size={20} color="#6B7280"/>
+                            <Text className="ml-3 text-base text-primary" weight="semibold">{t('changeLanguage')}</Text>
                         </View>
-                        <Ionicons name={showPasswordChange ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
+                        <Ionicons name={showLanguageSettings ? "chevron-up" : "chevron-down"} size={20}
+                                  color="#6B7280"/>
                     </TouchableOpacity>
 
-                    {showPasswordChange && (
-                        <View className="border-t border-default  mt-4 pt-4">
-                            <View className="mb-4 relative">
-                                <Text className="text-sm text-primary mb-1.5"
-                                      weight="semibold">{t('currentPassword')}</Text>
-                                <TextInput
-                                    className={`input-default text-primary ${focusedInput === 'current' ? 'border-focused' : 'border-default'}`}
-                                    onFocus={() => setFocusedInput('current')}
-                                    onBlur={() => setFocusedInput(null)}
-                                    value={currentPassword}
-                                    onChangeText={setCurrentPassword}
-                                    secureTextEntry={!showCurrentPassword}
-                                    placeholder={t('currentPasswordPlaceholder')}
-                                    placeholderTextColor="#9CA3AF"
+                    {showLanguageSettings && (
+                        <View className="justify-between gap-3 border-t border-default mt-4 pt-4">
+                            <TouchableOpacity
+                                className="flex-row items-center justify-between p-3 rounded-lg"
+                                onPress={() => changeLanguage('en')}
+                            >
+                                <Text className="text-base text-primary">English</Text>
+                                <Ionicons
+                                    name={i18n.language === 'en' ? 'radio-button-on' : 'radio-button-off'}
+                                    size={24}
+                                    color={i18n.language === 'en' ? '#3B82F6' : '#9CA3AF'}
                                 />
-                                <TouchableOpacity
-                                    className="absolute right-3 top-10"
-                                    onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                                >
-                                    <Ionicons name={showCurrentPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
-                                </TouchableOpacity>
-                            </View>
 
-                            <View className="mb-4 relative">
-                                <Text className="text-sm text-primary mb-1.5"
-                                      weight="semibold">{t('newPassword')}</Text>
-                                <TextInput
-                                    className={`input-default text-primary ${focusedInput === 'new' ? 'border-focused' : 'border-default'}`}
-                                    onFocus={() => setFocusedInput('new')}
-                                    onBlur={() => setFocusedInput(null)}
-                                    value={newPassword}
-                                    onChangeText={setNewPassword}
-                                    secureTextEntry={!showNewPassword}
-                                    placeholder={t('newPasswordPlaceholder')}
-                                    placeholderTextColor="#9CA3AF"
-                                />
-                                <TouchableOpacity
-                                    className="absolute right-3 top-10"
-                                    onPress={() => setShowNewPassword(!showNewPassword)}
-                                >
-                                    <Ionicons name={showNewPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
-                                </TouchableOpacity>
-                            </View>
-
-                            <View className="mb-4 relative">
-                                <Text className="text-sm text-primary mb-1.5"
-                                      weight="semibold">{t('confirmNewPassword')}</Text>
-                                <TextInput
-                                    className={`input-default text-primary ${focusedInput === 'confirm' ? 'border-focused' : 'border-default'}`}
-                                    onFocus={() => setFocusedInput('confirm')}
-                                    onBlur={() => setFocusedInput(null)}
-                                    value={confirmPassword}
-                                    onChangeText={setConfirmPassword}
-                                    secureTextEntry={!showConfirmPassword}
-                                    placeholder={t('confirmNewPasswordPlaceholder')}
-                                    placeholderTextColor="#9CA3AF"
-                                />
-                                <TouchableOpacity
-                                    className="absolute right-3 top-10"
-                                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                                >
-                                    <Ionicons name={showConfirmPassword ? "eye-off" : "eye"} size={20} color="#6B7280"/>
-                                </TouchableOpacity>
-                            </View>
+                            </TouchableOpacity>
 
                             <TouchableOpacity
-                                className="btn-primary"
-                                onPress={handleChangePassword}
-                                disabled={isSaving}
+                                className="flex-row items-center justify-between p-3 rounded-lg"
+                                onPress={() => changeLanguage('bg')}
                             >
-                                {isSaving ? (
-                                    <ButtonSpinner/>
+                                <Text className="text-base text-primary">Български</Text>
+                                <Ionicons
+                                    name={i18n.language === 'bg' ? 'radio-button-on' : 'radio-button-off'}
+                                    size={24}
+                                    color={i18n.language === 'bg' ? '#3B82F6' : '#9CA3AF'}
+                                />
 
-                                ) : (
-                                    <>
-                                        <Ionicons name="save-outline" size={20} color="#ffffff"/>
-                                        <Text className="text-white text-base ml-2" weight="bold">
-                                            {t('confirmPasswordChange')}
-                                        </Text>
-                                    </>
-                                )}
                             </TouchableOpacity>
                         </View>
                     )}
+                    <TouchableOpacity
+                        className="expandable-btn"
+                        onPress={() => setShowThemeSettings(!showThemeSettings)}
+                    >
+                        <View className="flex-row items-center">
+                            <MaterialCommunityIcons name="theme-light-dark" size={24} color="#6B7280"/>
+                            <Text className="ml-3 text-base text-primary" weight="semibold">{t('theme')}</Text>
+                        </View>
+                        <Ionicons name={showThemeSettings ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
+                    </TouchableOpacity>
+
+                    {showThemeSettings && (
+                        <ThemeSwitcher/>
+                    )}
                 </View>
-            )}
-            <View className={`${sectionClass} gap-4`}>
-                <View className="flex-row justify-between items-center mb-5">
-                    <Text className="text-lg text-primary" weight="bold">{t('settings')}</Text>
-                    <Ionicons name="settings-outline" size={22} color="#3B82F6"/>
-                </View>
-
-                <TouchableOpacity
-                    className="expandable-btn"
-                    onPress={() => setShowLanguageSettings(!showLanguageSettings)}
-                >
-                    <View className="flex-row items-center">
-                        <Ionicons name="language" size={20} color="#6B7280"/>
-                        <Text className="ml-3 text-base text-primary" weight="semibold">{t('changeLanguage')}</Text>
-                    </View>
-                    <Ionicons name={showLanguageSettings ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
-                </TouchableOpacity>
-
-                {showLanguageSettings && (
-                    <View className="justify-between gap-3 border-t border-default mt-4 pt-4">
-                        <TouchableOpacity
-                            className="flex-row items-center justify-between p-3 rounded-lg"
-                            onPress={() => changeLanguage('en')}
-                        >
-                            <Text className="text-base text-primary">English</Text>
-                            <Ionicons
-                                name={i18n.language === 'en' ? 'radio-button-on' : 'radio-button-off'}
-                                size={24}
-                                color={i18n.language === 'en' ? '#3B82F6' : '#9CA3AF'}
-                            />
-
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            className="flex-row items-center justify-between p-3 rounded-lg"
-                            onPress={() => changeLanguage('bg')}
-                        >
-                            <Text className="text-base text-primary">Български</Text>
-                            <Ionicons
-                                name={i18n.language === 'bg' ? 'radio-button-on' : 'radio-button-off'}
-                                size={24}
-                                color={i18n.language === 'bg' ? '#3B82F6' : '#9CA3AF'}
-                            />
-
-                        </TouchableOpacity>
-                    </View>
-                )}
-                <TouchableOpacity
-                    className="expandable-btn"
-                    onPress={() => setShowThemeSettings(!showThemeSettings)}
-                >
-                    <View className="flex-row items-center">
-                        <MaterialCommunityIcons name="theme-light-dark" size={24} color="#6B7280"/>
-                        <Text className="ml-3 text-base text-primary" weight="semibold">{t('theme')}</Text>
-                    </View>
-                    <Ionicons name={showThemeSettings ? "chevron-up" : "chevron-down"} size={20} color="#6B7280"/>
-                </TouchableOpacity>
-
-                {showThemeSettings && (
-                    <ThemeSwitcher/>
-                )}
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </View>
     );
 }
