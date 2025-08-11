@@ -51,7 +51,7 @@ services:
     ports:
       - "80:80"
     env_file:
-      - ./backend/envs/.env.dev
+      - ./backend/envs/.env.nginx
     restart: always
     depends_on:
       - backend
