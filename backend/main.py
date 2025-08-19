@@ -1,17 +1,24 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from admin import UserAdmin
+from admin_panel_auth import authentication_backend
+from db.database import engine
 from core.config import settings
 from routers import users, auth, health, admin_users
 from routers import tasks
+from sqladmin import Admin
 
 app = FastAPI(
-    title="Task App",
+    title="Tasks App",
     description="Application for tasks management",
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+admin = Admin(app, engine, base_url="/admin-portal", authentication_backend=authentication_backend)
+admin.add_view(UserAdmin)
 
 if settings.ENVIRONMENT == "development" or settings.ENVIRONMENT == "local":
     print("Running in development mode, enabling CORS for web testing.")

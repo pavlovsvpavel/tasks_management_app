@@ -29,21 +29,6 @@ services:
       db:
         condition: service_healthy
 
-  admin_panel:
-    container_name: adminpanel-tasks-app
-    image: ppavlovp/private_images:tasks-app-admin_panel
-#    build:
-#      context: ./backend/admin_panel
-#      dockerfile: Dockerfile
-    ports:
-      - "8501:8501"
-    env_file:
-      - ./backend/admin_panel/.env
-    restart: always
-    depends_on:
-      - backend
-      - db
-
   nginx:
     container_name: nginx-tasks-app
     build:
@@ -61,7 +46,6 @@ services:
       - ./certbot/conf/:/etc/nginx/ssl/:ro
     depends_on:
       - backend
-      - admin_panel
 
 volumes:
   postgres_data:

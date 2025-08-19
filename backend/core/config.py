@@ -30,7 +30,10 @@ class Settings(BaseSettings):
     GOOGLE_AUTH_URL: str
     FRONTEND_REDIRECT_SCHEME: str
     STATE_SECRET_KEY: str
-    ADMIN_TOKEN: str
+    ADMIN_USERNAME: str
+    ADMIN_PASSWORD: str
+    ADMIN_SECRET_KEY: str
+    NGINX_APP_KEY: str
 
     @model_validator(mode='after')
     def assemble_db_connection(self) -> 'Settings':

@@ -14,5 +14,6 @@ echo "----- Starting Gunicorn with $WORKERS workers -----"
 exec gunicorn -k uvicorn.workers.UvicornWorker \
   --workers="$WORKERS" \
   --bind=0.0.0.0:8000 \
+  --forwarded-allow-ips='*' \
   main:app
 
