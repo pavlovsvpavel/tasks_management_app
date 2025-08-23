@@ -16,7 +16,7 @@ export function useUserTasks() {
     const [tasks, setTasks] = useState<TaskResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [updatingTaskId, setUpdatingTaskId] = useState<number | null>(null);
-    const [sortBy, setSortBy] = useState<SortField>('due_date');
+    const [sortBy, setSortBy] = useState<SortField>('status');
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isSortingVisible, setIsSortingVisible] = useState(false);
@@ -131,13 +131,19 @@ export function useUserTasks() {
 
     const sortedTasks = useMemo(() => {
         return [...filteredTasks].sort((a, b) => {
-            let comparison = 0;
-            if (sortBy === 'due_date') {
-                comparison = new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-            } else if (sortBy === 'status') {
-                comparison = Number(a.completed) - Number(b.completed);
+            let primaryComparison = 0;
+
+            if (sortBy === 'status') {
+                primaryComparison = Number(a.completed) - Number(b.completed);
+            } else if (sortBy === 'due_date') {
+                primaryComparison = new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
             }
-            return sortDirection === 'desc' ? comparison * -1 : comparison;
+            const finalPrimaryComparison = sortDirection === 'desc' ? primaryComparison * -1 : primaryComparison;
+
+            if (finalPrimaryComparison !== 0) {
+                return finalPrimaryComparison;
+            }
+            return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
         });
     }, [filteredTasks, sortBy, sortDirection]);
 
