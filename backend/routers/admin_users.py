@@ -26,6 +26,7 @@ async def create_user_admin(
         _: str = Depends(verify_admin),
 ):
     db_user = await get_user_by_email(db, email=user.email)
+
     if db_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

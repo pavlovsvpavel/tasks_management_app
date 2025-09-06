@@ -3,25 +3,33 @@ import time
 import uuid
 from typing import Dict, Any, Optional
 
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 from fastapi import Header
 from httpx import AsyncClient
 from jose import jwt, JWTError, ExpiredSignatureError, jwk
-from passlib.context import CryptContext
 from starlette import status
 from starlette.exceptions import HTTPException
 from core.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_hasher = PasswordHasher()
 
 
 def get_password_hash(password: str) -> str:
     """Generate a password hash"""
-    return pwd_context.hash(password)
+    return pwd_hasher.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        pwd_hasher.verify(hashed_password, plain_password)
+        return True
+    except VerifyMismatchError:
+        return False
+    except Exception as e:
+        print(f"An error occurred during password verification: {e}")
+        return False
 
 
 def create_access_token(data: dict):
