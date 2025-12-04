@@ -28,7 +28,12 @@ const languageDetector = {
     },
     init: () => {
     },
-    cacheUserLanguage: () => {
+    cacheUserLanguage: async (lng: string) => {
+        try {
+            await SecureStore.setItemAsync(LANGUAGE_KEY, lng);
+        } catch (error) {
+            console.error('Error saving language to storage:', error);
+        }
     },
 };
 

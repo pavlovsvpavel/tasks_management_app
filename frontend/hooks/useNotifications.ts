@@ -57,7 +57,8 @@ export const useNotifications = () => {
         });
 
         const notificationSubscription = Notifications.addNotificationReceivedListener(notification => {
-            console.log('Notification received while app is foregrounded:', notification);
+            const {title, body, data} = notification.request.content;
+            console.log('Notification received while app is foregrounded:', {title, body, data});
         });
 
         return () => {
