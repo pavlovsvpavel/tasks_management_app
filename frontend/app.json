@@ -2,7 +2,7 @@
   "expo": {
     "name": "TaskFlow",
     "slug": "tasks-management-app",
-    "version": "1.0.6",
+    "version": "1.0.8",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "scheme": "tasks-app",
@@ -54,8 +54,7 @@
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": false,
-            "enableEdgeToEdge": true
+            "usesCleartextTraffic": false
           }
         }
       ]
