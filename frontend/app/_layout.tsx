@@ -15,7 +15,7 @@ import {TaskCacheProvider} from "@/contexts/TaskCacheContext";
 import {ThemeProvider} from '@/contexts/ThemeContext';
 import {useTheme} from '@/contexts/ThemeContext';
 import {useNotifications} from '@/hooks/useNotifications';
-
+import UpdateManager from "@/components/UpdateManager";
 
 export default function RootLayout() {
     return (
@@ -26,6 +26,7 @@ export default function RootLayout() {
                         <TaskCacheProvider>
                             <AuthProvider>
                                 <RefreshProvider>
+                                    <UpdateManager/>
                                     <AppContent/>
                                 </RefreshProvider>
                             </AuthProvider>

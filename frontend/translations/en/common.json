@@ -154,7 +154,9 @@
     "signInLink": "Sign in"
   },
   "common": {
-    "exitMessage": "Tap or swipe again!"
+    "exitMessage": "Tap or swipe again!",
+    "cancel": "Cancel",
+    "ok": "OK"
   },
   "reminderOptions": {
     "label": "Set a reminder",
@@ -163,5 +165,15 @@
     "hoursBefore": "{{count}} hours before",
     "onDueDate": "On due date",
     "noReminder": "No reminder"
+  },
+  "update": {
+    "availableTitle": "Update Available",
+    "availableMessage": "Version {{version}} is available. Do you want to download and install it now?",
+    "updateNow": "Update now",
+    "failedTitle": "Update Failed",
+    "failedMessage": "An error occurred while downloading.",
+    "updatingTitle": "Updating",
+    "downloadingMessage": "Downloading latest version...",
+    "warningMessage": "Please do not close the app or turn off your screen!"
   }
 }
