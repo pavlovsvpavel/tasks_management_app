@@ -143,7 +143,14 @@ export function useUserTasks() {
             if (finalPrimaryComparison !== 0) {
                 return finalPrimaryComparison;
             }
-            return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+            const dateA = new Date(a.due_date).getTime();
+            const dateB = new Date(b.due_date).getTime();
+
+            if (a.completed) {
+                return dateB - dateA;
+            } else {
+                return dateA - dateB;
+            }
         });
     }, [filteredTasks, sortBy, sortDirection]);
 
