@@ -20,11 +20,9 @@ def _get_image_src(image_data: str) -> str:
     if not image_data:
         return ""
 
-    if image_data.startswith("https://"):
+    if image_data.startswith("https://") or image_data.startswith("data:image"):
         return image_data
-    else:
-        image_data.startswith("data:image")
-        return image_data
+    return image_data
 
 
 def list_view_image_formatter(model, attribute_name):
@@ -41,8 +39,36 @@ def list_view_image_formatter(model, attribute_name):
     return Markup(html)
 
 
+def active_formatter(model, attribute_name):
+    """
+    Renders a Bootstrap badge based on the boolean value.
+    """
+    is_active = getattr(model, attribute_name, False)
+
+    if is_active:
+        html = '<span class="badge rounded-pill bg-success" style="font-size: 0.8em; padding: 6px 10px;">Active</span>'
+    else:
+        html = '<span class="badge rounded-pill bg-danger" style="font-size: 0.8em; padding: 6px 10px;">Inactive</span>'
+
+    return Markup(html)
+
+
 class UserAdmin(ModelView, model=User):
-    column_list = [User.id, User.email, User.full_name, User.is_active, User.picture]
+    name = "User"
+    name_plural = "Users"
+    icon = "fa-solid fa-user"
+    list_template = "custom_list.html"
+    details_template = "custom_details.html"
+    edit_template = "custom_edit.html"
+
+    column_list = [
+        User.id,
+        User.email,
+        User.full_name,
+        User.is_active,
+        User.picture
+    ]
+
     column_details_list = [
         User.id,
         User.email,
@@ -53,14 +79,32 @@ class UserAdmin(ModelView, model=User):
         User.auth_provider,
         User.hashed_password
     ]
+
     column_searchable_list = [User.email]
-    column_formatters = {User.picture: list_view_image_formatter}
-    column_sortable_list = [User.id, User.email]
-    form_columns = [User.email, User.full_name, User.is_active, User.hashed_password]
-    column_labels = {User.full_name: "Full Name", User.is_active: "Active", User.hashed_password: "Password"}
-    name = "User"
-    name_plural = "Users"
-    icon = "fa-solid fa-user"
+
+    column_formatters = {
+        User.picture: list_view_image_formatter,
+        User.is_active: active_formatter
+    }
+
+    column_sortable_list = [
+        User.id,
+        User.email
+    ]
+
+    form_columns = [
+        User.email,
+        User.full_name,
+        User.is_active,
+        User.hashed_password
+    ]
+
+    column_labels = {
+        User.full_name: "Full Name",
+        User.is_active: "Status",
+        User.hashed_password: "Password",
+        User.picture: "Avatar"
+    }
 
     async def insert_model(self, request, data):
         """

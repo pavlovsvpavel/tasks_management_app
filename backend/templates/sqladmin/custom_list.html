@@ -1,0 +1,168 @@
+{% extends "sqladmin/list.html" %}
+
+{% block content %}
+{{ super() }}
+
+<style>
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+
+    }
+
+    .card-title {
+        font-weight: bold;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 1em;
+    }
+
+    #search-input, #search-button, #search-reset, .btn-light {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        border-radius: 5px !important;
+    }
+
+    .card {
+        display: flex;
+        gap: 1em;
+        border-radius: 12px !important;
+        border: none !important;
+    }
+
+    .d-flex {
+        display: flex !important;;
+        gap: 1em;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+
+    }
+
+    @media (max-width: 768px) {
+        .card-header {
+            padding: 1rem 0;
+        }
+
+        .card-body {
+            padding: 1rem 0;
+        }
+
+        .d-flex {
+            flex-direction: column !important;
+        }
+
+        .card {
+            background-color: transparent !important;
+        }
+
+        .card-footer {
+            gap: 1em !important;
+            background-color: transparent !important;
+        }
+
+        .pagination {
+            margin: 0 !important;
+        }
+
+        thead {
+            display: none;
+        }
+
+        table, tbody, th, td, tr {
+            display: block;
+            width: 100%;
+        }
+
+        tbody tr {
+            background: #fff;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+        }
+
+        tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: right;
+        }
+
+        tbody td:last-child {
+            border-bottom: none;
+        }
+
+        td:nth-of-type(1) {
+            display: none;
+        }
+
+        td:nth-of-type(2) {
+            justify-content: flex-end;
+            padding-top: 15px;
+            border-bottom: none;
+        }
+        td:nth-of-type(2) a {
+            font-size: 1.5em;
+            padding-left: 1.5em;
+        }
+
+        /* ID */
+        td:nth-of-type(3)::before {
+            content: "ID";
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        /* Email */
+        td:nth-of-type(4)::before {
+            content: "Email";
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        /* Force email to wrap if too long */
+        td:nth-of-type(4) {
+            word-break: break-all;
+        }
+
+        /* Name */
+        td:nth-of-type(5)::before {
+            content: "Name";
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        /* Make the Name bold */
+        td:nth-of-type(5) {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        /* Status */
+        td:nth-of-type(6)::before {
+            content: "Status";
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        /* Avatar */
+        td:nth-of-type(7)::before {
+            content: "Avatar";
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        /* Fix Image alignment */
+        td:nth-of-type(7) {
+            justify-content: space-between;
+        }
+    }
+</style>
+
+{% endblock %}

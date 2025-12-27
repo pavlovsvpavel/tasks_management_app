@@ -1,0 +1,25 @@
+{% extends "sqladmin/edit.html" %}
+
+{% block content %}
+{{ super() }}
+
+<style>
+    .btn-group {
+        display: flex !important;
+        gap: 1em !important;
+    }
+
+    @media (max-width: 768px) {
+        .card-body .row {
+            display: flex;
+            flex-direction: column !important;
+            gap: 1em;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+{% endblock %}

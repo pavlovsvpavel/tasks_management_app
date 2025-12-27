@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,7 +19,16 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-admin = Admin(app, engine, base_url="/admin-portal", authentication_backend=authentication_backend)
+current_path = os.path.dirname(os.path.abspath(__file__))
+
+admin = Admin(
+    app,
+    engine,
+    base_url="/admin-portal",
+    authentication_backend=authentication_backend,
+    templates_dir=os.path.join(current_path, "templates/sqladmin")
+)
+
 admin.add_view(UserAdmin)
 
 if settings.ENVIRONMENT == "development" or settings.ENVIRONMENT == "local":
