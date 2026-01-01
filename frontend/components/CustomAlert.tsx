@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from '@/components/Themed';
+import {View, Text, TouchableOpacity} from '@/components/Themed';
 import {Ionicons} from '@expo/vector-icons';
 import {CustomAlertProps} from "@/interfaces/interfaces";
 
