@@ -2,6 +2,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
 from admin import UserAdmin
 from admin_panel_auth import authentication_backend
@@ -40,6 +41,15 @@ if settings.ENVIRONMENT == "development" or settings.ENVIRONMENT == "local":
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Session middleware for admin panel with security settings
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.ADMIN_SECRET_KEY,
+    https_only=True,
+    same_site="lax",
+    path="/admin-portal"
+)
 
 # Include routers
 app.include_router(health.router, prefix=settings.API_PREFIX)

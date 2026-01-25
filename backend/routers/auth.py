@@ -1,16 +1,15 @@
 import time
 import urllib.parse
-from typing import Optional
 
 import httpx
-from fastapi import APIRouter, Depends, Header, Body, Query
+from fastapi import APIRouter, Depends, Header, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from starlette.exceptions import HTTPException
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import RedirectResponse
 from db.database import get_db
 from core.config import settings
 from models.users import User
@@ -139,8 +138,8 @@ async def google_login_start():
 
 @router.get("/google/callback")
 async def google_auth_callback(
-        code: str = Query(...),
-        state: str = Query(...),
+        code: str = Query(..., min_length=1, max_length=2048),
+        state: str = Query(..., min_length=1, max_length=2048),
         db: AsyncSession = Depends(get_db)
 ):
     """

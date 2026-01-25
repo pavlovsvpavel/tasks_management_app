@@ -1,6 +1,7 @@
 import datetime
 import time
 import uuid
+import hmac
 from typing import Dict, Any, Optional
 
 from argon2 import PasswordHasher
@@ -90,9 +91,10 @@ async def validate_token(token: str, expected_type: str):
         )
 
 
-async def verify_admin(x_admin_token: str = Header(...)):
-    if x_admin_token != settings.ADMIN_TOKEN:
+async def verify_admin(x_admin_token: str = Header(...)) -> str:
+    if not hmac.compare_digest(x_admin_token, settings.ADMIN_TOKEN):
         raise HTTPException(status_code=403, detail="Invalid admin token")
+    return x_admin_token
 
 
 GOOGLE_KEYS_URL = "https://www.googleapis.com/oauth2/v3/certs"

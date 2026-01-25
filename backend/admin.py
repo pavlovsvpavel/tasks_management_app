@@ -1,15 +1,7 @@
-from argon2 import PasswordHasher
-
 from models.users import User
 from sqladmin import ModelView
 from markupsafe import Markup
-
-pwd_hasher = PasswordHasher()
-
-
-def get_password_hash(password: str) -> str:
-    """Generate a password hash"""
-    return pwd_hasher.hash(password)
+from core.security import get_password_hash
 
 
 def _get_image_src(image_data: str) -> str:
@@ -77,7 +69,6 @@ class UserAdmin(ModelView, model=User):
         User.created_at,
         User.last_login,
         User.auth_provider,
-        User.hashed_password
     ]
 
     column_searchable_list = [User.email]
