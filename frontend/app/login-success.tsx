@@ -18,25 +18,33 @@ export default function LoginSuccessScreen() {
     const {access_token, refresh_token} = useLocalSearchParams<{ access_token: string, refresh_token: string }>();
 
     useEffect(() => {
-        if (access_token && refresh_token) {
-            console.log("Processing tokens on login-success screen...");
+        const processTokens = async () => {
+            if (access_token && refresh_token) {
+                console.log("Processing tokens from OAuth callback...");
 
-            const tokenPair = {
-                accessToken: access_token,
-                refreshToken: refresh_token,
-                isRefreshed: false,
-            };
+                try {
+                    const tokenPair = {
+                        accessToken: access_token,
+                        refreshToken: refresh_token,
+                        isRefreshed: false,
+                    };
 
-            setTokens(tokenPair).then(() => {
-                console.log("Tokens stored successfully. Navigating to main app area.");
-                router.replace('/(tabs)/userTasks');
-            });
-        } else {
-            console.error("LoginSuccessScreen was reached without the required tokens in the URL.");
-            router.replace('/');
-        }
+                    await setTokens(tokenPair);
+                    console.log("Tokens stored successfully. Navigating to main app area.");
+                    router.replace('/(tabs)/userTasks');
+                } catch (error) {
+                    console.error("Failed to store tokens:", error);
+                    router.replace('/');
+                }
+            } else {
+                console.error("LoginSuccessScreen reached without required tokens in URL parameters.");
+                console.warn(`Received - access_token: ${!!access_token}, refresh_token: ${!!refresh_token}`);
+                router.replace('/');
+            }
+        };
+
+        processTokens();
     }, [access_token, refresh_token]);
-
 
     return (
         <PageLoadingSpinner/>

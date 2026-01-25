@@ -2,6 +2,8 @@ services:
   db:
     container_name: db-tasks-app
     image: postgres:17
+    networks:
+      - tasks-network
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -30,6 +32,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - tasks-network
 
   nginx:
     container_name: nginx-tasks-app
@@ -43,7 +47,15 @@ services:
     restart: always
     depends_on:
       - backend
+    networks:
+      - tasks-network
 
 volumes:
   postgres_data:
     name: tasks_app_postgres_data
+
+networks:
+  tasks-network:
+    external: false
+    driver: bridge
+    name: tasks_management_app_tasks-network

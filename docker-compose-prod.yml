@@ -2,6 +2,14 @@ services:
   db:
     container_name: db-tasks-app
     image: postgres:17
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -14,10 +22,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - tasks-network
 
   backend:
     container_name: fastapi-tasks-app
     image: ppavlovp/private_images:tasks-app-backend
+    environment:
+      - GUNICORN_WORKERS=2
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
 #    build:
 #      context: ./backend
 #      dockerfile: Dockerfile
@@ -28,9 +48,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - tasks-network
 
   nginx:
     container_name: nginx-tasks-app
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
     build:
       context: ./nginx
       dockerfile: prod/Dockerfile
@@ -46,6 +76,14 @@ services:
       - ./certbot/conf/:/etc/nginx/ssl/:ro
     depends_on:
       - backend
+    networks:
+      - tasks-network
 
 volumes:
   postgres_data:
+
+networks:
+  tasks-network:
+    external: false
+    driver: bridge
+    name: tasks_management_app_tasks-network
