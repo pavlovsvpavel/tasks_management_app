@@ -1,0 +1,26 @@
+name: Deploy to production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy_to_prod_environment:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.2.4
+        with:
+          host: ${{ secrets.GCP_INSTANCE_IP }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GCP_PASSPHRASE }}
+          script: |
+                cd /home/ubuntu/app/tasks_management_app
+                sudo git pull origin main
+                echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+                docker stop $(docker ps -aq)
+                docker compose -f docker-compose-prod.yml pull backend
+                docker compose -f docker-compose-prod.yml up -d --build
+                docker compose -f docker-compose-monitoring.yml up -d --build
+
