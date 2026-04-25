@@ -1,5 +1,6 @@
 import React from 'react';
-import {Modal, TouchableOpacity, SafeAreaView} from 'react-native';
+import {Modal, TouchableOpacity} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {View, Text} from '@/components/Themed';
 import {Ionicons} from '@expo/vector-icons';
 import {useTheme} from '@/contexts/ThemeContext';

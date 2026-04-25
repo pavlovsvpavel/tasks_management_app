@@ -40,15 +40,31 @@ export function useUserTasks() {
     const fetchTasks = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await apiClient('/tasks/get/all-tasks');
+            let url = '/tasks/get/all-tasks';
+            const params = new URLSearchParams();
+
+            if (dateRange.startDate) {
+                params.append('start_date', dateRange.startDate);
+            }
+            if (dateRange.endDate) {
+                params.append('end_date', dateRange.endDate);
+            }
+
+            const queryString = params.toString();
+            if (queryString) {
+                url += `?${queryString}`;
+            }
+
+            const response = await apiClient(url);
             const fetchedTasks: TaskResponse[] = await response.json();
             setTasks(fetchedTasks);
+
         } catch (error) {
             handleApiError(error, 'fetch-tasks');
         } finally {
             setIsLoading(false);
         }
-    }, [apiClient, handleApiError]);
+    }, [apiClient, handleApiError, dateRange]);
 
     const handleToggleComplete = async (task: TaskResponse, completed: boolean) => {
         if (completed && task.notification_id) {
@@ -106,31 +122,8 @@ export function useUserTasks() {
         return () => unregisterRefreshHandler();
     }, [fetchTasks, registerRefreshHandler, unregisterRefreshHandler]));
 
-    const filteredTasks = useMemo(() => {
-        const {startDate, endDate} = dateRange;
-
-        if (!startDate) {
-            return tasks;
-        }
-
-        return tasks.filter(task => {
-            if (!task.due_date) return false;
-            const taskDueDate = task.due_date.substring(0, 10);
-            if (startDate && !endDate) {
-                return taskDueDate === startDate;
-            }
-
-            if (startDate && endDate) {
-                return taskDueDate >= startDate && taskDueDate <= endDate;
-            }
-
-            return false;
-        });
-
-    }, [tasks, dateRange]);
-
     const sortedTasks = useMemo(() => {
-        return [...filteredTasks].sort((a, b) => {
+        return [...tasks].sort((a, b) => {
             let primaryComparison = 0;
 
             if (sortBy === 'status') {
@@ -152,7 +145,7 @@ export function useUserTasks() {
                 return dateA - dateB;
             }
         });
-    }, [filteredTasks, sortBy, sortDirection]);
+    }, [tasks, sortBy, sortDirection]);
 
     const handleSortChange = (field: SortField) => {
         if (sortBy === field) {

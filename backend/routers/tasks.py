@@ -1,8 +1,8 @@
 import datetime
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+from typing import List, Optional
 from db.database import get_db
 from models.tasks import Task
 from schemas.tasks import TaskCreate, TaskResponse, TaskUpdate
@@ -32,6 +32,8 @@ async def create_task(
 
 @router.get("/get/all-tasks", response_model=List[TaskResponse])
 async def get_all_tasks(
+        start_date: Optional[datetime.date] = None,
+        end_date: Optional[datetime.date] = None,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
@@ -44,6 +46,21 @@ async def get_all_tasks(
     """
 
     query = select(Task).where(Task.user_id == current_user.id)
+
+    # If filters exist, apply them and skip the limit
+    if start_date and not end_date:
+        query = query.where(func.date(Task.due_date) == start_date)
+    elif start_date and end_date:
+        query = query.where(
+            func.date(Task.due_date) >= start_date,
+            func.date(Task.due_date) <= end_date
+        )
+
+    # Sort descending to get newest first
+    query = query.order_by(Task.id.desc())
+
+    if not start_date and not end_date:
+        query = query.where(Task.completed == False).limit(10)
 
     result = await db.execute(query)
     tasks = result.scalars().all()
