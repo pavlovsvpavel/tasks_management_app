@@ -3,6 +3,14 @@ services:
     image: prom/node-exporter:latest
     container_name: node-exporter
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 50M
+        reservations:
+          cpus: '0.05'
+          memory: 25M
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -19,11 +27,22 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 250M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+      # Keep only 3 days of data instead of the default 15
+      - '--storage.tsdb.retention.time=3d'
+      # Compress the Write-Ahead Log to save memory and I/O
+      - '--storage.tsdb.wal-compression'
     ports:
       - "9090:9090"
     depends_on:
@@ -35,11 +54,23 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+        reservations:
+          cpus: '0.10'
+          memory: 100M
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_SERVER_ROOT_URL=https://tasks-app.win/monitoring/
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      # Disable analytics to save background CPU/RAM
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      # Reduce log noise
+      - GF_LOG_LEVEL=warn
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
