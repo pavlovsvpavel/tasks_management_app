@@ -1,5 +1,5 @@
 # Stage 1: Build stage
-FROM python:3.12.10-slim AS builder
+FROM python:3.14.2-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -32,7 +32,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
 
 # Stage 2: Runtime stage
-FROM python:3.12.10-slim
+FROM python:3.14.2-slim
 
 # Environment setup
 ENV DEBIAN_FRONTEND=noninteractive

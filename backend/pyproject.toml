@@ -1,30 +1,31 @@
 [project]
 name = "backend"
-version = "0.2.0"
+version = "0.3.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.16.4",
     "argon2-cffi>=25.1.0",
-    "cryptography==47.0.0",
-    "fastapi-cli==0.0.24",
-    "fastapi-cloud-cli==0.17.0",
-    "fastapi[all]==0.136.1",
-    "gunicorn==25.3.0",
+    "cryptography>=47.0.0",
+    "fastapi-cli>=0.0.24",
+    "fastapi-cloud-cli>=0.17.0",
+    "fastapi[all]>=0.136.1",
+    "gunicorn>=25.3.0",
     "httpx>=0.28.1",
     "psycopg[binary,c]>=3.2.9",
-    "pydantic-extra-types==2.11.1",
-    "pydantic-settings==2.14.0",
+    "pydantic-extra-types>=2.11.1",
+    "pydantic-settings>=2.14.0",
+    "pyrefly>=0.60.0",
     "python-dotenv>=1.1.1",
     "python-jose[cryptography]>=3.5.0",
-    "sqladmin==0.25.0",
-    "sqlalchemy>=2.0.41",
-    "typer==0.24.1",
-    "uvicorn==0.41.0",
+    "sqladmin>=0.25.0",
+    "sqlalchemy[asyncio]>=2.0.41",
+    "typer>=0.24.1",
+    "uvicorn>=0.41.0",
 ]
 
 [dependency-groups]
 dev = [
-    "pip>=25.2",
+    "pip==26.3",
 ]
